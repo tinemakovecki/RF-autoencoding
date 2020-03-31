@@ -56,9 +56,6 @@ y = train_data[:, 2:]
 # print(dir(estimator))
 # print(dir(estimator.tree_))
 
-# def leaf_coverage(tree_model, test_set, leaf_id):
-#     """ Returns the percent of samples covered by the specified leaf. """
-
 
 def max_coverage(tree_model, test_set, n_leaves=1):
     """ Returns a list of pairs with coverage percentages and indices of
@@ -104,7 +101,9 @@ def max_coverage(tree_model, test_set, n_leaves=1):
 
 
 def path_to(tree_model, goal_node):
-    """ Returns the path to the given node """
+    """ Returns the path to a given node in the given tree model.
+    | tree_model: the tree that we want to search through.
+    | goal_node: id of the node from the given tree that we want a path to. """
     # The returned path is formatted as follows:
     # [(feature, value, bool), ...]
     #
@@ -180,6 +179,29 @@ def path_to(tree_model, goal_node):
     return path
 
 
+def print_path(path):
+    """ Function print_path prints out the given path in a neat form. """
+    line_count = 0
+
+    for node in path[:-1]:
+        feature, threshold, path_dir = node
+        # print out node
+        if path_dir == 0:
+            print("%s test node: feature %s <= %s"
+                  % (line_count * "  ",
+                     feature,
+                     threshold
+                     ))
+        else:
+            print("%s test node: feature %s > %s"
+                  % (line_count * "  ",
+                     feature,
+                     threshold
+                     ))
+        line_count += 1
+    return None
+
+
 def encoding_naive(forest, code_size, X_set):
     """ Finds a very naive encoding """
     n_trees = forest.n_estimators
@@ -216,8 +238,15 @@ def encoding_naive(forest, code_size, X_set):
                 candidates[-1] = (cover, i, candidate_leaf)
                 candidates.sort()
 
-    # should we return paths instead??
-    return candidates
+    # we return the encoding presented in a readable manner
+    encoding_paths = []
+    for candidate in candidates:
+        tree = forest.estimators_[candidate[1]]
+        leaf = candidate[2]
+        path = path_to(tree, leaf)
+        encoding_paths.append(path)
+
+    return encoding_paths
 
 
 def encoding(forest, code_size, X_set):
@@ -277,8 +306,15 @@ def encoding(forest, code_size, X_set):
                 candidates[-1] = (coverage, i, leaf)
                 candidates.sort()
 
-    # should we return paths instead??
-    return candidates
+    # we return the encoding presented in a readable manner
+    encoding_paths = []
+    for candidate in candidates:
+        tree = forest.estimators_[candidate[1]]
+        leaf = candidate[2]
+        path = path_to(tree, leaf)
+        encoding_paths.append(path)
+
+    return encoding_paths
 
 
 # ============================== #
@@ -311,15 +347,42 @@ def estimate_on_set(X):
 #            TESTING             #
 # ============================== #
 
-# read the specified data and save it into a table
-with open("generated_set.csv", mode='r') as csv_file:
-    data_reader = csv.reader(csv_file, delimiter=' ')
-    data = []
-    for row in data_reader:
-        entry = list(map(int, row))
-        data.append(entry)
+def read_set(file_name):
+    """ Function read_set reads data from file and saves it into a table.
+    | file_name: name of file containing the generated data. """
 
-# we want our model to predict the original data
-# we double each entry, so the learning and target variables are the same
-data = list(map(lambda x: 2 * x, data))
-print(data)
+    with open(file_name, mode='r') as csv_file:
+        data_reader = csv.reader(csv_file, delimiter=' ')
+        data = []
+        for row in data_reader:
+            entry = list(map(int, row))
+            data.append(entry)
+
+    return data
+
+
+def test_encoding(file):
+    """ Function test_encoding reads data from a file and uses that set
+    to train a RF model. Then it finds an encoding of the set from the
+    RF model and prints it out. """
+    # TODO: add model parameters and encoding type as parameters
+
+    X = read_set(file)
+    # train model on set X
+    forest = RandomForestClassifier(n_estimators=20, random_state=1)
+    forest.fit(X, X)
+
+    # currently we arbitrarily choose a code size and use a naive encoding
+    code_size = 5
+    # code = encoding_naive(forest, code_size, X)
+    code = encoding(forest, code_size, X)
+
+    # print out the encoding
+    for i in range(len(code)):
+        print(" ====== %s. path: ====== " % (i+1))
+        new_variable_path = code[i]
+        print_path(new_variable_path)
+
+    return code
+
+trial_code = test_encoding("generated_set.csv")
