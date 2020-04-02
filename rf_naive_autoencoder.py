@@ -130,12 +130,12 @@ def path_to(tree_model, goal_node):
             if (children_left[node_id] != children_right[node_id]):
                 # adding left and right sub-branches
                 left_child = children_left[node_id]
-                left_path = path_ids
+                left_path = [id for id in path_ids]
                 left_path.append(left_child)
                 stack.append((left_child, left_path))
 
                 right_child = children_right[node_id]
-                right_path = path_ids
+                right_path = [id for id in path_ids]
                 right_path.append(right_child)
                 stack.append((right_child, right_path))
 
@@ -369,13 +369,13 @@ def test_encoding(file):
 
     X = read_set(file)
     # train model on set X
-    forest = RandomForestClassifier(n_estimators=20, random_state=1)
+    forest = RandomForestClassifier(n_estimators=20, random_state=1, n_jobs=2)
     forest.fit(X, X)
 
     # currently we arbitrarily choose a code size and use a naive encoding
     code_size = 5
-    # code = encoding_naive(forest, code_size, X)
-    code = encoding(forest, code_size, X)
+    code = encoding_naive(forest, code_size, X)
+    # code = encoding(forest, code_size, X)
 
     # print out the encoding
     for i in range(len(code)):
