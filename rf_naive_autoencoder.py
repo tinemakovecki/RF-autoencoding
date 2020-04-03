@@ -33,22 +33,6 @@ y = train_data[:, 2:]
 # print(forest.predict(test_data_x))
 # print(dir(forest))
 
-# === inspecting trees === #
-# tree = forest.estimators_[19]
-# print(forest.classes_)
-# print(tree.classes_)
-# print(tree.predict(test_data_x))
-
-# test printing attributes
-# print(tree)
-# print(dir(tree.tree_))
-# print(tree.tree_.feature)
-# print(tree.tree_.children_left)
-# print(tree.tree_.children_right)
-# print(tree.tree_.feature)
-# print(tree.tree_.node_count)
-# print(tree.tree_.threshold)
-
 # ============================== #
 #           MAH STUFF            #
 # ============================== #
@@ -96,7 +80,9 @@ def max_coverage(tree_model, test_set, n_leaves=1):
 
     # returns an ordered list of best leaves containing:
     # coverage percentage and id of leaf
-    map(lambda pair: (pair[0]/n_samples, pair[1]), best_leaves)
+    best_leaves = map(lambda pair: (pair[0]/n_samples, pair[1]), best_leaves)
+    best_leaves = list(best_leaves)
+
     return best_leaves
 
 
@@ -239,12 +225,14 @@ def encoding_naive(forest, code_size, X_set):
                 candidates.sort()
 
     # we return the encoding presented in a readable manner
+    # the entries are (coverage, path)
     encoding_paths = []
     for candidate in candidates:
         tree = forest.estimators_[candidate[1]]
         leaf = candidate[2]
+        cover = candidate[0]
         path = path_to(tree, leaf)
-        encoding_paths.append(path)
+        encoding_paths.append((cover, path))
 
     return encoding_paths
 
@@ -311,8 +299,9 @@ def encoding(forest, code_size, X_set):
     for candidate in candidates:
         tree = forest.estimators_[candidate[1]]
         leaf = candidate[2]
+        cover = candidate[0]
         path = path_to(tree, leaf)
-        encoding_paths.append(path)
+        encoding_paths.append((cover, path))
 
     return encoding_paths
 
@@ -380,7 +369,9 @@ def test_encoding(file):
     # print out the encoding
     for i in range(len(code)):
         print(" ====== %s. path: ====== " % (i+1))
-        new_variable_path = code[i]
+        cover = code[i][0]
+        print(" The leaf of this path covers %s of all examples." % cover)
+        new_variable_path = code[i][1]
         print_path(new_variable_path)
 
     return code
