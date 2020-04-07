@@ -136,7 +136,7 @@ def path_to(tree_model, goal_node):
     threshold = thresholds[0]
     node_id = 0
 
-    for i in range(1, len_path-1):
+    for i in range(1, len_path):
 
         # if the path went to the left
         if children_left[node_id] == path_ids[i]:
