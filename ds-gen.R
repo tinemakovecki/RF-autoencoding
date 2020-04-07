@@ -61,11 +61,20 @@ pca.dim = function(ds, th = 0.95) {
 
 # dimensionality of the complete data set
 ds = complete.bin.ds(10)
+ds1 = complete.bin.ds(10)
+ds2 = complete.bin.ds(10)
+ds3 = complete.bin.ds(10)
 print(pca.dim(ds))
 
 # select rows from the complete data set using a logical formula
 ds = ds[ds[, 1] & ds[, 2] & ds[, 3] & ! ds[, 4], ]
-print(pca.dim(ds))
+ds1 = ds1[ds1[, 1] & ds1[, 2] & ! ds1[, 3] & ds1[, 10], ]
+ds2 = ds2[ds2[, 1] & ds2[, 2] & ! ds2[, 3] & ds2[, 9], ]
+ds3 = ds3[ds3[, 1] & ds3[, 2] & ! ds3[, 3] & ! ds3[, 4], ]
+# we select multiple formulas and merge the subsets together
+DS = rbind(ds, ds1, ds2, ds3)
+
+print(pca.dim(DS))
 
 
 # === generate numeric data sets === #
@@ -78,4 +87,4 @@ print(pca.dim(ds))
 
 # ===== PRINTING GENERATED DATA TO FILE ===== #
 
-write.table(ds, file="generated_set.csv", row.names=FALSE, col.names=FALSE)
+write.table(DS, file="generated_set.csv", row.names=FALSE, col.names=FALSE)

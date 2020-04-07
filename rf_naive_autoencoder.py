@@ -217,12 +217,12 @@ def encoding_naive(forest, code_size, X_set):
         if len(candidates) < code_size:
             # we add the new candidate and sort the list
             candidates.append((cover, i, candidate_leaf))
-            candidates.sort()
+            candidates.sort(reverse=True)
         else:
             if cover > candidates[-1][0]:
                 # we replace the last element and sort
                 candidates[-1] = (cover, i, candidate_leaf)
-                candidates.sort()
+                candidates.sort(reverse=True)
 
     # we return the encoding presented in a readable manner
     # the entries are (coverage, path)
@@ -265,12 +265,12 @@ def encoding(forest, code_size, X_set):
         if len(candidates) < code_size:
             # we add the new candidate and sort the list
             candidates.append((cover, i, candidate_leaf))
-            candidates.sort()
+            candidates.sort(reverse=True)
         else:
             if cover > candidates[-1][0]:
                 # we replace the last element and sort
                 candidates[-1] = (cover, i, candidate_leaf)
-                candidates.sort()
+                candidates.sort(reverse=True)
                 # TODO: insert in right spot instead of sorting?
 
     # We have the best leaf from each tree. Now we check the best trees in case
@@ -358,11 +358,18 @@ def test_encoding(file):
 
     X = read_set(file)
     # train model on set X
-    forest = RandomForestClassifier(n_estimators=20, random_state=1, n_jobs=2)
+    # We can use parameters max_leaf_nodes and min_impurity_decrease
+    # to decrease the number of leaves in the tree and therefore increase
+    # the number of samples covered by a leaf.
+    forest = RandomForestClassifier(n_estimators=20,
+                                    # max_leaf_nodes=25,
+                                    # min_impurity_decrease=0.003,
+                                    random_state=1,
+                                    n_jobs=2)
     forest.fit(X, X)
 
     # currently we arbitrarily choose a code size and use a naive encoding
-    code_size = 5
+    code_size = 8
     code = encoding_naive(forest, code_size, X)
     # code = encoding(forest, code_size, X)
 
