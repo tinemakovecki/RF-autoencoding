@@ -1,37 +1,8 @@
-# Tree to be
 
 import numpy as np
 import csv
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
-
-# copied example, will soon be completely useless
-
-#  A      B   C    D    E   F    G
-train_data = np.array([
-  [5, 133.5, 27, 284, 638, 31, 220],
-  [5, 111.9, 27, 285, 702, 36, 230],
-  [5,  99.3, 25, 310, 713, 39, 227],
-  [5, 102.5, 25, 311, 670, 34, 218],
-  [5, 114.8, 25, 312, 685, 34, 222],
-])
-# These I just made up
-test_data_x = np.array([
-  [5, 100.0],
-  [5, 105.2],
-  [5, 102.7],
-  [5, 103.5],
-  [5, 120.3],
-  [5, 132.5],
-  [5, 152.5],
-])
-
-x = train_data[:, :2]
-y = train_data[:, 2:]
-# forest = RandomForestClassifier(n_estimators=20, random_state=1)
-# forest.fit(x, y)
-# print(forest.predict(test_data_x))
-# print(dir(forest))
 
 # ============================== #
 #           MAH STUFF            #
@@ -86,31 +57,19 @@ def max_coverage(tree_model, test_set, n_leaves=1):
     return best_leaves
 
 
-def path_to(tree_model, goal_node):
-    """ Returns the path to a given node in the given tree model.
-    | tree_model: the tree that we want to search through.
-    | goal_node: id of the node from the given tree that we want a path to. """
-    # The returned path is formatted as follows:
-    # [(feature, value, bool), ...]
-    #
-    # for example:
-    # [(2, 4.0, 1), (4, -2.5, 0)]
-    # represents the conditions:
-    # 2nd feature is > 4.0
-    # 4th feature is <= -2.5
+def find_path(children_left, children_right, goal_node):
+    """ Returns the path to a goal_node in the given tree model. The connections
+        in the tree are given with left_children and right_children lists.
+        The path is returned as a list of node ids. """
 
-    # we parse the tree structure as shown in documentation
-    children_left = tree_model.tree_.children_left
-    children_right = tree_model.tree_.children_right
-
-    # We traverse the tree structure to identify the leaves
+    # travel through the tree until we hit the goal node
     stack = [(0, [0])]  # seed is the root node id
     while len(stack) > 0:
         node_id, path_ids = stack.pop()
 
         # If we have a test node
         if node_id == goal_node:
-            stack = []
+            break
         else:
             # if the node is a split node, not a leaf
             if (children_left[node_id] != children_right[node_id]):
@@ -125,13 +84,36 @@ def path_to(tree_model, goal_node):
                 right_path.append(right_child)
                 stack.append((right_child, right_path))
 
-    # we write down the conditions of path nodes
+    return path_ids
+
+
+def path_to(tree_model, goal_node):
+    """ Returns the path to a given node in the given tree model.
+    | tree_model: the tree that we want to search through.
+    | goal_node: id of the node from the given tree that we want a path to. """
+    # The returned path is formatted as follows:
+    # [(feature, value, bool), ...]
+    #
+    # for example:
+    # [(2, 4.0, 1), (4, -2.5, 0)]
+    # represents the conditions:
+    # 2nd feature is > 4.0
+    # 4th feature is <= -2.5
+
+    # save the way nodes are connected
+    children_left = tree_model.tree_.children_left
+    children_right = tree_model.tree_.children_right
+
+    # find which nodes are in the path to goal node
+    path_ids = find_path(children_left, children_right, goal_node)
+
+    # we write down the parameters of tree nodes
     features = tree_model.tree_.feature
     thresholds = tree_model.tree_.threshold
     len_path = len(path_ids)
     path = []
 
-    # we set up the first entry for the root
+    # we set up the first path element for the root
     feature = features[0]
     threshold = thresholds[0]
     node_id = 0
@@ -143,7 +125,7 @@ def path_to(tree_model, goal_node):
             # left turn, i.e. <= than threshold
             path_direction = 0
         else:
-            # right turn
+            # right turn, i.e. > than threshold
             path_direction = 1
         # we add entry for the node before
         path.append((feature, threshold, path_direction))
@@ -153,15 +135,8 @@ def path_to(tree_model, goal_node):
         feature = features[node_id]
         threshold = thresholds[node_id]
 
-    # add element for last node to path
-    if children_left[node_id] == path_ids[-1]:
-        # left turn
-        path_direction = 0
-    else:
-        # right turn
-        path_direction = 1
-    path.append((feature, threshold, path_direction))
-
+    # We leave out the last node in the path as it is a leaf node
+    # and the path only ends there.
     return path
 
 
@@ -169,7 +144,7 @@ def print_path(path):
     """ Function print_path prints out the given path in a neat form. """
     line_count = 0
 
-    for node in path[:-1]:
+    for node in path:
         feature, threshold, path_dir = node
         # print out node
         if path_dir == 0:
@@ -290,9 +265,10 @@ def encoding(forest, code_size, X_set):
         for j in range(1, i):
             coverage, leaf = new_leaves[j]
             if coverage > candidates[-1][0]:
+
                 # we replace the last element and sort
                 candidates[-1] = (coverage, i, leaf)
-                candidates.sort()
+                candidates.sort(reverse=True)
 
     # we return the encoding presented in a readable manner
     encoding_paths = []
