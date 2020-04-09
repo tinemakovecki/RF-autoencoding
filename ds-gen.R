@@ -70,7 +70,7 @@ print(pca.dim(ds))
 ds = ds[ds[, 1] & ds[, 2] & ds[, 3] & ! ds[, 4], ]
 ds1 = ds1[ds1[, 1] & ds1[, 2] & ! ds1[, 3] & ds1[, 10], ]
 ds2 = ds2[ds2[, 1] & ds2[, 2] & ! ds2[, 3] & ds2[, 9], ]
-ds3 = ds3[ds3[, 1] & ds3[, 2] & ! ds3[, 3] & ! ds3[, 4], ]
+ds3 = ds3[ds3[, 1] & ds3[, 2] & ds3[, 3] & ! ds3[, 4], ]
 # we select multiple formulas and merge the subsets together
 DS = rbind(ds, ds1, ds2, ds3)
 

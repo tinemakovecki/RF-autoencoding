@@ -14,7 +14,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 def max_coverage(tree_model, test_set, n_leaves=1):
     """ Returns a list of pairs with coverage percentages and indices of
-     leaves which covers the most samples from test_set. The parameters are:
+        leaves which covers the most samples from test_set. The parameters are:
     | tree_model: A trained decision tree model.
     | test_set: The set where we want to analyze samples from.
     | n_leaves: The number of best leaves that the function returns.
@@ -163,25 +163,28 @@ def print_path(path):
     return None
 
 
-def encoding_naive(forest, code_size, X_set):
-    """ Finds a very naive encoding """
-    n_trees = forest.n_estimators
+def find_naive_candidates(forest, n_candidates, X_set):
+    """ Function find_naive_candidates looks through a given forest and returns
+        the leaves with the largest coverage. It is naive and only looks at
+        the best leaf of each tree.
+    | forest: The forest that the function searches through.
+    | n_candidates: how many best candidates are returned by the function.
+    | X_set: the set being studied, the forest should be trained on X_set. """
 
-    # For a start we shall find candidates very naively.
-    # We search through the trees and look at the leaf with
-    # largest coverage in each tree. We take code_size best
-    # leaves found this way.
-    #
-    # Any tree can only have one leaf in the encoding.
+    n_trees = forest.n_estimators
+    candidates = []
+
+    # We search through the trees and look at the leaf with largest coverage
+    # in each tree. We take n_candidates best leaves found this way.
     #
     # We save candidates using a list of triples that is
-    # code_size long. We keep only the best candidates in it.
+    # n_candidates long. We keep only the best candidates in it.
     #
     # A candidate is described by:
     # (coverage, tree_id, leaf_id)
 
-    candidates = []
-
+    # TODO: replace lists with a better structure?
+    # TODO: insert in correct place instead of sorting every step?
     for i in range(n_trees):
         # find the best leaf in current tree
         tree = forest.estimators_[i]
@@ -189,7 +192,7 @@ def encoding_naive(forest, code_size, X_set):
 
         # if the new candidate is good enough we save it. That is:
         # not enough candidates or it's better than one of the candidates
-        if len(candidates) < code_size:
+        if len(candidates) < n_candidates:
             # we add the new candidate and sort the list
             candidates.append((cover, i, candidate_leaf))
             candidates.sort(reverse=True)
@@ -198,6 +201,19 @@ def encoding_naive(forest, code_size, X_set):
                 # we replace the last element and sort
                 candidates[-1] = (cover, i, candidate_leaf)
                 candidates.sort(reverse=True)
+
+    return candidates
+
+
+def encoding_naive(forest, code_size, X_set):
+    """ The function encoding_naive looks through the given random
+        forest model and uses it to (very) naively find an econding.
+    | forest: The random forest model to be used.
+    | code_size: the size of the returned encoding.
+    | X_set: the set being studied, the forest should be trained on X_set. """
+
+    # naively find candidates for the encoding
+    candidates = find_naive_candidates(forest, code_size, X_set)
 
     # we return the encoding presented in a readable manner
     # the entries are (coverage, path)
@@ -213,43 +229,17 @@ def encoding_naive(forest, code_size, X_set):
 
 
 def encoding(forest, code_size, X_set):
-    """ Finds a naive encoding """
-    n_trees = forest.n_estimators
+    """ The function encoding_naive looks through the given random
+        forest model and uses it to naively find an econding.
+    | forest: The random forest model to be used.
+    | code_size: the size of the returned encoding.
+    | X_set: the set being studied, the forest should be trained on X_set. """
 
-    # We search through the trees and look at the leaf with
-    # largest coverage in each tree. We take code_size best
-    # leaves found this way.
-    #
-    # Any tree can only have one leaf in the encoding.
-    #
-    # We save candidates using a list of triples that is
-    # code_size long. We keep only the best candidates in it.
-    #
-    # A candidate is described by:
-    # (coverage, tree_id, leaf_id)
+    # naively find candidates for the encoding
+    candidates = find_naive_candidates(forest, code_size, X_set)
 
-    candidates = []
-
-    for i in range(n_trees):
-        # find the best leaf in current tree
-        tree = forest.estimators_[i]
-        cover, candidate_leaf = max_coverage(tree, X_set)[0]
-
-        # if the new candidate is good enough we save it. That is:
-        # not enough candidates or it's better than one of the candidates
-        if len(candidates) < code_size:
-            # we add the new candidate and sort the list
-            candidates.append((cover, i, candidate_leaf))
-            candidates.sort(reverse=True)
-        else:
-            if cover > candidates[-1][0]:
-                # we replace the last element and sort
-                candidates[-1] = (cover, i, candidate_leaf)
-                candidates.sort(reverse=True)
-                # TODO: insert in right spot instead of sorting?
-
-    # We have the best leaf from each tree. Now we check the best trees in case
-    # they have other leaves which would improve our encoding.
+    # We have the best leaf from each tree. Now we check the best trees
+    # in case they have other leaves which would improve our encoding.
     # This might be unlikely?
 
     candidate_trees = [cand[1] for cand in candidates]
