@@ -5,56 +5,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 
 # ============================== #
-#           MAH STUFF            #
+#      OUTPUT & FORMATTING       #
 # ============================== #
-
-# print(dir(estimator))
-# print(dir(estimator.tree_))
-
-
-def max_coverage(tree_model, test_set, n_leaves=1):
-    """ Returns a list of pairs with coverage percentages and indices of
-        leaves which covers the most samples from test_set. The parameters are:
-    | tree_model: A trained decision tree model.
-    | test_set: The set where we want to analyze samples from.
-    | n_leaves: The number of best leaves that the function returns.
-              Set to 1 by default. """
-
-    # prep for leaf analysis
-    leaves_classified = tree_model.apply(test_set)
-    n_samples = len(leaves_classified)
-    n_nodes = tree_model.tree_.node_count
-    leaf_sample_count = [0 for _ in range(n_nodes)]
-
-    # we calculate how many samples are in each leaf
-    for sample_id in range(n_samples):
-        leaf = leaves_classified[sample_id]
-        leaf_sample_count[leaf] += 1
-
-    # TODO: decide: Should a list is_leaf be a parameter of the function???
-    # check which leaves have the largest coverage
-    first_leaf = leaves_classified[0]
-    best_leaves = [(leaf_sample_count[first_leaf], first_leaf)]
-
-    for node in range(n_nodes):
-        if len(best_leaves) < n_leaves:
-            # we only count leaves that cover at least 1 sample
-            if leaf_sample_count[node] > 0:
-                best_leaves.append((leaf_sample_count[node], node))
-                best_leaves.sort()  # could be moved to optimize a little
-        else:
-            # compare node with the worst example currently included
-            if leaf_sample_count[node] >= best_leaves[-1][0]:
-                # switch the last element and sort
-                best_leaves[-1] = (leaf_sample_count[node], node)
-                best_leaves.sort()
-
-    # returns an ordered list of best leaves containing:
-    # coverage percentage and id of leaf
-    best_leaves = map(lambda pair: (pair[0]/n_samples, pair[1]), best_leaves)
-    best_leaves = list(best_leaves)
-
-    return best_leaves
 
 
 def find_path(children_left, children_right, goal_node):
@@ -163,6 +115,56 @@ def print_path(path):
     return None
 
 
+# ============================== #
+#       ENCODING FUNCTIONS       #
+# ============================== #
+
+
+def max_coverage(tree_model, test_set, n_leaves=1):
+    """ Returns a list of pairs with coverage percentages and indices of
+        leaves which covers the most samples from test_set. The parameters are:
+    | tree_model: A trained decision tree model.
+    | test_set: The set where we want to analyze samples from.
+    | n_leaves: The number of best leaves that the function returns.
+              Set to 1 by default. """
+
+    # prep for leaf analysis
+    leaves_classified = tree_model.apply(test_set)
+    n_samples = len(leaves_classified)
+    n_nodes = tree_model.tree_.node_count
+    leaf_sample_count = [0 for _ in range(n_nodes)]
+
+    # we calculate how many samples are in each leaf
+    for sample_id in range(n_samples):
+        leaf = leaves_classified[sample_id]
+        leaf_sample_count[leaf] += 1
+
+    # TODO: decide: Should a list is_leaf be a parameter of the function???
+    # check which leaves have the largest coverage
+    first_leaf = leaves_classified[0]
+    best_leaves = [(leaf_sample_count[first_leaf], first_leaf)]
+
+    for node in range(n_nodes):
+        if len(best_leaves) < n_leaves:
+            # we only count leaves that cover at least 1 sample
+            if leaf_sample_count[node] > 0:
+                best_leaves.append((leaf_sample_count[node], node))
+                best_leaves.sort()  # could be moved to optimize a little
+        else:
+            # compare node with the worst example currently included
+            if leaf_sample_count[node] >= best_leaves[-1][0]:
+                # switch the last element and sort
+                best_leaves[-1] = (leaf_sample_count[node], node)
+                best_leaves.sort()
+
+    # returns an ordered list of best leaves containing:
+    # coverage percentage and id of leaf
+    best_leaves = map(lambda pair: (pair[0]/n_samples, pair[1]), best_leaves)
+    best_leaves = list(best_leaves)
+
+    return best_leaves
+
+
 def find_naive_candidates(forest, n_candidates, X_set):
     """ Function find_naive_candidates looks through a given forest and returns
         the leaves with the largest coverage. It is naive and only looks at
@@ -219,9 +221,9 @@ def encoding_naive(forest, code_size, X_set):
     # the entries are (coverage, path)
     encoding_paths = []
     for candidate in candidates:
+        cover = candidate[0]
         tree = forest.estimators_[candidate[1]]
         leaf = candidate[2]
-        cover = candidate[0]
         path = path_to(tree, leaf)
         encoding_paths.append((cover, path))
 
@@ -263,9 +265,9 @@ def encoding(forest, code_size, X_set):
     # we return the encoding presented in a readable manner
     encoding_paths = []
     for candidate in candidates:
+        cover = candidate[0]
         tree = forest.estimators_[candidate[1]]
         leaf = candidate[2]
-        cover = candidate[0]
         path = path_to(tree, leaf)
         encoding_paths.append((cover, path))
 
@@ -273,7 +275,7 @@ def encoding(forest, code_size, X_set):
 
 
 # ============================== #
-#         METRIC & OTHER         #
+#             OTHER              #
 # ============================== #
 
 
@@ -349,4 +351,5 @@ def test_encoding(file):
 
     return code
 
+# compute the encoding
 trial_code = test_encoding("generated_set.csv")
