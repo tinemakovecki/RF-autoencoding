@@ -115,6 +115,28 @@ def print_path(path):
     return None
 
 
+def return_max_index(l):
+    """ Placeholder. auxilliary function """
+    max_element = max(l)
+    i = l.index(max_element)
+
+    return i
+
+
+def leaf_label(tree_model, leaf):
+    """ Function leaf_label returns the label of the given leaf, which is the class
+    that the tree will predict for the elements that belong to the leaf. """
+
+    values = tree_model.tree_.value
+    # transform data from numpy array into list
+    leaf_values = list(map(list, values[leaf]))
+
+    # for each feature we find which value is dominant among elements of leaf
+    prediction = list(map(return_max_index, leaf_values))
+
+    return prediction
+
+
 # ============================== #
 #       ENCODING FUNCTIONS       #
 # ============================== #
@@ -225,7 +247,12 @@ def encoding_naive(forest, code_size, X_set):
         tree = forest.estimators_[candidate[1]]
         leaf = candidate[2]
         path = path_to(tree, leaf)
-        encoding_paths.append((cover, path))
+
+        # we add the prediction at the end of the path to output
+        # TODO: correct comments to include this part
+        prediction = leaf_label(tree, leaf)
+
+        encoding_paths.append((cover, path, prediction))
 
     return encoding_paths
 
@@ -269,7 +296,12 @@ def encoding(forest, code_size, X_set):
         tree = forest.estimators_[candidate[1]]
         leaf = candidate[2]
         path = path_to(tree, leaf)
-        encoding_paths.append((cover, path))
+
+        # we add the prediction at the end of the path to output
+        # TODO: correct comments to include this part
+        prediction = leaf_label(tree, leaf)
+
+        encoding_paths.append((cover, path, prediction))
 
     return encoding_paths
 
@@ -337,6 +369,7 @@ def test_encoding(file):
     forest.fit(X, X)
 
     # currently we arbitrarily choose a code size and use a naive encoding
+    # TODO: pca to select code_size?
     code_size = 8
     code = encoding_naive(forest, code_size, X)
     # code = encoding(forest, code_size, X)
@@ -344,10 +377,16 @@ def test_encoding(file):
     # print out the encoding
     for i in range(len(code)):
         print(" ====== %s. path: ====== " % (i+1))
+        # print out the coverage
         cover = code[i][0]
         print(" The leaf of this path covers %s of all examples." % cover)
+        # print out the path
         new_variable_path = code[i][1]
         print_path(new_variable_path)
+        # print prediction
+        prediction = code[i][2]
+        print(" This path predicts the element is: %s" % prediction)
+        print()
 
     return code
 
