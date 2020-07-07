@@ -117,6 +117,7 @@ def print_path(path):
 
 def return_max_index(l):
     """ Placeholder. auxilliary function """
+
     max_element = max(l)
     i = l.index(max_element)
 
@@ -135,6 +136,17 @@ def leaf_label(tree_model, leaf):
     prediction = list(map(return_max_index, leaf_values))
 
     return prediction
+
+
+def convert_labels(keys, class_legend):
+    """ Function convert_labels transforms a predictions of indices given by
+    a tree model to the actual values of the variables.
+    The argument class_legend is given by forest.classes_ """
+
+    n = len(class_legend)
+    class_values = map(lambda x: class_legend[x][keys[x]], list(range(n)))
+
+    return list(class_values)
 
 
 # ============================== #
@@ -370,7 +382,7 @@ def test_encoding(file):
 
     # currently we arbitrarily choose a code size and use a naive encoding
     # TODO: pca to select code_size?
-    code_size = 8
+    code_size = 7
     code = encoding_naive(forest, code_size, X)
     # code = encoding(forest, code_size, X)
 
@@ -383,9 +395,15 @@ def test_encoding(file):
         # print out the path
         new_variable_path = code[i][1]
         print_path(new_variable_path)
+
         # print prediction
         prediction = code[i][2]
-        print(" This path predicts the element is: %s" % prediction)
+        # TODO: further checking that prediction_values are correct
+        class_keys = list(map(list, forest.classes_))
+        prediction_values = convert_labels(prediction, class_keys)
+
+        print(" This path predicts the element is: %s" % prediction_values)
+        # print(predictions)
         print()
 
     return code

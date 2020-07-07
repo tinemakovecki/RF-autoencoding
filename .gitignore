@@ -1,4 +1,10 @@
 __pycache__/
 .Rhistory
+
 generated_set.csv
 generated_data/
+
+prototip.aux
+prototip.log
+prototip.pdf
+prototip.synctex.gz
