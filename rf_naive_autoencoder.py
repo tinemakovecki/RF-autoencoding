@@ -6,8 +6,61 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier
 
 # ============================== #
-#      OUTPUT & FORMATTING       #
+#      PRINT OUT & COSMETIC      #
 # ============================== #
+
+
+def print_path(path):
+    """ Function print_path prints out the given path in a neat form. """
+    line_count = 0
+
+    for node in path:
+        feature, threshold, path_dir = node
+        # print out node
+        if path_dir == 0:
+            print("%s test node: feature %s <= %s"
+                  % (line_count * "  ",
+                     feature,
+                     threshold
+                     ))
+        else:
+            print("%s test node: feature %s > %s"
+                  % (line_count * "  ",
+                     feature,
+                     threshold
+                     ))
+        line_count += 1
+    return None
+
+
+def print_encoding(code, forest):
+    """ Prints out the encoding in a neatly arranged form. """
+
+    for i in range(len(code)):
+        print(" ====== %s. path: ====== " % (i+1))
+        # print out the coverage
+        cover = code[i][0]
+        print(" The leaf of this path covers %s of all examples." % cover)
+        # print out the path
+        new_variable_path = code[i][1]
+        print_path(new_variable_path)
+
+        # print prediction
+        prediction = code[i][2]
+        class_keys = list(map(list, forest.classes_))
+        prediction_values = convert_labels(prediction, class_keys)
+
+        print(" This path predicts the element is: %s" % prediction_values)
+        # print(predictions)
+        print()
+
+
+# ============================== #
+#      AUXILLIARY FUNCTIONS      #
+# ============================== #
+
+
+# ===== PATH TRANSFORMATION ===== #
 
 
 def find_path(children_left, children_right, goal_node):
@@ -93,83 +146,7 @@ def path_to(tree_model, goal_node):
     return path
 
 
-def print_path(path):
-    """ Function print_path prints out the given path in a neat form. """
-    line_count = 0
-
-    for node in path:
-        feature, threshold, path_dir = node
-        # print out node
-        if path_dir == 0:
-            print("%s test node: feature %s <= %s"
-                  % (line_count * "  ",
-                     feature,
-                     threshold
-                     ))
-        else:
-            print("%s test node: feature %s > %s"
-                  % (line_count * "  ",
-                     feature,
-                     threshold
-                     ))
-        line_count += 1
-    return None
-
-
-def print_encoding(code, forest):
-    """ Prints out the encoding in a neatly arranged form. """
-
-    for i in range(len(code)):
-        print(" ====== %s. path: ====== " % (i+1))
-        # print out the coverage
-        cover = code[i][0]
-        print(" The leaf of this path covers %s of all examples." % cover)
-        # print out the path
-        new_variable_path = code[i][1]
-        print_path(new_variable_path)
-
-        # print prediction
-        prediction = code[i][2]
-        class_keys = list(map(list, forest.classes_))
-        prediction_values = convert_labels(prediction, class_keys)
-
-        print(" This path predicts the element is: %s" % prediction_values)
-        # print(predictions)
-        print()
-
-
-def return_max_index(l):
-    """ Placeholder. auxilliary function """
-
-    max_element = max(l)
-    i = l.index(max_element)
-
-    return i
-
-
-def leaf_label(tree_model, leaf):
-    """ Function leaf_label returns the label of the given leaf, which is the class
-    that the tree will predict for the elements that belong to the leaf. """
-
-    values = tree_model.tree_.value
-    # transform data from numpy array into list
-    leaf_values = list(map(list, values[leaf]))
-
-    # for each feature we find which value is dominant among elements of leaf
-    prediction = list(map(return_max_index, leaf_values))
-
-    return prediction
-
-
-def convert_labels(keys, class_legend):
-    """ Function convert_labels transforms a predictions of indices given by
-    a tree model to the actual values of the variables.
-    The argument class_legend is given by forest.classes_ """
-
-    n = len(class_legend)
-    class_values = map(lambda x: class_legend[x][keys[x]], list(range(n)))
-
-    return list(class_values)
+# ======== SET ENCODING ======== #
 
 
 def check_condition_for_sample(condition, sample):
@@ -210,8 +187,123 @@ def encode_set(code, X):
     return encoded_set
 
 
+# ==== SIMILARITY MEASURE ==== #
+
+
+# TODO: maybe delete
+def path_to_vector(path, number_of_features):
+    """ Converts a list that describes a path to a vector.
+    The i-th element of the vector is:
+    -1; if the i-th feature is set to 0 in the path
+    1; if the i-th feature is set to 1
+    0; otherwise """
+    
+    # create vector
+    v = [0 for _ in range(number_of_features)]
+
+    # correct vector entriy for each node in path
+    for node in path:
+        feature, threshold, path_dir = node
+        # TODO: check indices, might be an off by one error
+        if path_dir >= 1:
+            v[feature] = 1
+        else:
+            v[feature] = -1
+    
+    return v
+
+
+def node_to_vector(path, training_set):
+    """ Maps the given path to a vector describing which of the examples
+    in the training are described by the leaf at the end of the path. """
+
+    # TODO: check if map alters the original object
+    v = list(map(lambda x: check_condition_for_sample(path, x), training_set))
+
+    return v
+
+
+def code_similarity(x, y, training_set):
+    """ The function calculates a 'normalized' similarity
+    measure for the two given code entries. """
+
+    # we extract vectors to represent the codes
+    # x = (cover, path, prediction)
+
+    v1 = node_to_vector(x[1], training_set)
+    v2 = node_to_vector(y[1], training_set)
+
+    # scalar product of encodings
+    similarity = np.dot(v1, v2)
+
+    # normalization (untested as of yet)
+    samples_covered_by_v1 = sum(v1)
+    samples_covered_by_v2 = sum(v2)
+    norm = max(samples_covered_by_v1, samples_covered_by_v2)
+
+    similarity_normalized = similarity/norm
+
+    return similarity_normalized
+
+
+# ====== LEAF PREDICTION ====== #
+# TODO: debug predictions!!!!
+
+
+def leaf_label(tree_model, leaf):
+    """ Function leaf_label returns the label of the given leaf, which is the class
+    that the tree will predict for the elements that belong to the leaf. """
+
+    values = tree_model.tree_.value
+    # transform data from numpy array into list
+    leaf_values = list(map(list, values[leaf]))
+
+    # for each feature we find which value is dominant among elements of leaf
+    prediction = list(map(return_max_index, leaf_values))
+
+    return prediction
+
+
+def convert_labels(keys, class_legend):
+    """ Function convert_labels transforms a predictions of indices given by
+    a tree model to the actual values of the variables.
+    The argument class_legend is given by forest.classes_ """
+
+    n = len(class_legend)
+    class_values = map(lambda x: class_legend[x][keys[x]], list(range(n)))
+
+    return list(class_values)
+
+
+# ======== OTHER ======== #
+
+
+def return_max_index(l):
+    """ Placeholder. auxilliary function """
+
+    max_element = max(l)
+    i = l.index(max_element)
+
+    return i
+
+
+def d(v1, v2):
+    """ Calculates d_2 distance between v1 and v2 """
+    n = len(v1)
+    m = len(v2)
+    if m == n:
+        square_differences = [0 for i in range(n)]
+        for i in range(n):
+            square_differences[i] = (v1[i] - v2[i])**2
+        d_2 = np.sqrt(sum(square_differences))
+        return(d_2)
+    else:
+        print("Vector dimension mismatch")
+        return None
+
+
 # ============================== #
-#       ENCODING FUNCTIONS       #
+#       ENCODING FRAMEWORK       #
 # ============================== #
 
 
@@ -448,90 +540,16 @@ def encoding(forest, code_size, X_set):
 
 
 # ============================== #
-#             OTHER              #
-# ============================== #
-
-
-def d(v1, v2):
-    """ Calculates d_2 distance between v1 and v2 """
-    n = len(v1)
-    m = len(v2)
-    if m == n:
-        square_differences = [0 for i in range(n)]
-        for i in range(n):
-            square_differences[i] = (v1[i] - v2[i])**2
-        d_2 = np.sqrt(sum(square_differences))
-        return(d_2)
-    else:
-        print("Vector dimension mismatch")
-        return None
-
-
-def estimate_on_set(X):
-    """ Trains a multivariable RF on set X to predict X
-     and returns the distance between data and prediction """
-    return None
-
-
-# TODO: maybe relocate
-def path_to_vector(path, number_of_features):
-    """ Converts a list that describes a path to a vector.
-    The i-th element of the vector is:
-    -1; if the i-th feature is set to 0 in the path
-    1; if the i-th feature is set to 1
-    0; otherwise """
-    
-    # create vector
-    v = [0 for _ in range(number_of_features)]
-
-    # correct vector entriy for each node in path
-    for node in path:
-        feature, threshold, path_dir = node
-        # TODO: check indices, might be an off by one error
-        if path_dir >= 1:
-            v[feature] = 1
-        else:
-            v[feature] = -1
-    
-    return v
-
-
-def node_to_vector(path, training_set):
-    """ Maps the given path to a vector describing which of the examples
-    in the training are described by the leaf at the end of the path. """
-
-    # TODO: check if map alters the original object
-    v = list(map(lambda x: check_condition_for_sample(path, x), training_set))
-
-    return v
-
-
-def code_similarity(x, y, training_set):
-    """ The function calculates a 'normalized' similarity
-    measure for the two given code entries. """
-
-    # we extract vectors to represent the codes
-    # x = (cover, path, prediction)
-
-    v1 = node_to_vector(x[1], training_set)
-    v2 = node_to_vector(y[1], training_set)
-
-    # scalar product of encodings
-    similarity = np.dot(v1, v2)
-
-    # normalization (untested as of yet)
-    samples_covered_by_v1 = sum(v1)
-    samples_covered_by_v2 = sum(v2)
-    norm = max(samples_covered_by_v1, samples_covered_by_v2)
-
-    similarity_normalized = similarity/norm
-
-    return similarity_normalized
-
-
-# ============================== #
 #            TESTING             #
 # ============================== #
+
+
+def estimate_reconstruction_error(X):
+    """ Trains a multivariable RF on set X to predict X
+     and returns the distance between data and prediction """
+     # TODO
+    return None
+
 
 def read_set(file_name):
     """ Function read_set reads data from file and saves it into a table.
