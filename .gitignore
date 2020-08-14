@@ -1,7 +1,9 @@
 __pycache__/
+.vscode/
 .Rhistory
 
 generated_set.csv
+latent-space.csv
 generated_data/
 
 prototip.aux

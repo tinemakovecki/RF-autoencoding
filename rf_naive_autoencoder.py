@@ -3,6 +3,7 @@ import numpy as np
 import csv
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.neural_network import MLPClassifier
 
 # ============================== #
 #      OUTPUT & FORMATTING       #
@@ -115,6 +116,28 @@ def print_path(path):
     return None
 
 
+def print_encoding(code, forest):
+    """ Prints out the encoding in a neatly arranged form. """
+
+    for i in range(len(code)):
+        print(" ====== %s. path: ====== " % (i+1))
+        # print out the coverage
+        cover = code[i][0]
+        print(" The leaf of this path covers %s of all examples." % cover)
+        # print out the path
+        new_variable_path = code[i][1]
+        print_path(new_variable_path)
+
+        # print prediction
+        prediction = code[i][2]
+        class_keys = list(map(list, forest.classes_))
+        prediction_values = convert_labels(prediction, class_keys)
+
+        print(" This path predicts the element is: %s" % prediction_values)
+        # print(predictions)
+        print()
+
+
 def return_max_index(l):
     """ Placeholder. auxilliary function """
 
@@ -147,6 +170,44 @@ def convert_labels(keys, class_legend):
     class_values = map(lambda x: class_legend[x][keys[x]], list(range(n)))
 
     return list(class_values)
+
+
+def check_condition_for_sample(condition, sample):
+    """ The function checks whether the given condition holds for the given sample.
+    Condition is given as a 'path', sample is a vector. """
+
+    # check if the sample fits the steps of the condition
+    checklist = list(map(
+        lambda x: sample[x[0]] >= x[1] if x[2] else sample[x[0]] < x[1],
+        condition))
+
+    # check if all parts of the condition are true
+    fits_condition = all(checklist)
+
+    return fits_condition
+
+
+def encode_sample(code_paths, sample):
+    """ Function encode_sample encodes the given sample with
+     the given code of code_paths. """
+
+    # for each code_path check if the sample fits
+    x_code = map(lambda x: check_condition_for_sample(x, sample), code_paths)
+    # transform to 1/0 instead of True/False
+    encoded_sample = list(map(lambda x: 1 if x else 0, x_code))
+
+    return encoded_sample
+
+
+def encode_set(code, X):
+    """ Function encode_set encodes the set X with the given code. """
+
+    # extract the code paths from code
+    code_paths = list(map(lambda x: x[1], code))
+    # map the samples to encoded samples
+    encoded_set = list(map(lambda x: encode_sample(code_paths, x), X))
+
+    return encoded_set
 
 
 # ============================== #
@@ -241,6 +302,74 @@ def find_naive_candidates(forest, n_candidates, X_set):
     return candidates
 
 
+def find_different_candidates(forest, n_candidates, X_set, measure_of_difference=0.4):
+    """ Function find_different_candidates looks through a given forest and returns
+        leaves that are suitable candidates as a basis for encoding. It tries to
+        ensure a large enough difference between candidates.
+    | forest: The forest that the function searches through.
+    | n_candidates: how many best candidates are returned by the function.
+    | X_set: the set being studied, the forest should be trained on X_set. """
+
+    n_trees = forest.n_estimators
+    candidates = []
+
+    # We search through the trees and look at the leaf with largest coverage
+    # in each tree. We take n_candidates best leaves found this way.
+    #
+    # We save candidates using a list of triples that is
+    # n_candidates long. We keep only the best candidates in it.
+    #
+    # A candidate is described by:
+    # (coverage, tree_id, leaf_id)
+
+    # TODO: replace lists with a better structure?
+    # TODO: insert in correct place instead of sorting every step?
+    for i in range(n_trees):
+        # find the best leaf in current tree
+        tree = forest.estimators_[i]
+        cover, candidate_leaf = max_coverage(tree, X_set)[0]
+        # init
+        difference_check = True
+        # check the similarity with other entries
+        new_path = path_to(tree, candidate_leaf)
+
+        # if the new candidate is good enough we save it. That is:
+        # not enough candidates or it's better than one of the candidates
+        if len(candidates) < n_candidates:
+
+            for candidate in candidates:
+                # TODO: this should be rewritten
+                # convert format to work for code_similarity()
+                old_path = path_to(tree, candidate[1])
+                sim = code_similarity((cover, new_path, candidate_leaf), (candidate[0], old_path, candidate[2]), X_set)
+                print(sim)
+                if sim > measure_of_difference:
+                    difference_check = False
+
+            # we add the new candidate if it isn't too similar and sort the list
+            if difference_check:
+                candidates.append((cover, i, candidate_leaf))
+                candidates.sort(reverse=True)
+
+        else:
+            for candidate in candidates:
+                # TODO: this should be rewritten
+                # convert format to work for code_similarity()
+                old_path = path_to(tree, candidate[1])
+                sim = code_similarity((cover, new_path, candidate_leaf), (candidate[0], old_path, candidate[2]), X_set)
+                print(sim)
+                if sim > measure_of_difference:
+                    difference_check = False
+
+            if cover > candidates[-1][0]:
+                if difference_check:
+                    # we replace the last element and sort
+                    candidates[-1] = (cover, i, candidate_leaf)
+                    candidates.sort(reverse=True)
+
+    return candidates
+
+
 def encoding_naive(forest, code_size, X_set):
     """ The function encoding_naive looks through the given random
         forest model and uses it to (very) naively find an econding.
@@ -249,10 +378,10 @@ def encoding_naive(forest, code_size, X_set):
     | X_set: the set being studied, the forest should be trained on X_set. """
 
     # naively find candidates for the encoding
-    candidates = find_naive_candidates(forest, code_size, X_set)
+    candidates = find_different_candidates(forest, code_size, X_set)
 
     # we return the encoding presented in a readable manner
-    # the entries are (coverage, path)
+    # the entries are (coverage, path, prediction)
     encoding_paths = []
     for candidate in candidates:
         cover = candidate[0]
@@ -344,6 +473,62 @@ def estimate_on_set(X):
     return None
 
 
+# TODO: maybe relocate
+def path_to_vector(path, number_of_features):
+    """ Converts a list that describes a path to a vector.
+    The i-th element of the vector is:
+    -1; if the i-th feature is set to 0 in the path
+    1; if the i-th feature is set to 1
+    0; otherwise """
+    
+    # create vector
+    v = [0 for _ in range(number_of_features)]
+
+    # correct vector entriy for each node in path
+    for node in path:
+        feature, threshold, path_dir = node
+        # TODO: check indices, might be an off by one error
+        if path_dir >= 1:
+            v[feature] = 1
+        else:
+            v[feature] = -1
+    
+    return v
+
+
+def node_to_vector(path, training_set):
+    """ Maps the given path to a vector describing which of the examples
+    in the training are described by the leaf at the end of the path. """
+
+    # TODO: check if map alters the original object
+    v = list(map(lambda x: check_condition_for_sample(path, x), training_set))
+
+    return v
+
+
+def code_similarity(x, y, training_set):
+    """ The function calculates a 'normalized' similarity
+    measure for the two given code entries. """
+
+    # we extract vectors to represent the codes
+    # x = (cover, path, prediction)
+
+    v1 = node_to_vector(x[1], training_set)
+    v2 = node_to_vector(y[1], training_set)
+
+    # scalar product of encodings
+    similarity = np.dot(v1, v2)
+
+    # normalization (untested as of yet)
+    samples_covered_by_v1 = sum(v1)
+    samples_covered_by_v2 = sum(v2)
+    norm = max(samples_covered_by_v1, samples_covered_by_v2)
+
+    similarity_normalized = similarity/norm
+
+    return similarity_normalized
+
+
 # ============================== #
 #            TESTING             #
 # ============================== #
@@ -382,31 +567,36 @@ def test_encoding(file):
 
     # currently we arbitrarily choose a code size and use a naive encoding
     # TODO: pca to select code_size?
-    code_size = 7
-    code = encoding_naive(forest, code_size, X)
+    # code_size = 5
+    # code = encoding_naive(forest, code_size, X)
     # code = encoding(forest, code_size, X)
 
+    # print_encoding(code, forest)
+
+    # ===== 2nd option: dynamically select encoding size ===== #
+
+    code_size = 1
+    covered_samples_sum = 0 # init, chosen to ensure loop
+    # THIS IS VERY INEFFICIENT
+    while covered_samples_sum < 0.8:
+        code = encoding_naive(forest, code_size, X)
+        # TODO: check that covering is large enough
+        # we want it to cover at least 0.5
+        covered_samples_sum = sum(map(lambda x: x[0], code))
+        # expand code by one
+        code_size += 1
+
     # print out the encoding
-    for i in range(len(code)):
-        print(" ====== %s. path: ====== " % (i+1))
-        # print out the coverage
-        cover = code[i][0]
-        print(" The leaf of this path covers %s of all examples." % cover)
-        # print out the path
-        new_variable_path = code[i][1]
-        print_path(new_variable_path)
+    print_encoding(code, forest)
 
-        # print prediction
-        prediction = code[i][2]
-        # TODO: further checking that prediction_values are correct
-        class_keys = list(map(list, forest.classes_))
-        prediction_values = convert_labels(prediction, class_keys)
-
-        print(" This path predicts the element is: %s" % prediction_values)
-        # print(predictions)
-        print()
+    # encode the set as a test:
+    # Y = encode_set(code, X)
+    # print(Y)
 
     return code
 
-# compute the encoding
-trial_code = test_encoding("generated_set.csv")
+
+# COMPUTE THE ENCODING
+
+# trial_code = test_encoding("generated_set.csv")
+trial_code = test_encoding("latent-space.csv")
