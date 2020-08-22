@@ -5,6 +5,9 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier
 
+from keras.layers import Input, Dense
+from keras.models import Model
+
 # ============================== #
 #      PRINT OUT & COSMETIC      #
 # ============================== #
@@ -539,16 +542,85 @@ def encoding(forest, code_size, X_set):
     return encoding_paths
 
 
-# ============================== #
-#            TESTING             #
-# ============================== #
+def decode_sample(encoding, encoded_sample):
+    """ The function decodes an encoded vector. 
+    The encoding and the encoded_sample are parameters. """
+
+    # encoding is a list of elements of the format: (coverage, path, prediction)
+    # if the encoded sample fit any of the encoded paths, we just take that prediction
+    # NOTE: this really has to be refined later.
+    # TODO: FIX THE GODDAMN PREDICTIONS!!!
+
+    n = len(encode_sample)
+    decoded = False
+    for i in range(n):
+        # if the sample fits into i-th leaf, we take the saved prediction
+        if encode_sample[i] == 1:
+            prediction = encoding[i][2]
+            decoded_sample = prediction
+            decoded = True
+
+    # if the sample doesn't match any path we have to get crafty
+    if not decoded:
+        # we will have to go through the paths and make guesses
+        # TODO: this.
+        decoded_sample = "oof"
+
+    return decoded_sample
 
 
-def estimate_reconstruction_error(X):
-    """ Trains a multivariable RF on set X to predict X
-     and returns the distance between data and prediction """
-     # TODO
-    return None
+def decode_set(encoding, encoded_set):
+    """ The function decodes an encoded set. 
+    The encoding and the encoded set are parameters. """
+
+    # encoding is a list of elements of the format: (coverage, path, prediction)
+    # we decode the whole set
+    decoded_set = list(map(lambda x: decode_sample(encoding, x), encode_set))
+
+    return decode_set
+
+
+def encode_with_nn(training_set, encoding_dim):
+
+    # "encoded" is the encoded representation of the input
+    encoded_set = Dense(encoding_dim, activation='relu')(training_set)
+    # "decoded" is the lossy reconstruction of the input
+    decoded_set = Dense(784, activation='sigmoid')(encoded_set)
+
+    # this model maps an input to its reconstruction
+    autoencoder = Model(training_set, decoded_set)
+
+    # this model maps an input to its encoded representation
+    encoder = Model(input_img, encoded)
+
+    # create a placeholder for an encoded (32-dimensional) input
+    encoded_input = Input(shape=(encoding_dim,))
+    # retrieve the last layer of the autoencoder model
+    decoder_layer = autoencoder.layers[-1]
+    # create the decoder model
+    decoder = Model(encoded_input, decoder_layer(encoded_input))
+
+    # ================================= #
+    # We have prepared all of the autoencoder parts
+
+    # we use 'adadelta optimize' and a per-pixel binary crossentropy loss
+    autoencoder.compile(optimizer='adadelta', loss='binary_crossentropy')
+
+    # we train the model for 50 epochs
+    autoencoder.fit(training_set, training_set,
+                    epochs=100,
+                    batch_size=128,
+                    shuffle=True) # batch_size / epochs changed
+
+    encoded_data = encoder.predict(training_set)
+    decoded_data = decoder.predict(encoded_data)
+
+    print(decoded_data)
+
+
+# ============================== #
+#         READ & WRITE           #
+# ============================== #
 
 
 def read_set(file_name):
@@ -563,6 +635,34 @@ def read_set(file_name):
             data.append(entry)
 
     return data
+
+
+def save_results(original_set, encoded_set, decoded_set, file_name):
+    """ Save the given results including the original set, the encoded set
+    and extra info into a txt file. """
+    # TODO: add extra info to save, like recon error, etc.
+
+    with open(file_name, mode='w') as csv_file:
+        data_writer = csv.writer(csv_file, delimiter=' ')
+
+        # TODO: add header
+        n = len(original_set)
+        for i in range(n):
+            row = original_set[i] + ['|'] + encoded_set[i] + ['|'] + decoded_set[i]
+            data_writer.writerow(row)
+
+
+# ============================== #
+#            TESTING             #
+# ============================== #
+
+
+def estimate_reconstruction_error(X, metric):
+    """ Trains a multivariable RF on set X to predict X
+     and returns the distance between data and prediction.
+     Possible metrics are: MSE, RMSE, MAE """
+     # TODO
+    return None
 
 
 def test_encoding(file):
@@ -610,6 +710,9 @@ def test_encoding(file):
     # encode the set as a test:
     # Y = encode_set(code, X)
     # print(Y)
+
+    # TEST NEURAL NETWORK, TO BE REMOVED
+    # encode_with_nn(file, 5)
 
     return code
 
