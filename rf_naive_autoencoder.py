@@ -1,6 +1,7 @@
 
 import numpy as np
 import csv
+import copy
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier
@@ -278,7 +279,201 @@ def convert_labels(keys, class_legend):
     return list(class_values)
 
 
+# ======== DPLL ======== #
+
+
+def feature_in_list(fixed_value_list, feature):
+    """ The function checks if the list already contains a value
+     attributed to the given feature to avoid repeated entries. """
+
+    feature_equality_list = list(map(lambda x: x[0] == feature, fixed_value_list))
+    feature_present = any(feature_equality_list)
+
+    return feature_present
+
+def prune_formula(formula):
+    """ Removes occurences of False from the formula and 
+    removes clauses that contain a True literal. """
+
+    pruned_formula = []
+
+    for clause in formula:
+        pruned_clause = []
+
+        # go through literals in the clause
+        clause_obsolete = False
+        for literal in clause:
+            if literal == True:
+                clause_obsolete = True
+            elif literal != False:
+                pruned_clause.append(literal)
+            
+        # add shortened clause to new formula
+        if not clause_obsolete:
+            pruned_formula.append(pruned_clause)
+    
+    return pruned_formula
+
+
+def choose_literal(formula):
+    """ Returns a literal contained in the formula. """
+
+    candidate_literal = False
+
+    for clause in formula:
+        for literal in clause:
+            candidate_literal = literal
+
+    return candidate_literal
+
+
+def replace_literal(formula, literal):
+    """ Replaces all occurences of the selected literal or its negation
+    in the formula with True/False as appropriate. """
+
+    n_clauses = len(formula)
+    updated_formula = formula # TODO: deep copy !!!!
+
+    feature = literal[0]
+    feature_value = literal[1]
+
+    for i in range(n_clauses):
+        clause = formula[i]
+        n_literals = len(clause)
+        for j in range(n_literals):
+            if clause[j] != False and clause[j] != True:
+                if feature == clause[j][0]:
+                    # we assign a value to this literal
+                    if clause[j][1] == feature_value:
+                        updated_formula[i][j] = True
+                    else:
+                        updated_formula[i][j] = False
+
+    return updated_formula
+
+
+def check_for_unit_clause(formula):
+    """ Checks if any clause in the formula contains only one literal. """
+
+    unit_clauses = []
+    seen_features = []
+
+    for clause in formula:
+        if len(clause) == 1:
+            if clause[0] != True and clause[0] != False:
+                feature = clause[0][0]
+                if feature not in seen_features:
+                    unit_clauses.append(clause[0]) 
+                    seen_features.append(clause[0][0])
+
+    return unit_clauses
+
+
+def check_for_pure_literal(formula, n_of_features):
+    """ Checks if any literal appears only in negated or 
+    non-negated form in the formula. """
+
+    # init a vector to keep track of each feature
+    feature_vector = [-1 for _ in range(n_of_features)]
+
+    for clause in formula:
+        for literal in clause:
+            feature = literal[0]
+            bool_value = literal[1]
+
+            if feature_vector[feature] == -1:
+                # this is the first assignment for this feature
+                feature_vector[feature] = bool_value
+            elif feature_vector[feature] != bool_value:
+                # this assignment doesn't match the ones before
+                # the literal isn't pure
+                feature_vector[feature] = -2
+    
+    # go through the list and check for a pure literal
+    pure_candidates = []
+    for feature in range(n_of_features):
+        bool_value = feature_vector[feature]
+        if bool_value == 0 or bool_value == 1:
+            # this is a pure literal
+            pure_candidates.append((feature, bool_value))
+
+    # we return the result
+    return pure_candidates
+
+
+def dpll(formula, n_of_features, fixed_feature_values):
+    """ Performs the DPLL algorithm on the given formula in CNF. """
+    # TODO: check that that objects are overwritten correctly
+
+    # TODO: deep copy
+    new_formula = copy.deepcopy(formula)
+    expanded_fixed_values = copy.deepcopy(fixed_feature_values)
+
+    # check if algorithm is finished
+    if len(formula) == 0:
+        # we went through the whole formula without finding a contradiction
+        # therefore the set of values we found is consistent
+        return fixed_feature_values
+    else:
+        for clause in formula:
+            if clause == []:
+                # we found a contradiction
+                return False
+
+    # check for unit clauses and pure literals
+    unit_clauses = check_for_unit_clause(formula)
+    pure_literals = check_for_pure_literal(formula, n_of_features)
+
+    # TODO: add a check so we don't add repeated literals
+    while unit_clauses != []:
+        unit_clause = unit_clauses.pop()
+        new_formula = replace_literal(new_formula, unit_clause)
+        expanded_fixed_values.append(unit_clause)
+    while pure_literals != []:
+        pure_literal = pure_literals.pop()
+        new_formula = replace_literal(new_formula, pure_literal)
+        # check so we don't repeat literals
+        if not feature_in_list(expanded_fixed_values, pure_literal[0]):
+            expanded_fixed_values.append(pure_literal)
+
+    # prune the formula
+    pruned_formula = prune_formula(new_formula)
+
+    # choose a literal and fix its value
+    trial_literal = choose_literal(pruned_formula)
+
+    if trial_literal == False:
+        # print('didnt find a trial literal')
+        # there are no more literals, we call another iteration to give results
+        return dpll(pruned_formula, n_of_features, expanded_fixed_values)
+    else:
+        # print('found a trial literal')
+        trial_feature = trial_literal[0]
+        # we try to solve with literal value fixed as true
+        subformula_positive = pruned_formula + [[(trial_feature, 1)]]
+        result = dpll(subformula_positive, n_of_features, expanded_fixed_values)
+
+        if result != False:
+            return result
+        else:
+            # print('checking other branch')
+            # we don't find an answer, fix the value as false
+            subformula_negative = pruned_formula + [[(trial_feature, 0)]]
+            return dpll(subformula_negative, n_of_features, expanded_fixed_values)
+
+
 # ======== OTHER ======== #
+
+
+def find_negation_candidate(encoding):
+    """ The function looks through the paths of an encoding and 
+    finds a prediction for samples that don't match any of the paths. """
+
+    # we have to look through the negations of the path conditions
+
+    # TODO
+
+    return "test"
 
 
 def return_max_index(l):
@@ -591,7 +786,7 @@ def encode_with_nn(training_set, encoding_dim):
     autoencoder = Model(training_set, decoded_set)
 
     # this model maps an input to its encoded representation
-    encoder = Model(input_img, encoded)
+    encoder = Model(training_set, encoded_set)
 
     # create a placeholder for an encoded (32-dimensional) input
     encoded_input = Input(shape=(encoding_dim,))
@@ -720,4 +915,15 @@ def test_encoding(file):
 # COMPUTE THE ENCODING
 
 # trial_code = test_encoding("generated_set.csv")
-trial_code = test_encoding("latent-space.csv")
+# trial_code = test_encoding("latent-space.csv")
+
+# TEST THE DPLL IMPLEMENTATION
+
+CNF = [[(0,1),(1,1)], 
+    [(1,1),(2,0),(3,1)],
+    [(0,0),(1,0)],
+    [(0,0),(2,0),(3,0)],
+    [(0,1)]]
+
+cnf_solution = dpll(CNF, 4, [])
+print(cnf_solution)
