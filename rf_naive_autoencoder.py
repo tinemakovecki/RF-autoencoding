@@ -5,6 +5,7 @@ import copy
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import mean_squared_error
 
 from keras.layers import Input, Dense
 from keras.models import Model
@@ -443,11 +444,9 @@ def dpll(formula, n_of_features, fixed_feature_values):
     trial_literal = choose_literal(pruned_formula)
 
     if trial_literal == False:
-        # print('didnt find a trial literal')
         # there are no more literals, we call another iteration to give results
         return dpll(pruned_formula, n_of_features, expanded_fixed_values)
     else:
-        # print('found a trial literal')
         trial_feature = trial_literal[0]
         # we try to solve with literal value fixed as true
         subformula_positive = pruned_formula + [[(trial_feature, 1)]]
@@ -456,7 +455,6 @@ def dpll(formula, n_of_features, fixed_feature_values):
         if result != False:
             return result
         else:
-            # print('checking other branch')
             # we don't find an answer, fix the value as false
             subformula_negative = pruned_formula + [[(trial_feature, 0)]]
             return dpll(subformula_negative, n_of_features, expanded_fixed_values)
@@ -465,15 +463,28 @@ def dpll(formula, n_of_features, fixed_feature_values):
 # ======== OTHER ======== #
 
 
-def find_negation_candidate(encoding):
+def find_negation_candidate(encoding, n_of_features):
     """ The function looks through the paths of an encoding and 
     finds a prediction for samples that don't match any of the paths. """
 
     # we have to look through the negations of the path conditions
 
-    # TODO
+    # convert encoding into CNF
+    code_paths = list(map(lambda x: x[1], encoding))
 
-    return "test"
+    # call DPLL
+    fixed_values = dpll(code_paths, n_of_features, [])
+
+    # fill out the non-fixed features with random values
+    negation_candidate = np.random.randint(2, size=n_of_features)
+
+    if fixed_values != False:
+        for fixed_feature in fixed_values:
+            feature = fixed_feature[0]
+            value = fixed_feature[1]
+            negation_candidate[feature] = value
+    
+    return negation_candidate
 
 
 def return_max_index(l):
@@ -486,9 +497,10 @@ def return_max_index(l):
 
 
 def d(v1, v2):
-    """ Calculates d_2 distance between v1 and v2 """
+    """ Calculates distance between v1 and v2 """
     n = len(v1)
     m = len(v2)
+
     if m == n:
         square_differences = [0 for i in range(n)]
         for i in range(n):
@@ -632,7 +644,7 @@ def find_different_candidates(forest, n_candidates, X_set, measure_of_difference
                 # convert format to work for code_similarity()
                 old_path = path_to(tree, candidate[1])
                 sim = code_similarity((cover, new_path, candidate_leaf), (candidate[0], old_path, candidate[2]), X_set)
-                print(sim)
+                
                 if sim > measure_of_difference:
                     difference_check = False
 
@@ -647,7 +659,7 @@ def find_different_candidates(forest, n_candidates, X_set, measure_of_difference
                 # convert format to work for code_similarity()
                 old_path = path_to(tree, candidate[1])
                 sim = code_similarity((cover, new_path, candidate_leaf), (candidate[0], old_path, candidate[2]), X_set)
-                print(sim)
+
                 if sim > measure_of_difference:
                     difference_check = False
 
@@ -737,56 +749,62 @@ def encoding(forest, code_size, X_set):
     return encoding_paths
 
 
-def decode_sample(encoding, encoded_sample):
+def decode_sample(encoding, n_of_features, encoded_sample):
     """ The function decodes an encoded vector. 
     The encoding and the encoded_sample are parameters. """
 
     # encoding is a list of elements of the format: (coverage, path, prediction)
     # if the encoded sample fit any of the encoded paths, we just take that prediction
-    # NOTE: this really has to be refined later.
+    # NOTE: it might be better to just compute find_negation_candidate once in decode_set
     # TODO: FIX THE GODDAMN PREDICTIONS!!!
 
-    n = len(encode_sample)
+    n = len(encoded_sample)
+
     decoded = False
     for i in range(n):
+
         # if the sample fits into i-th leaf, we take the saved prediction
-        if encode_sample[i] == 1:
+        if encoded_sample[i] == 1:
             prediction = encoding[i][2]
             decoded_sample = prediction
             decoded = True
 
     # if the sample doesn't match any path we have to get crafty
     if not decoded:
-        # we will have to go through the paths and make guesses
-        # TODO: this.
-        decoded_sample = "oof"
+        decoded_sample = find_negation_candidate(encoding, n_of_features)
 
     return decoded_sample
 
 
-def decode_set(encoding, encoded_set):
+def decode_set(encoding, original_set_dim, encoded_set):
     """ The function decodes an encoded set. 
     The encoding and the encoded set are parameters. """
 
     # encoding is a list of elements of the format: (coverage, path, prediction)
     # we decode the whole set
-    decoded_set = list(map(lambda x: decode_sample(encoding, x), encode_set))
+    decoded_set = list(map(lambda x: decode_sample(encoding, original_set_dim, x), encoded_set))
 
-    return decode_set
+    return decoded_set
 
 
-def encode_with_nn(training_set, encoding_dim):
+def encode_with_nn(training_set, test_set, encoding_dim):
+    
+    original_dim = len(training_set[0])
+
+    # TODO: should the vector be reshaped? -> shape=(,original_dim)
+    # PROBABLY!!!!
+    input_data = Input(shape=(original_dim,))
 
     # "encoded" is the encoded representation of the input
-    encoded_set = Dense(encoding_dim, activation='relu')(training_set)
+    encoded_data = Dense(encoding_dim, activation='relu')(input_data)
     # "decoded" is the lossy reconstruction of the input
-    decoded_set = Dense(784, activation='sigmoid')(encoded_set)
+    decoded_data = Dense(original_dim, activation='sigmoid')(encoded_data)
 
     # this model maps an input to its reconstruction
-    autoencoder = Model(training_set, decoded_set)
+    autoencoder = Model(input_data, decoded_data)
 
     # this model maps an input to its encoded representation
-    encoder = Model(training_set, encoded_set)
+    encoder = Model(input_data, encoded_data)
 
     # create a placeholder for an encoded (32-dimensional) input
     encoded_input = Input(shape=(encoding_dim,))
@@ -807,10 +825,18 @@ def encode_with_nn(training_set, encoding_dim):
                     batch_size=128,
                     shuffle=True) # batch_size / epochs changed
 
-    encoded_data = encoder.predict(training_set)
-    decoded_data = decoder.predict(encoded_data)
+    # calculate RMSE
+    encoded_set = encoder.predict(test_set)
+    decoded_set = decoder.predict(encoded_set)
 
-    print(decoded_data)
+    rmse = mean_squared_error(test_set, decoded_set, squared=False)
+
+    print("The reconstruction error for the neural network autoencoder is:")
+    print(rmse)
+
+    # print(decoded_data)
+    
+    return (encoder, decoder)
 
 
 # ============================== #
@@ -852,11 +878,75 @@ def save_results(original_set, encoded_set, decoded_set, file_name):
 # ============================== #
 
 
-def estimate_reconstruction_error(X, metric):
+def estimate_reconstruction_error(file, metric):
     """ Trains a multivariable RF on set X to predict X
      and returns the distance between data and prediction.
      Possible metrics are: MSE, RMSE, MAE """
-     # TODO
+    
+    # read file
+    X = read_set(file)
+    original_set_dim = len(X[0])
+    set_size = len(X)
+
+    # split set into two
+    training_set_samples = np.random.randint(set_size, size=set_size)
+    training_set = []
+
+    test_set_samples = [1 for _ in range(set_size)]
+    test_set = []
+
+    for sample_id in training_set_samples:
+        # maybe deep copy?
+        training_set.append(X[sample_id])
+        test_set_samples[sample_id] = 0
+
+    for sample_id in range(set_size):
+        if test_set_samples[sample_id] == 1:
+            test_set.append(X[sample_id])
+
+    # TODO: use train_set to train, test on test_set
+    
+    # train model on set X
+    forest = RandomForestClassifier(n_estimators=20,
+                                    random_state=1,
+                                    n_jobs=2)
+    forest.fit(test_set, test_set)
+
+    # ===== dynamically select encoding size ===== #
+
+    code_size = 1
+    covered_samples_sum = 0 # init, chosen to ensure loop
+    # THIS IS VERY INEFFICIENT
+    while covered_samples_sum < 1.2:
+        forest_encoding = encoding_naive(forest, code_size, X)
+        # we want it to cover at least 0.5
+        covered_samples_sum = sum(map(lambda x: x[0], forest_encoding))
+        # expand code by one
+        code_size += 1
+
+    # print out the encoding
+    # print_encoding(code, forest)
+
+    # ===== train the neural network ===== #
+
+    encode_with_nn(training_set, test_set, code_size)
+
+    # ===== using the encodings on the test set ===== #
+
+    # encode the set as a test:
+    forest_encoded_set = encode_set(forest_encoding, test_set)
+
+    # reconstruct the sets
+    forest_decoded_set = decode_set(forest_encoding, original_set_dim, forest_encoded_set)
+
+    # calculate reconstruction error
+    
+    forest_rmse = mean_squared_error(test_set, forest_decoded_set, squared=False)
+
+    # print out results
+    print("The reconstruction error for the forest autoencoder is:")
+    print(forest_rmse)
+
     return None
 
 
@@ -917,13 +1007,17 @@ def test_encoding(file):
 # trial_code = test_encoding("generated_set.csv")
 # trial_code = test_encoding("latent-space.csv")
 
+# TEST RECON ERROR
+
+estimate_reconstruction_error("latent-space.csv", "rmse")
+
 # TEST THE DPLL IMPLEMENTATION
 
-CNF = [[(0,1),(1,1)], 
-    [(1,1),(2,0),(3,1)],
-    [(0,0),(1,0)],
-    [(0,0),(2,0),(3,0)],
-    [(0,1)]]
+# CNF = [[(0,1),(1,1)], 
+#     [(1,1),(2,0),(3,1)],
+#     [(0,0),(1,0)],
+#     [(0,0),(2,0),(3,0)],
+#     [(0,1)]]
 
-cnf_solution = dpll(CNF, 4, [])
-print(cnf_solution)
+# cnf_solution = dpll(CNF, 4, [])
+# print(cnf_solution)
