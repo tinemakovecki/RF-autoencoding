@@ -5,6 +5,7 @@ __pycache__/
 generated_set.csv
 latent-space.csv
 generated_data/
+results/
 
 prototip.aux
 prototip.log

@@ -10,6 +10,24 @@ from sklearn.metrics import mean_squared_error
 from keras.layers import Input, Dense
 from keras.models import Model
 
+
+# ============================== #
+#       PARAMETER SETTING        #
+# ============================== #
+
+# we init the parameters to a standard value
+
+# the threshold that the sum of all coverages in the encoding should exceed
+coverage_sum_threshold = 1.8
+# default measure used to exclude leaves that are too similar
+default_measure_of_diff = 0.1
+
+# random forest parameters
+default_n_estimators = 50
+
+# TODO: move this into one of the testing functions for parameter tuning
+
+
 # ============================== #
 #      PRINT OUT & COSMETIC      #
 # ============================== #
@@ -604,7 +622,7 @@ def find_naive_candidates(forest, n_candidates, X_set):
     return candidates
 
 
-def find_different_candidates(forest, n_candidates, X_set, measure_of_difference=0.4):
+def find_different_candidates(forest, n_candidates, X_set, measure_of_difference=default_measure_of_diff):
     """ Function find_different_candidates looks through a given forest and returns
         leaves that are suitable candidates as a basis for encoding. It tries to
         ensure a large enough difference between candidates.
@@ -788,16 +806,16 @@ def decode_set(encoding, original_set_dim, encoded_set):
 
 
 def encode_with_nn(training_set, test_set, encoding_dim):
+    """ Trains a neural network autoencoder on the training set and
+    prints out its error on the test set. Saves the results. """
     
     original_dim = len(training_set[0])
 
-    # TODO: should the vector be reshaped? -> shape=(,original_dim)
-    # PROBABLY!!!!
     input_data = Input(shape=(original_dim,))
 
-    # "encoded" is the encoded representation of the input
+    # "encoded_data" is the encoded representation of the input
     encoded_data = Dense(encoding_dim, activation='relu')(input_data)
-    # "decoded" is the lossy reconstruction of the input
+    # "decoded_data" is the lossy reconstruction of the input
     decoded_data = Dense(original_dim, activation='sigmoid')(encoded_data)
 
     # this model maps an input to its reconstruction
@@ -806,7 +824,7 @@ def encode_with_nn(training_set, test_set, encoding_dim):
     # this model maps an input to its encoded representation
     encoder = Model(input_data, encoded_data)
 
-    # create a placeholder for an encoded (32-dimensional) input
+    # create a placeholder for an encoded input
     encoded_input = Input(shape=(encoding_dim,))
     # retrieve the last layer of the autoencoder model
     decoder_layer = autoencoder.layers[-1]
@@ -819,24 +837,32 @@ def encode_with_nn(training_set, test_set, encoding_dim):
     # we use 'adadelta optimize' and a per-pixel binary crossentropy loss
     autoencoder.compile(optimizer='adadelta', loss='binary_crossentropy')
 
-    # we train the model for 50 epochs
+    # we train the model for 100 epochs
     autoencoder.fit(training_set, training_set,
                     epochs=100,
                     batch_size=128,
                     shuffle=True) # batch_size / epochs changed
 
-    # calculate RMSE
+    # encode and decode the data
     encoded_set = encoder.predict(test_set)
     decoded_set = decoder.predict(encoded_set)
 
+    encoded_training_set = encoder.predict(training_set)
+    decoded_training_set = decoder.predict(encoded_training_set)
+
+    # calculate RMSE
     rmse = mean_squared_error(test_set, decoded_set, squared=False)
 
     print("The reconstruction error for the neural network autoencoder is:")
     print(rmse)
 
+    # save/show the results
     # print(decoded_data)
+
+    save_results(test_set, decoded_set, encoded_set, "./results/test_set_nn_results.csv")
+    save_results(training_set, decoded_training_set, encoded_training_set, "./results/training_set_nn_results.csv")
     
-    return (encoder, decoder)
+    return None
 
 
 # ============================== #
@@ -858,7 +884,7 @@ def read_set(file_name):
     return data
 
 
-def save_results(original_set, encoded_set, decoded_set, file_name):
+def save_results(original_set, decoded_set, encoded_set, file_name):
     """ Save the given results including the original set, the encoded set
     and extra info into a txt file. """
     # TODO: add extra info to save, like recon error, etc.
@@ -869,7 +895,7 @@ def save_results(original_set, encoded_set, decoded_set, file_name):
         # TODO: add header
         n = len(original_set)
         for i in range(n):
-            row = original_set[i] + ['|'] + encoded_set[i] + ['|'] + decoded_set[i]
+            row = list(original_set[i]) + ['|'] + list(decoded_set[i]) + ['|'] + list(encoded_set[i])
             data_writer.writerow(row)
 
 
@@ -907,7 +933,7 @@ def estimate_reconstruction_error(file, metric):
     # TODO: use train_set to train, test on test_set
     
     # train model on set X
-    forest = RandomForestClassifier(n_estimators=20,
+    forest = RandomForestClassifier(n_estimators=default_n_estimators,
                                     random_state=1,
                                     n_jobs=2)
     forest.fit(test_set, test_set)
@@ -917,7 +943,7 @@ def estimate_reconstruction_error(file, metric):
     code_size = 1
     covered_samples_sum = 0 # init, chosen to ensure loop
     # THIS IS VERY INEFFICIENT
-    while covered_samples_sum < 1.2:
+    while covered_samples_sum < coverage_sum_threshold:
         forest_encoding = encoding_naive(forest, code_size, X)
         # we want it to cover at least 0.5
         covered_samples_sum = sum(map(lambda x: x[0], forest_encoding))
@@ -935,9 +961,11 @@ def estimate_reconstruction_error(file, metric):
 
     # encode the set as a test:
     forest_encoded_set = encode_set(forest_encoding, test_set)
+    forest_encoded_train_set = encode_set(forest_encoding, training_set)
 
     # reconstruct the sets
     forest_decoded_set = decode_set(forest_encoding, original_set_dim, forest_encoded_set)
+    forest_decoded_train_set = decode_set(forest_encoding, original_set_dim, forest_encoded_train_set)
 
     # calculate reconstruction error
     
@@ -946,6 +974,10 @@ def estimate_reconstruction_error(file, metric):
     # print out results
     print("The reconstruction error for the forest autoencoder is:")
     print(forest_rmse)
+
+    # save results
+    save_results(test_set, forest_decoded_set, forest_encoded_set, "./results/test_set_forest_results.csv")
+    save_results(training_set, forest_decoded_train_set, forest_encoded_train_set, "./results/training_set_forest_results.csv")
 
     return None
 
@@ -961,7 +993,7 @@ def test_encoding(file):
     # We can use parameters max_leaf_nodes and min_impurity_decrease
     # to decrease the number of leaves in the tree and therefore increase
     # the number of samples covered by a leaf.
-    forest = RandomForestClassifier(n_estimators=20,
+    forest = RandomForestClassifier(n_estimators=default_n_estimators,
                                     # max_leaf_nodes=25,
                                     # min_impurity_decrease=0.003,
                                     random_state=1,
@@ -981,7 +1013,7 @@ def test_encoding(file):
     code_size = 1
     covered_samples_sum = 0 # init, chosen to ensure loop
     # THIS IS VERY INEFFICIENT
-    while covered_samples_sum < 0.8:
+    while covered_samples_sum < coverage_sum_threshold:
         code = encoding_naive(forest, code_size, X)
         # TODO: check that covering is large enough
         # we want it to cover at least 0.5
