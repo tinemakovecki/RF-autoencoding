@@ -2,6 +2,7 @@
 import numpy as np
 import csv
 import copy
+import time
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier
@@ -17,8 +18,14 @@ from keras.models import Model
 
 # we init the parameters to a standard value
 
+# random seed
+global_seed = 42
+
+# IMPORTANT: fix code_size or coverage_sum_threshold NOT BOTH!
 # the threshold that the sum of all coverages in the encoding should exceed
-coverage_sum_threshold = 1.8
+coverage_sum_threshold = "NA"
+code_size = 15
+
 # default measure used to exclude leaves that are too similar
 default_measure_of_diff = 0.1
 
@@ -310,6 +317,7 @@ def feature_in_list(fixed_value_list, feature):
 
     return feature_present
 
+
 def prune_formula(formula):
     """ Removes occurences of False from the formula and 
     removes clauses that contain a True literal. """
@@ -494,6 +502,7 @@ def find_negation_candidate(encoding, n_of_features):
     fixed_values = dpll(code_paths, n_of_features, [])
 
     # fill out the non-fixed features with random values
+    np.random.seed(global_seed)
     negation_candidate = np.random.randint(2, size=n_of_features)
 
     if fixed_values != False:
@@ -809,6 +818,9 @@ def encode_with_nn(training_set, test_set, encoding_dim):
     """ Trains a neural network autoencoder on the training set and
     prints out its error on the test set. Saves the results. """
     
+    # set seed
+    np.random.seed(global_seed)
+
     original_dim = len(training_set[0])
 
     input_data = Input(shape=(original_dim,))
@@ -838,6 +850,7 @@ def encode_with_nn(training_set, test_set, encoding_dim):
     autoencoder.compile(optimizer='adadelta', loss='binary_crossentropy')
 
     # we train the model for 100 epochs
+    np.random.seed(global_seed)
     autoencoder.fit(training_set, training_set,
                     epochs=100,
                     batch_size=128,
@@ -853,16 +866,17 @@ def encode_with_nn(training_set, test_set, encoding_dim):
     # calculate RMSE
     rmse = mean_squared_error(test_set, decoded_set, squared=False)
 
-    print("The reconstruction error for the neural network autoencoder is:")
-    print(rmse)
+    # print("The reconstruction error for the neural network autoencoder is:")
+    # print(rmse)
 
     # save/show the results
     # print(decoded_data)
 
-    save_results(test_set, decoded_set, encoded_set, "./results/test_set_nn_results.csv")
-    save_results(training_set, decoded_training_set, encoded_training_set, "./results/training_set_nn_results.csv")
+    # TODO: save results with numbers, without overwriting
+    # save_results(test_set, decoded_set, encoded_set, "./results/test_set_nn_results.csv")
+    # save_results(training_set, decoded_training_set, encoded_training_set, "./results/training_set_nn_results.csv")
     
-    return None
+    return rmse
 
 
 # ============================== #
@@ -899,85 +913,173 @@ def save_results(original_set, decoded_set, encoded_set, file_name):
             data_writer.writerow(row)
 
 
+def write_log(seed, original_set_dim, code_size, coverage_sum_threshold, measure_of_diff, n_estimators, n_of_repeats, metric, average_forest_error, average_nn_error):
+    """ Writes a log of the conducted experiment """
+
+    # create a name for log file
+    sec_count = time.time()
+    log_name = "./logs/execution_log" + str(sec_count) + ".txt"
+
+    # record data to log file
+    with open(log_name, mode='w') as log:
+
+        log.write("On {} a run of the autoencoder script was performed. \n".format(time.ctime()))
+
+        log.write("\n")
+        log.write("=== The initial data ===  \n")
+        log.write("random seed: {} \n".format(seed))
+        log.write("original set dimension: {} \n".format(original_set_dim))
+        log.write("encoded set dimension: {} \n".format(code_size))
+
+        log.write("\n")
+        log.write("=== The learning parameters === \n")
+        log.write("coverage_sum_threshold: {} \n".format(coverage_sum_threshold))
+        log.write("measure_of_diff: {} \n".format(measure_of_diff))
+        log.write("n_estimators: {} \n".format(n_estimators)) # TODO: clearer name
+        log.write("n_of_repeats: {} \n".format(n_of_repeats))
+
+        log.write("\n")
+        log.write("=== The results === \n")
+        log.write("the metric used: {} \n".format(metric))
+        log.write("average error with forest based reconstruction: {} \n".format(average_forest_error))
+        log.write("average error with nn reconstruction: {} \n".format(average_nn_error))
+    
+    # create another log that is in .csv so it's easier to process further
+    # 
+    csv_log_name = "./logs/log" + str(sec_count) + ".csv"
+
+    with open(csv_log_name, mode='w') as csv_log:
+        csv_log_writer = csv.writer(csv_log, delimiter=' ')
+
+        # write header
+        csv_log_writer.writerow(["code_size", "original_set_dim", "average_forest_error", "average_nn_error"])
+        # write data
+        csv_log_writer.writerow([code_size, original_set_dim, average_forest_error, average_nn_error])
+
+
+
 # ============================== #
 #            TESTING             #
 # ============================== #
 
 
-def estimate_reconstruction_error(file, metric):
+def estimate_reconstruction_error(file, n_of_repeats, metric):
     """ Trains a multivariable RF on set X to predict X
      and returns the distance between data and prediction.
      Possible metrics are: MSE, RMSE, MAE """
     
+    # TODO: include metric options
+
     # read file
     X = read_set(file)
+
+    # set some basic values
     original_set_dim = len(X[0])
     set_size = len(X)
+    forest_error_history = []
+    nn_error_history = []
 
-    # split set into two
-    training_set_samples = np.random.randint(set_size, size=set_size)
-    training_set = []
+    for i in range(n_of_repeats):
 
-    test_set_samples = [1 for _ in range(set_size)]
-    test_set = []
+        print("Performing training iteration " + str(i) + "...")
 
-    for sample_id in training_set_samples:
-        # maybe deep copy?
-        training_set.append(X[sample_id])
-        test_set_samples[sample_id] = 0
+        # split set into two
+        training_set_samples = np.random.randint(set_size, size=set_size)
+        training_set = []
 
-    for sample_id in range(set_size):
-        if test_set_samples[sample_id] == 1:
-            test_set.append(X[sample_id])
+        test_set_samples = [1 for _ in range(set_size)]
+        test_set = []
 
-    # TODO: use train_set to train, test on test_set
-    
-    # train model on set X
-    forest = RandomForestClassifier(n_estimators=default_n_estimators,
-                                    random_state=1,
-                                    n_jobs=2)
-    forest.fit(test_set, test_set)
+        for sample_id in training_set_samples:
+            # maybe deep copy?
+            training_set.append(X[sample_id])
+            test_set_samples[sample_id] = 0
 
-    # ===== dynamically select encoding size ===== #
+        for sample_id in range(set_size):
+            if test_set_samples[sample_id] == 1:
+                test_set.append(X[sample_id])
 
-    code_size = 1
-    covered_samples_sum = 0 # init, chosen to ensure loop
-    # THIS IS VERY INEFFICIENT
-    while covered_samples_sum < coverage_sum_threshold:
+        # TODO: use train_set to train, test on test_set
+        print(len(training_set))
+        print(len(test_set))
+        
+        # train model on set X
+        np.random.seed(global_seed) # set seed 
+
+        forest = RandomForestClassifier(n_estimators=default_n_estimators,
+                                        random_state=1,
+                                        n_jobs=2)
+
+        np.random.seed(global_seed)
+        forest.fit(training_set, training_set) # was test_set. WTF?
+
+        print("RF model trained!")
+
+        # ===== dynamically select encoding size ===== #
+
         forest_encoding = encoding_naive(forest, code_size, X)
-        # we want it to cover at least 0.5
-        covered_samples_sum = sum(map(lambda x: x[0], forest_encoding))
-        # expand code by one
-        code_size += 1
+        # code_size = 1
+        # covered_samples_sum = 0 # init, chosen to ensure loop
+        # # THIS IS VERY INEFFICIENT
+        # while covered_samples_sum < coverage_sum_threshold:
+        #     forest_encoding = encoding_naive(forest, code_size, X)
+        #     # we want it to cover at least 0.5
+        #     covered_samples_sum = sum(map(lambda x: x[0], forest_encoding))
+        #     # expand code by one
+        #     code_size += 1
 
-    # print out the encoding
-    # print_encoding(code, forest)
+        print("Encoding size fixed! The encoding size is:")
+        print(code_size)
+        # print out the encoding
+        # print_encoding(code, forest)
 
-    # ===== train the neural network ===== #
+        # ===== train the neural network ===== #
 
-    encode_with_nn(training_set, test_set, code_size)
+        nn_rmse = encode_with_nn(training_set, test_set, code_size)
+        print("NN model trained!")
 
-    # ===== using the encodings on the test set ===== #
+        # save the result
+        nn_error_history.append(nn_rmse)
 
-    # encode the set as a test:
-    forest_encoded_set = encode_set(forest_encoding, test_set)
-    forest_encoded_train_set = encode_set(forest_encoding, training_set)
+        # ===== using the encodings on the test set ===== #
 
-    # reconstruct the sets
-    forest_decoded_set = decode_set(forest_encoding, original_set_dim, forest_encoded_set)
-    forest_decoded_train_set = decode_set(forest_encoding, original_set_dim, forest_encoded_train_set)
+        # encode the set as a test:
+        forest_encoded_set = encode_set(forest_encoding, test_set)
+        forest_encoded_train_set = encode_set(forest_encoding, training_set)
+        print("Encoded set with forest framework!")
 
-    # calculate reconstruction error
-    
-    forest_rmse = mean_squared_error(test_set, forest_decoded_set, squared=False)
+        # reconstruct the sets
+        forest_decoded_set = decode_set(forest_encoding, original_set_dim, forest_encoded_set)
+        forest_decoded_train_set = decode_set(forest_encoding, original_set_dim, forest_encoded_train_set)
+        print("Decoded set with forest framework!")
 
-    # print out results
-    print("The reconstruction error for the forest autoencoder is:")
-    print(forest_rmse)
+        # calculate reconstruction error
+        
+        forest_rmse = mean_squared_error(test_set, forest_decoded_set, squared=False)
 
-    # save results
-    save_results(test_set, forest_decoded_set, forest_encoded_set, "./results/test_set_forest_results.csv")
-    save_results(training_set, forest_decoded_train_set, forest_encoded_train_set, "./results/training_set_forest_results.csv")
+        # print out results
+        # print("The reconstruction error for the forest autoencoder is:")
+        # print(forest_rmse)
+
+        # save results
+        forest_error_history.append(forest_rmse)
+
+        save_results(test_set, forest_decoded_set, forest_encoded_set, "./results/test_set_forest_results_{}.csv".format(i))
+        save_results(training_set, forest_decoded_train_set, forest_encoded_train_set, "./results/training_set_forest_results_{}.csv".format(i))
+
+    # calculate the average error
+    average_forest_error = sum(forest_error_history)/len(forest_error_history)
+    average_nn_error = sum(nn_error_history)/len(nn_error_history)
+
+    # show results
+    print("The average reconstruction error for the forest autoencoder is:")
+    print(average_forest_error)
+    print("The average reconstruction error for the neural network autoencoder is:")
+    print(average_nn_error)
+
+    # write log
+    # TODO: check if anything's missing
+    write_log(global_seed, original_set_dim, code_size, coverage_sum_threshold, default_measure_of_diff, default_n_estimators, n_of_repeats, metric, average_forest_error, average_nn_error)
 
     return None
 
@@ -993,6 +1095,7 @@ def test_encoding(file):
     # We can use parameters max_leaf_nodes and min_impurity_decrease
     # to decrease the number of leaves in the tree and therefore increase
     # the number of samples covered by a leaf.
+    np.random.seed(global_seed)
     forest = RandomForestClassifier(n_estimators=default_n_estimators,
                                     # max_leaf_nodes=25,
                                     # min_impurity_decrease=0.003,
@@ -1041,7 +1144,7 @@ def test_encoding(file):
 
 # TEST RECON ERROR
 
-estimate_reconstruction_error("latent-space.csv", "rmse")
+estimate_reconstruction_error("latent-space-15.csv", 100, "rmse")
 
 # TEST THE DPLL IMPLEMENTATION
 

@@ -6,8 +6,18 @@ generated_set.csv
 latent-space.csv
 generated_data/
 results/
+graph_data/
+logs/
+
+autoencoder_test.py
+autoencoder_test2.py
 
 prototip.aux
 prototip.log
 prototip.pdf
 prototip.synctex.gz
+
+the prototip.aux
+the prototip.log
+the prototip.pdf
+the prototip.synctex.gz
