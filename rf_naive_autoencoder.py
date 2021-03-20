@@ -3,6 +3,8 @@ import numpy as np
 import csv
 import copy
 import time
+import math
+
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier
@@ -18,19 +20,19 @@ from keras.models import Model
 
 # we init the parameters to a standard value
 
-# random seed
+# random seed - CURRENTLY USELESS
 global_seed = 42
 
 # IMPORTANT: fix code_size or coverage_sum_threshold NOT BOTH!
 # the threshold that the sum of all coverages in the encoding should exceed
 coverage_sum_threshold = "NA"
-code_size = 15
+code_size = 7 # 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 done
 
 # default measure used to exclude leaves that are too similar
 default_measure_of_diff = 0.1
 
 # random forest parameters
-default_n_estimators = 50
+default_n_estimators = 100
 
 # TODO: move this into one of the testing functions for parameter tuning
 
@@ -177,6 +179,7 @@ def path_to(tree_model, goal_node):
 
 
 # ======== SET ENCODING ======== #
+# TODO: premaknit v del kode posvečen kodirniku
 
 
 def check_condition_for_sample(condition, sample):
@@ -245,7 +248,7 @@ def path_to_vector(path, number_of_features):
 
 def node_to_vector(path, training_set):
     """ Maps the given path to a vector describing which of the examples
-    in the training are described by the leaf at the end of the path. """
+    in the training set are described by the leaf at the end of the path. """
 
     # TODO: check if map alters the original object
     v = list(map(lambda x: check_condition_for_sample(path, x), training_set))
@@ -269,7 +272,7 @@ def code_similarity(x, y, training_set):
     # normalization (untested as of yet)
     samples_covered_by_v1 = sum(v1)
     samples_covered_by_v2 = sum(v2)
-    norm = max(samples_covered_by_v1, samples_covered_by_v2)
+    norm = max(samples_covered_by_v1, samples_covered_by_v2) # TODO: zamenjati max s čim drugim? refer to text
 
     similarity_normalized = similarity/norm
 
@@ -502,7 +505,6 @@ def find_negation_candidate(encoding, n_of_features):
     fixed_values = dpll(code_paths, n_of_features, [])
 
     # fill out the non-fixed features with random values
-    np.random.seed(global_seed)
     negation_candidate = np.random.randint(2, size=n_of_features)
 
     if fixed_values != False:
@@ -537,6 +539,18 @@ def d(v1, v2):
     else:
         print("Vector dimension mismatch")
         return None
+
+
+def variance(data, ddof=0):
+    n = len(data)
+    mean = sum(data) / n
+    return sum((x - mean) ** 2 for x in data) / (n - ddof)
+
+
+def stdev(data):
+    var = variance(data, ddof=1) # we set degrees of freedom with ddof - we're calculating the variance of a sample as an estimate for the variance of a population
+    std_dev = math.sqrt(var)
+    return std_dev
 
 
 # ============================== #
@@ -701,7 +715,7 @@ def find_different_candidates(forest, n_candidates, X_set, measure_of_difference
 
 def encoding_naive(forest, code_size, X_set):
     """ The function encoding_naive looks through the given random
-        forest model and uses it to (very) naively find an econding.
+        forest model and uses it to (very) naively find an econding_vector.
     | forest: The random forest model to be used.
     | code_size: the size of the returned encoding.
     | X_set: the set being studied, the forest should be trained on X_set. """
@@ -728,8 +742,8 @@ def encoding_naive(forest, code_size, X_set):
 
 
 def encoding(forest, code_size, X_set):
-    """ The function encoding_naive looks through the given random
-        forest model and uses it to naively find an econding.
+    """ The function encoding looks through the given random
+        forest model and uses it to naively find an econding_vector.
     | forest: The random forest model to be used.
     | code_size: the size of the returned encoding.
     | X_set: the set being studied, the forest should be trained on X_set. """
@@ -776,7 +790,7 @@ def encoding(forest, code_size, X_set):
     return encoding_paths
 
 
-def decode_sample(encoding, n_of_features, encoded_sample):
+def decode_sample(encoding, decoded_dim, decoding_mode, encoded_sample):
     """ The function decodes an encoded vector. 
     The encoding and the encoded_sample are parameters. """
 
@@ -786,20 +800,67 @@ def decode_sample(encoding, n_of_features, encoded_sample):
     # TODO: FIX THE GODDAMN PREDICTIONS!!!
 
     n = len(encoded_sample)
-
     decoded = False
-    for i in range(n):
 
-        # if the sample fits into i-th leaf, we take the saved prediction
-        if encoded_sample[i] == 1:
-            prediction = encoding[i][2]
-            decoded_sample = prediction
-            decoded = True
+    if decoding_mode == "simple prediction":
 
-    # if the sample doesn't match any path we have to get crafty
-    if not decoded:
-        decoded_sample = find_negation_candidate(encoding, n_of_features)
+        for i in range(n):
+            # if the sample fits into i-th leaf, we take the saved prediction
+            if encoded_sample[i] == 1:
+                prediction = encoding[i][2]
+                decoded_sample = prediction
+                decoded = True
+        if not decoded:
+            decoded_sample = find_negation_candidate(encoding, decoded_dim)
 
+    elif decoding_mode == "average prediction":
+
+        n_predictions = 0
+        prediction_sum = [0 for _ in range(decoded_dim)]
+
+        for i in range(n):
+
+            # if the sample fits into i-th leaf, we add prediction to sum for averaging
+            if encoded_sample[i] == 1:
+
+                prediction = encoding[i][2]
+                prediction_sum = list(map(lambda pair: pair[0] + pair[1], list(zip(prediction, prediction_sum))))
+                n_predictions += 1
+                
+                decoded = True
+
+        if not decoded:
+            # if the sample doesn't match any path we have to get crafty
+            decoded_sample = find_negation_candidate(encoding, decoded_dim)
+        else:
+            decoded_sample = list(map(lambda x: x // n_predictions, prediction_sum))
+
+    elif decoding_mode == "fixed value tracking":
+        # create a vector where we'll save fixed values from paths
+        fixed_values = [-1 for _ in range(decoded_dim)]
+
+        for i in range(n):
+
+            # if the sample fits into i-th leaf, we take the saved prediction
+            if encoded_sample[i] == 1:
+                # fix the values that are part of path
+                path = encoding[i][1]
+                for vertex in path:
+                    fixed_values[vertex[0]] = vertex[2] # TODO: fix reference to features?!
+
+                prediction = encoding[i][2]
+                decoded_sample = prediction  
+                decoded = True
+
+        if not decoded:
+            # if the sample doesn't match any path we have to get crafty
+            decoded_sample = find_negation_candidate(encoding, decoded_dim)
+        else:
+            # use the fixed values to improve prediction
+            for i in range(decoded_dim):
+                if fixed_values[i] != -1:
+                    decoded_sample[i] = fixed_values[i]
+    
     return decoded_sample
 
 
@@ -809,7 +870,7 @@ def decode_set(encoding, original_set_dim, encoded_set):
 
     # encoding is a list of elements of the format: (coverage, path, prediction)
     # we decode the whole set
-    decoded_set = list(map(lambda x: decode_sample(encoding, original_set_dim, x), encoded_set))
+    decoded_set = list(map(lambda x: decode_sample(encoding, original_set_dim, "simple prediction", x), encoded_set))
 
     return decoded_set
 
@@ -817,9 +878,6 @@ def decode_set(encoding, original_set_dim, encoded_set):
 def encode_with_nn(training_set, test_set, encoding_dim):
     """ Trains a neural network autoencoder on the training set and
     prints out its error on the test set. Saves the results. """
-    
-    # set seed
-    np.random.seed(global_seed)
 
     original_dim = len(training_set[0])
 
@@ -850,7 +908,6 @@ def encode_with_nn(training_set, test_set, encoding_dim):
     autoencoder.compile(optimizer='adadelta', loss='binary_crossentropy')
 
     # we train the model for 100 epochs
-    np.random.seed(global_seed)
     autoencoder.fit(training_set, training_set,
                     epochs=100,
                     batch_size=128,
@@ -913,7 +970,7 @@ def save_results(original_set, decoded_set, encoded_set, file_name):
             data_writer.writerow(row)
 
 
-def write_log(seed, original_set_dim, code_size, coverage_sum_threshold, measure_of_diff, n_estimators, n_of_repeats, metric, average_forest_error, average_nn_error):
+def write_log(seed, original_set_dim, code_size, coverage_sum_threshold, measure_of_diff, n_estimators, n_of_repeats, metric, average_forest_error, forest_std, average_nn_error, nn_std):
     """ Writes a log of the conducted experiment """
 
     # create a name for log file
@@ -927,7 +984,7 @@ def write_log(seed, original_set_dim, code_size, coverage_sum_threshold, measure
 
         log.write("\n")
         log.write("=== The initial data ===  \n")
-        log.write("random seed: {} \n".format(seed))
+        log.write("random seed (is not used ATM): {} \n".format(seed))
         log.write("original set dimension: {} \n".format(original_set_dim))
         log.write("encoded set dimension: {} \n".format(code_size))
 
@@ -952,9 +1009,9 @@ def write_log(seed, original_set_dim, code_size, coverage_sum_threshold, measure
         csv_log_writer = csv.writer(csv_log, delimiter=' ')
 
         # write header
-        csv_log_writer.writerow(["code_size", "original_set_dim", "average_forest_error", "average_nn_error"])
+        csv_log_writer.writerow(["code_size", "original_set_dim", "average_forest_error", "forest_std", "average_nn_error", "nn_std"])
         # write data
-        csv_log_writer.writerow([code_size, original_set_dim, average_forest_error, average_nn_error])
+        csv_log_writer.writerow([code_size, original_set_dim, average_forest_error, forest_std, average_nn_error, nn_std])
 
 
 
@@ -983,6 +1040,9 @@ def estimate_reconstruction_error(file, n_of_repeats, metric):
 
         print("Performing training iteration " + str(i) + "...")
 
+        # set a new seed for each iteration
+        np.random.seed(i)
+
         # split set into two
         training_set_samples = np.random.randint(set_size, size=set_size)
         training_set = []
@@ -1004,19 +1064,17 @@ def estimate_reconstruction_error(file, n_of_repeats, metric):
         print(len(test_set))
         
         # train model on set X
-        np.random.seed(global_seed) # set seed 
-
         forest = RandomForestClassifier(n_estimators=default_n_estimators,
                                         random_state=1,
                                         n_jobs=2)
 
-        np.random.seed(global_seed)
         forest.fit(training_set, training_set) # was test_set. WTF?
 
         print("RF model trained!")
 
         # ===== dynamically select encoding size ===== #
 
+        print(code_size)
         forest_encoding = encoding_naive(forest, code_size, X)
         # code_size = 1
         # covered_samples_sum = 0 # init, chosen to ensure loop
@@ -1071,15 +1129,27 @@ def estimate_reconstruction_error(file, n_of_repeats, metric):
     average_forest_error = sum(forest_error_history)/len(forest_error_history)
     average_nn_error = sum(nn_error_history)/len(nn_error_history)
 
+    # calculate standard deviation
+    print("Here it is, bitch!")
+    print(forest_error_history)
+
+    forest_std = stdev(forest_error_history)
+    nn_std = stdev(nn_error_history)
+
     # show results
     print("The average reconstruction error for the forest autoencoder is:")
     print(average_forest_error)
+    print("with the standard deviation: {}".format(forest_std))
+
     print("The average reconstruction error for the neural network autoencoder is:")
     print(average_nn_error)
+    print("with the standard deviation: {}".format(nn_std))
 
     # write log
     # TODO: check if anything's missing
-    write_log(global_seed, original_set_dim, code_size, coverage_sum_threshold, default_measure_of_diff, default_n_estimators, n_of_repeats, metric, average_forest_error, average_nn_error)
+    write_log(global_seed, original_set_dim, code_size, coverage_sum_threshold, 
+            default_measure_of_diff, default_n_estimators, n_of_repeats, metric, 
+            average_forest_error, forest_std, average_nn_error, nn_std)
 
     return None
 
@@ -1095,7 +1165,6 @@ def test_encoding(file):
     # We can use parameters max_leaf_nodes and min_impurity_decrease
     # to decrease the number of leaves in the tree and therefore increase
     # the number of samples covered by a leaf.
-    np.random.seed(global_seed)
     forest = RandomForestClassifier(n_estimators=default_n_estimators,
                                     # max_leaf_nodes=25,
                                     # min_impurity_decrease=0.003,

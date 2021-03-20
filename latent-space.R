@@ -3,13 +3,13 @@ library(utils)
 set.seed(42)
 
 # dimensionality of the original space
-p = 10
+p = 20
 
 # dimensionality of the latent space, should be less than p
-q = 5
+q = 10
 
 # Upper bound for number of ones per row/column (see below)
-qs = 3
+qs = 7
 
 # Number of examples
 #  n = qC1 + qC2 + ... + qCqs
@@ -62,4 +62,5 @@ X[X != 0] = 1
 print(X)
 #print(max(X))
 
-write.table(X, file="C:/Users/Tine/Desktop/RF-autoencoding/latent-space.csv", row.names=FALSE, col.names=FALSE)
+write.table(X, file="C:/Users/Tine/Desktop/RF-autoencoding/latent-space-20.csv", row.names=FALSE, col.names=FALSE)
+
