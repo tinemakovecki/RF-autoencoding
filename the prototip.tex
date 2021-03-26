@@ -35,6 +35,12 @@
 \maketitle
 
 
+\pagebreak
+
+\tableofcontents
+
+\pagebreak
+
 
 \section{Uvod}
 
@@ -535,12 +541,12 @@ Množici $N_1$ pravimo \textbf{vhodna plast}, množici $N_l$ pa \textbf{izhodna 
 \end{figure}
 
 % TODO: pregledat definicijo nevronske mreže
-Velja torej, da je v arhitekturi nevronske mreže vsako vozlišče povezano z vsemi iz prejšnje in naslednje plasti. 
+Velja torej, da je v arhitekturi usmerjene nevronske mreže vsako vozlišče povezano z vsemi iz prejšnje in naslednje plasti. 
 Opisati moramo še, kako točno arhitektura opiše delovanje modela.
 
 \begin{definicija}
 
-Naj bo $N_{p_1,p_2,\ldots,p_l}$ arhitektura nevronske mreže. Po definiciji vemo, da vsebuje $n= p_1+p_2+\cdots+p_l$ vozlišč. Pravimo, da arhitektura $N_{p_1,p_2,\ldots,p_l}$ \textbf{opiše} model $m: D_1 \times \cdots \times D_p \rightarrow D_Y$, če vsakemu vozlišču arhitekture pripada en nevron in veljajo sledeča pravila:
+Naj bo $N_{p_1,p_2,\ldots,p_l}$ arhitektura usmerjene nevronske mreže. Po definiciji vemo, da vsebuje $n= p_1+p_2+\cdots+p_l$ vozlišč. Pravimo, da arhitektura $N_{p_1,p_2,\ldots,p_l}$ \textbf{opiše} model $m: D_1 \times \cdots \times D_p \rightarrow D_Y$, če vsakemu vozlišču arhitekture pripada en nevron in veljajo sledeča pravila:
 
 \begin{enumerate}
   \item $ p_1 = p$
@@ -625,7 +631,7 @@ Slabosti njihove uporabe pa so, da so računsko zelo zahtevne in posledično po�
 
 % uporaba točnih definicij nevronskih mrež, da se opiše struktura.
 Sedaj, ko smo definirali nevronske mreže lahko opišemo tipičen samokodirnik. 
-Samokodirnik je ponavadi nevronska mreža sestavljena iz treh ali več plasti: vhodne plasti, kode in izhodne plasti, med njimi pa so lahko še vmesne plasti. 
+Samokodirnik je ponavadi usmerjena nevronska mreža sestavljena iz treh ali več plasti: vhodne plasti, kode in izhodne plasti, med njimi pa so lahko še vmesne plasti. 
 Kodirnik in dekodirnik sta dela te mreže, kodirnik vsebuje vhodno plast, kodo ter vmesne plasti med njima, dekodirnik pa vsebuje kodo in izhodno plast ter vmesne plasti. 
 Vhodna in izhodna plast vsebujeta seveda enako število nevronov, razsežnost kode pa je lahko različna. 
 Struktura samokodirnika je prikazana na sliki 2 (TODO: dodat dinamične sklice na figure/slike)
@@ -654,12 +660,20 @@ TODO: Obravnava vrst samokodirnikov, predvsem bolj posebnih vrst (sklici na vire
 
 TODO: Zaključek, da se slabosti nevronskih mrež prenesejo na take samokodirnike -> alternativa.
 
+% TODO: !!!
+% PRIPOMBA od ljupčota
+% 3.2.2: 
+% tukaj je treba pojasniti, da je kodirnik posebne vrste UNM, ki napoveduje več (k) numeričnih spremenljivk hkrati. Lahko bi tudi pojasnili, da je UNM kodirnika simetrična UNM dekodirnika: 
+% če uporabimo notacijo iz 3.2.1, bi lahko predpisali, da veljajo enakosti |N^(e)_1| = |N^(d)_l| = p, |N^(e)_2| = |N^(d)_(l-1)|, ... |N^(e)_l| = |N^(d)_1| = k.
+
 
 % ========================= %
 
-\subsection{Alternativen samokodirnik}
+% TODO: preverit razdelke in naslove v nadaljevanju
+% pazit na rdečo nit/tok besed, glede na to, da je to zdej novo poglavje, ne samo razdelek.
+\section{Samokodirnik zgrajen iz naključnega gozda}
 
-Uvedli bomo nov koncept samokodirnika, ki bo alternativa standardnemu pristopu. 
+V tem poglavju bomo uvedli nov koncept samokodirnika, ki bo alternativa standardnemu pristopu. 
 Z našo različico samokodirnika želimo predvsem odpraviti slabosti večine samokodirnikov. 
 Cilj je torej kodiranje, ki uporabniku omogoča boljše razumevanje zakodiranih podatkov, kodirni postopek, ki ni črna škatla, in hitrejše procesiranje. 
 Samokodirnik bo zgrajen na osnovi naključnega gozda in v prvem podrazdelku bomo predstavili modele odločitvenih dreves in naključnega gozda. 
@@ -668,8 +682,9 @@ Nato bomo v ločenih podrazdelkih predstavili postopek kodiranja, ki deluje na o
 
 
 % ========================= %
+% TODO: bi morda združili odločitveno drevo in naključni gozd kot podrazdelka v skupni razdelek?
 
-\subsubsection{Odločitveno drevo}
+\subsection{Odločitveno drevo}
 
 % Uvod/groba ideja
 Odločitvena drevesa so model, pri katerem lahko uporabnik strukturo in napoved zelo dobro razume. 
@@ -779,7 +794,7 @@ Odločitveno drevo je dokaj preprost model, ki v splošnem ne more natančno opi
 V primeru kompleksnih podatkov namreč pogosto pride do preprileganja - 
 globoko, močno razvejano drevo (preveč) podrobno opiše podatke učne množice, s tem pa izgubi natančnost na ostalih primerih iz porazdelitve. 
 
-\subsubsection{Naključni gozd}
+\subsection{Naključni gozd}
 
 Natančnost modelov lahko izboljšamo z združevanjem v ansamble (TODO: citat!!! npr.\ Understanding random forests: from theory to practice)
 Zelo razširjena metoda za združevanje dreves v ansamble pa je model odločitvenega gozda. 
@@ -854,7 +869,7 @@ Glede na te lastnosti je naključni gozd primeren model za uporabo pri alternati
 
 % ========================= %
 
-\subsubsection{Kodirnik}
+\subsection{Kodirnik}
 
 Naključni gozd lahko naučimo in uporabimo za napovedovanje lastnih vhodnih spremenljivk. 
 Poudariti je treba, da morajo naključni gozd in drevesa, ki jih vsebuje, napovedovati vektorje vrednosti vseh vhodnih spremenljivk, namesto da bi npr.\ 
@@ -963,7 +978,7 @@ Definiramo preslikavo $\sigma_{\mathit{pripadnost}}: V(G) \rightarrow \mathcal{P
 Preslikava list $l$ preslika v podmnožico $\sigma_{\mathit{pripadnost}}(l) = \{v_1,v_2\ldots,v_{n_l}\}$, kjer $n_l$ označuje število primerov, ki pripadajo listu $l$.
 Mero podobnosti definiramo s sledečim predpisom:
 \[
-	sim(l_1, l_2) = \frac{|\sigma_{pripadnost}(l_1) \cap \sigma_{pripadnost}(l_2)|}{|\sigma_{pripadnost}(l_1)) \cup sum(\sigma_{pripadnost}(l_2)|}.
+	sim(l_1, l_2) = \frac{|\sigma_{pripadnost}(l_1) \cap \sigma_{pripadnost}(l_2)|}{|\sigma_{pripadnost}(l_1) \cup \sigma_{pripadnost}(l_2)|}.
 \]
 % TODO: preveriti, ali v skripti to res deluje tako.
 Kot mero torej vzamemo normirano razmerje med številom primerov, ki pripadajo obema listoma hkrati, in številom vseh primerov, ki pripadajo enemu ali drugemu listu.
@@ -1025,7 +1040,29 @@ Da bo določen celoten samokodirnik, moramo konstruirati in opisati še dekodirn
 
 % ========================= %
 
-\subsubsection{Dekodirnik}
+\subsection{Dekodirnik}
+
+V tem razdelku se bomo posvetili konstrukciji dekodirnika.
+
+\begin{definicija}
+	\label{def-dekodiranje}
+	Dekodirnik $\phi: \{0,1\}^c \rightarrow \omega$ je preslikava, ki preslika zakodiran primer nazaj v element množice $\omega$.
+\end{definicija}
+
+Če je dekodirnik nenatančen, ne moremo biti prepričani, da smo izbrano kodiranje dobro ovrednotili, saj so napake lahko krivda dekodirnika in ne pomanjkljivosti kodiranja samega.
+Zaradi tega je naš cilj konstruirati čim bolj natančen dekodirnik, ki preslika zakodiran primer v dober približek njegove prvotne vrednosti.
+V ta namen želimo izkoristiti vse podatke o zakodiranem primeru, ki jih poznamo.
+Pri tem pa si moramo pomagati predvsem s kodirnim vektorjem, kjer so shranjeni podatki o kodiranju.
+
+
+% OLD ----------------------------------------
+% Povemo katere podatke imamo glede kodirnega vektorja - napeljemo na SAT formulacijo
+Elementi kodirnega vektorja so listi, primeri pa lahko tem listom pripadajo kot smo defi
+
+Pri primerih, ki ne pripadajo nobenemu listu kodiranja, pa moramo napoved določiti na drug način.
+Primere podatkovne množice lahko torej razdelimo na tiste, ki pripadajo nekemu elementu kodiranja in tiste, ki ne pripadajo nobenemu.
+
+% ================================ STARO POGLAVJE - work in progress ================================ %
 
 Želimo poiskati dekodirnik, ki bo čim bolje uporabil vse podatke o kodiranju, ki jih ima na razpolago, in vrnil čim bolj točno napoved.
 Če je dekodirnik nenatančen, ne moremo biti prepričani, da smo izbrano kodiranje dobro ovrednotili, saj so napake lahko krivda dekodirnika in ne pomanjkljivosti kodiranja samega.
@@ -1033,27 +1070,35 @@ Najprej bomo primere razdelili v dve skupini glede na to, koliko podatkov imamo 
 
 % TODO: umestit definicijo v tekst
 \begin{definicija}
-	\label{def-dekodiranje}
+	% \label{def-dekodiranje}
 		% TODO: fix
 		% NOTE: tole bo bolj komplicirano kot se zdi
-		% def. preslika zakodirane primere pač v nekej. Je sploh treba omenit kodirni vektor???
+		% def. preslika zakodirane primere pač v nekaj. Je sploh treba omenit kodirni vektor???
 		% Če omenimo, da deluje na osnovi kodirnega vektorja, kako opišemo dekodiran primer?
 		% Zahtevamo: če primer pripada nekemu listu iz kodirnega vektorja, pol je napoved narejena z upoštevanjem vsaj enega primernega lista...?
 
 		% alternativno: bi napisal definicijo na osnovi SAT formulacije???
-		Dekodirnik $\phi_v: \{0,1\}^c \rightarrow \omega$, ki deluje na osnovi kodirnega vektorja $v=(l_1,\ldots, l_c)$, 
-		definiramo s predpisom $\psi_v(x) = (b_1, b_2, \ldots, b_d)$, kjer za $i=1,2,\ldots,d$ velja: % kok dfak je že dimenzija od \omega??? je res "d"?
-		$$
-		b_i = 
-		\begin{cases}
-		1 &;\ x \text{ pripada listu } l_i \\
-		0 &; \text{ sicer}\ \ .
-		\end{cases}
-		$$
+		% ================================================ %
+		Dekodirnik $\phi: \{0,1\}^c \rightarrow \omega$ je preslikava iz množice zakodiranih primerov v prvotno podatkovno množico $\omega$.
+
+		% TODO: probat napisat, da deluje na osnovi kodirnega vektorja v
+		% ne moremo napisat enega pogoja, ki bi ustrezal SAT in tudi uporabi shranjenih napovedi...
+		% če ne bo šlo z uredu formulacijo, se lahko naše želje omeni v okoliškem tekstu
+
+		% ================================================ %
+		% Dekodirnik $\phi_v: \{0,1\}^c \rightarrow \omega$, ki deluje na osnovi kodirnega vektorja $v=(l_1,\ldots, l_c)$, 
+		% definiramo s predpisom $\psi_v(x) = (b_1, b_2, \ldots, b_d)$, kjer za $i=1,2,\ldots,d$ velja:
+		% $$
+		% b_i = 
+		% \begin{cases}
+		% 1 &;\ x \text{ pripada listu } l_i \\
+		% 0 &; \text{ sicer}\ \ .
+		% \end{cases}
+		% $$
 \end{definicija}
 
 % Povemo katere podatke imamo glede kodiranja. Želimo uporabiti napovedi, ki jih drevesa pripišejo posameznim listom, iz katerih smo sestavili kodiranje.
-Elementi kodirnega vektorja so listi in za vsak list lahko ugotovimo napoved, ki jo drevo v katerem je vsebovan, priredi primerom, ki listu pripadajo.
+Elementi kodirnega vektorja so listi in za vsak list lahko ugotovimo napoved, ki jo drevo, v katerem je vsebovan, priredi primerom, ki listu pripadajo.
 To lahko izkoristimo pri dekodiranju primerov, ki pripadajo vsaj enemu listu kodiranja. 
 Njihovo rekonstruirano vrednost lahko določimo kot napoved primernega lista.
 Pri primerih, ki ne pripadajo nobenemu listu kodiranja, pa moramo napoved določiti na drug način.
@@ -1065,7 +1110,7 @@ Po definiciji \ref{def-pripadnost-listu} vemo, da primer $x$ pripada listu $l$, 
 To velja natanko tedaj, ko velja konjunkcija $q_1(x)\land \ldots \land q_k(x)$. 
 Če primer $x$ listu $l$ ne pripada, prejšnja izjava ne velja, oz.~velja njeno zanikanje $\lnot q_1(x) \lor \ldots \lor \lnot q_k(x)$.
 Če primer $x$ ne pripada nobenemu izmed listov kodiranja, vemo, da mora zanj veljati množica disjunkcij takšne oblike.
-Tako smo določili množico pogojev, ki jih je prvotna vektor vrednosti izpolnjeval.
+Tako smo določili množico pogojev, ki jih je prvotni vektor vrednosti zagotovo izpolnjeval.
 Ta podatek lahko izkoristimo tako, da izločimo napovedi, ki množici pogojev ne ustrezajo, saj vemo, da ne morejo biti točne.
 
 % TODO: razmislek: a bi bilo treba uporabljat bolj korektne izraze za pripadnost: primere, katerih prvotna vrednost pripada nekemu listu
@@ -1120,15 +1165,18 @@ da bomo problem lahko formulirali v primerni obliki in se sklicali na algoritem 
 Obstajajo standardne metode za poiskati rešitev SAT problema. Ena izmed takih metod je DPLL (Davis--Putnam--Logemann--Loveland) algoritem, ki ga bomo uporabili tudi mi. (TODO: citat!)
 DPLL algoritem vrne logično vrednost $True$, če je formula zadovoljiva, sicer pa vrne $False$. 
 Če je formula zadovoljiva sicer v postopku odkrije množico pogojev, katere morajo spremenljivke izpolnjevati, da formula velja.
-Uporabili bomo prirejen DPLL algoritem $DPLL\_example$, ki v primeru, če je formula zadovoljiva, vrne vektor vrednosti, pri katerih formula velja.
-Če tak vektor ne obstaja, mora vsak primer podatkovne množice pripadati vsaj enemu listu in tako ne bomo nikoli rabili uporabiti algoritma DPLL\_example.
+Uporabili bomo prirejen DPLL algoritem $DPLL\_example$, ki v primeru, če je formula zadovoljiva, vrne vektor vrednosti, pri katerih formula velja. 
+% uporabimo funkcijo find\_negation\_candidate, ki jo ovijemo okoli DPLL algoritma in vrne vektor vrednosti, pri katerih formula velja
+% maybe preimenovanje: DPLL\_example -> DPLL\_wrapper al neki
+Če tak vektor ne obstaja, mora vsak primer podatkovne množice pripadati vsaj enemu listu in tako ne bomo nikoli rabili uporabiti algoritma DPLL\_example. % TODO: premisliti, razložiti malo bolj temeljito
 
 V algoritmu \ref{algoritem-decode} je zapisan postopek rekonstrukcije zakodirane podatkovne množice.
 Algoritem pregleda vse primere v množici in sledi idejam za dekodiranje, ki smo jih opisali.
-Za primer preveri, ali pripada kateremu listu kodiranja $K$ in shrani vse liste, ki jim primer pripada v seznam prediction\_candidates.
+Za primer preveri, ali pripada kateremu listu kodiranja $K$, in shrani vse liste, ki jim primer pripada, v seznam prediction\_candidates.
 Če pripada vsaj enemu listu, tj.~seznam prediction\_candidates ni prazen, se rekonstrukcijo prvotne vrednosti primera določi z metodo $select\_prediction$, ki združi primerne napovedi.
 Če primer ne pripada nobenemu listu, algoritem pretvori poti do listov kodiranja v logične izjave in jih združi v formulo.
 Nato pa algoritmu $DPLL\_example$ poda to formulo in rekonstrukcijo $\hat{x}$ določi kot vektor, ki ga vrne $DPLL\_example$ algoritem.
+% oh boi OH BOI... te oznake se z implementacijo sploh ne poklapajo - za preverit - TODO
 
 \begin{algorithm}[h!]
 	\caption{Algoritem dekodiranja zakodirane podatkovne množice}
@@ -1168,94 +1216,107 @@ Nato pa algoritmu $DPLL\_example$ poda to formulo in rekonstrukcijo $\hat{x}$ do
 
 % Uvod v poglavje, pregled razdelkov.
 Različico samokodirnika, ki smo jo predstavili v prejšnjem poglavju, smo implementirali v programskem jeziku Python.
-Za primerjavo smo uporabili standardno implementacijo nevronskih mrež iz knjižnice keras (TODO: citat).
+% ===== CUT
+Za primerjavo smo uporabili standardno implementacijo nevronskih mrež iz knjižnice keras (TODO: citat). % TODO: ali je to sploh res??? najbrž ne bo ostalo
 Iz teh nevronskih mrež pa smo sestavili standarden samokodirnik, ki ga bomo uporabili za primerjavo z alternativno implementacijo.
+% =====
 V tem poglavju se bomo posvetili podrobnostim implementacije naše različice samokodirnika.
 Najprej bomo opisali parametre, ki so uporabljeni v implementaciji, nato pa komponente, na katere je razdeljena koda.
-Opisali bomo tudi dve (TODO: ali več?) različici samokodirnika, ki sta možni, glede na to na katerega izmed dveh načinov poiščemo kandidate za kodiranje.
-V zadnjem razdelku pa bomo komentirali še možne izboljšave implementaciji samokodirnika.
+Opisali bomo tudi različice samokodirnika, ki jih dobimo z uporabo nekaterih alternativnih različic funkcij, ki so sestavni deli samokodirnika.
+Nato bomo našteli še nekaj možnih izboljšav implementacije samokodirnika.
 
 % Komentar in utemeljitev za izbiro programskih jezikov, ki smo jih uporabili - python in R
-Za Python smo se odločili, ker ima veliko število knjižnic, in lahko tako Uporabimo že implementirane različice modelov strojnega učenja.
-Poleg tega je koda napisana v Pythonu v primerjavi z ostalimi programskimi jeziki sorazmerno kratka in pregledna, tako da je to primerna izbira za implementacijo idej.
-Uporabili smo implementacijo modelov iz knjižnice sklearn.
-Za naš namen je primeren tudi programski jezik R, za katerega je na razpolago zelo veliko knjižnic/paketov za strojno učenje in statistično obdelavo.
-V njem smo napisali skripto za generiranje podatkovnih množic, na katerih testiramo samokodirnik.
+Za Python smo se odločili, ker ima veliko število knjižnic, kar omogoča uporabo že implementiranih različic modelov strojnega učenja.
+Koda napisana v Pythonu je v primerjavi z ostalimi programskimi jeziki sorazmerno kratka in pregledna in tudi zaradi tega je Python dobra izbira za prvotno implementacijo idej.
+Uporabili smo implementacijo modelov strojnega učenja iz knjižnice sklearn.
+% TODO: ali bo R uporabljen še za kej? najbrž. UPDATE
+% Tudi programski jezik R ima na razpolago veliko število knjižnic in paketov za statistično analizo in strojno učenje.
+Skripti za generiranje podatkovnih množic, ki jih uporabljamo pri vrednotenju samokodirnika, in izris grafov, ki prikazujejo rezultate testov, sta napisani v programskem jeziku R.
+Za to smo se odločili zaradi velikega števila paketov in knjižnic za statistično analizo podatkov, ki jih ima R na razpolago.
 
+V Pythonu smo uporabili predvsem dve večji knjižnici: keras, oz. TensorFlow, in sklearn.
 % Komentar o knjižnicah, ki smo jih uporabili? npr.\ keras, sklearn
-Keras je vmesnik za uporabe knjižnice TensorFlow, namenjen predvsem t.~i.\ globokemu učenju, oz. nevronskim mrežam. 
-TensorFlow pa je popularna odprto kodna knjižnica in zbirka orodij za strojno učenje.
-Iz Keras smo uporabili implementacijo nevronskih mrež za izgradnjo standardnega samokodirnika.
-Knjižnica sklearn, oz.\ scikit-learn je odprto kodna knjižnica, ki vsebuje nabor različnih orodij za strojno učenje.
-V našem samokodirniku smo iz knjižnice sklearn uporabili implementacijo odločitvenih dreves, naključnega gozda ter funkcije za računanje razdalje med primeri.
+Keras je vmesnik za uporabo knjižnice TensorFlow, namenjen predvsem t.~i.\ globokemu učenju, oz. nevronskim mrežam. 
+TensorFlow pa je popularna odprto kodna zbirka orodij za strojno učenje.
+Za izgradnjo standardnega samokodirnika smo uporabili implementacijo nevronskih mrež iz knjižnice Keras.
+Knjižnica sklearn, oz.\ scikit-learn je odprto kodna knjižnica, ki vsebuje nabor različnih orodij in modelov za strojno učenje.
+V našem samokodirniku smo uporabili implementacijo odločitvenih dreves, naključnega gozda ter funkcije za računanje razdalje med primeri iz knjižnice sklearn.
 (TODO: sklici na dokumentacijo knjižnic)
 
 % TODO: odločitev; koliko je v tem poglavju smiselno pisati o nevronskih mrežah. Z opisi bi se morda posvetili predvsem naši alternativni implementaciji?
 
 \subsection{Parametri}
 
-V tem razdelku bomo opisali pomembnejše parametre samokodirnika. Nastavimo jih na začetku skripte, da jih lahko zlahka najdemo in spreminjamo.
+V tem razdelku bomo opisali pomembnejše parametre samokodirnika. 
+Nastavljeni so na začetku skripte, da jih lahko uporabnik zlahka najde in po potrebi spreminja.
 V poglavju o vrednotenju samokodirnika bomo tudi analizirali učinek spreminjanja večine teh parametrov na delovanje samokodirnika.
 Med pomembnejše parametre samokodirnika spadajo sledeči.
 
 \begin{itemize}
-	\item global\_seed: Parameter, ki določi t.~i. ``seed'', ki se v postopku uporabi za naključnost.
-	Poskusi učenja in vrednotenja samokodirnika se večkrat ponovijo, zato je global\_seed seznam primerne dolžine enake številu iteracij.
-	Tako ima postopek v vsaki iteracija lasten ``seed'', Privzeta vrednost tega parametra je seznam $[1,2,\ldots,100]$.
+	\item \texttt{global\_seed}: Parameter, ki določi t.~i. ``seed'', ki se uporabi za simulacijo naključnosti.
+	Postopek učenja in vrednotenja samokodirnika se večkrat ponovi, zato je global\_seed seznam, katerega dolžina je enaka številu iteracij.
+	Tako ima postopek v vsaki iteraciji nov ``seed''. 
+	Privzeta vrednost tega parametra je seznam $[1,2,\ldots,100]$.
 	% TODO: nastavit parameter za seed, ki bo vseboval toliko elementov, kot je ponovitev vzorčenja/učenja, in ga tu opisati.
 
-	\item code\_size: Parameter, ki označuje razsežnost zakodiranih podatkov, oz.\ razsežnost kode. 
+	\item \texttt{code\_size}: Parameter, ki označuje razsežnost zakodiranih primerov, oz.\ razsežnost kodirnega vektorja. 
 	Veljavne vrednosti so naravna števila manjša ali enaka razsežnosti podatkovne množice.
-	Primer, ko je code\_size enak ali večji od razsežnosti podatkovne množice, pa je načeloma trivialen.
-	Parameter code\_size je v algoritmu \ref{algoritem-decode} označen z oznako $c$ in v algoritmu \ref{algoritem-find-encoding} označen z $d_{code}$. 
+	Primer, ko je \texttt{code\_size} enak ali večji od razsežnosti podatkovne množice, pa je načeloma trivialen.
+	Parameter \texttt{code\_size} je v algoritmu \ref{algoritem-decode} označen z oznako $c$ in v algoritmu \ref{algoritem-find-encoding} označen z $d_{code}$. 
 	(TODO: poenotiti oznake parametrov v različnih algoritmih)
 	
-	\item default\_measure\_of\_diff: Parameter, ki določa dovoljeno mero podobnosti med listi, ki so vsebovani v kodirnem vektorju.
+	\item \texttt{default\_measure\_of\_diff}: Parameter, ki določa dovoljeno mero podobnosti med listi, ki so vsebovani v kodirnem vektorju.
 	Meja dovoljene podobnosti je uporabljena tako, kot je opisano v algoritmu \ref{algoritem-find-encoding}, kjer je označena s $t_{\mathit{sim}}$.
-	V naboru primerov vsebovanih v kodirnem vektorju, ima poljuben par primerov mero podobnosti manjšo od $\mathit{default\_measure\_of\_diff}$, saj bolj podobnih primerov v nabor ne vključimo.
-	Podrobnejša razlaga mere podobnosti se nahaja v prejšnjem poglavju v razdelku o Kodirniku (3.3.3). % TODO: tole pravilno sklicat
-	Privzeta vrednost parametra je ? % TODO: določiti privzeto vrednost
+	Iz nabora kandidatov vsebovanih v kodirnem vektorju, ima poljuben par listov mero podobnosti praviloma manjšo od \texttt{default\_\-measure\_\-of\_\-diff}, 
+	saj pri privzetem delovanju samokodirnika bolj podobnih parov v kodirni vektor ne vključimo.
+	Privzeta vrednost parametra \texttt{default\_measure\_of\_diff} je $0.1$. % TODO: določiti privzeto vrednost
 
-	\item default\_n\_estimators: Parameter, ki opiše (privzeto) število odločitvenih dreves iz katerih je sestavljen naključni gozd. 
+	\item \texttt{default\_n\_estimators}: Parameter, ki opiše število odločitvenih dreves, ki sestavljajo naključni gozd. 
 	V algoritmu \ref{algoritem-construct-RF} je ta parameter označen s $q$. 
 	Večje število odločitvenih dreves izboljša natančnost gozda (TODO: citat?) in pričakujemo, da posledično izboljša kvaliteto samokodirnika.
 	Privzeta vrednost parametra je $100$.
 
 \end{itemize}
 
-To so samo glavni (globalni) parametri, posamezne funkcije pa imajo seveda tudi druge (pomožne) parametre.
-Pričakujemo, da bodo našteti parametri tudi najmočneje vplivali na kvaliteto samokodirnika, zato bomo njihov vpliv tudi preizkusili pri vrednotenju delovanja samokodirnika. 
-Pomožne parametre bomo našteli pri opisu funkcij v naslednjem razdelku, pri testiranju pa jim ne nameravamo nameniti posebne pozornosti.
+To so glavni (globalni) parametri pri delovanju samokodirnika, posamezne funkcije pa imajo seveda tudi druge (pomožne) parametre.
+Pričakujemo, da bodo našteti parametri najmočneje vplivali na kvaliteto samokodirnika, zato bomo njihov vpliv preverili pri vrednotenju delovanja samokodirnika. 
+Pomembnejše pomožne parametre bomo našteli pri opisu funkcij v naslednjem razdelku, pri testiranju pa jim ne nameravamo nameniti posebne pozornosti.
 
 
 \subsection{Komponente}
 
 % Opis komponent samokodirnika, npr.\ funkcije za iskanje primernih listov za kodo, itd. najbrž ne preveč podrobno.
-TODO: dodati shemo delovanja
+\begin{figure}[h!]
+
+	\begin{center}
+	\includegraphics[width=\textwidth]{shema delovanja placeholder}
+	\end{center}
+	
+	\caption{(začasna) Shema delovanja samokodirnika}
+\end{figure}
 
 Skripta, s katero smo implementirali samokodirnik, je razdeljena na komponente.
-Nekatere komponente predstavljajo dele, ki so potrebni za delovanje našega samokodirnika, 
-druge pa so samo skupine dodatnih funkcij, ki smo jih umestili skupaj za boljšo organizacijo kode.
+Nekatere komponente so glavni deli samokodirnika, druge pa so samo skupine dodatnih funkcij, ki smo jih umestili skupaj za boljšo organizacijo kode.
 V tem razdelku bomo najprej našteli komponente iz katerih je skripta sestavljena, nato pa bomo pomembnejše komponente še podrobneje opisali.
-Celotno koda je možno pregledati v prilogi. Sestavljena je iz sledečih komponent.
+Celotno kodo je možno pregledati v prilogi, sestavljena pa je iz sledečih komponent. % TODO: je to treba sploh omeniti?
 
 \begin{itemize}
-	\item skripta za generiranje podatkovnih množic: služi ustvarjanju množic za testiranje delovanja. 
-	Implementirana je v R-ju, več pozornosti pa ji bomo namenili v poglavju o vrednotenju % TODO: uskladiti s poglavjem o vrednotenju
+	\item skripta za generiranje podatkovnih množic: z njo generiramo množice za testiranje delovanja samokodirnika. 
+	Implementirana je v R-ju, več pozornosti pa ji bomo namenili v poglavju o vrednotenju. % TODO: uskladiti s poglavjem o vrednotenju
 	
-	\item pomožne funkcije: nekatere dodatne funkcije, ki ne spadajo direktno k nobeni izmed ostalih komponent, 
-	vendar poenostavijo implementacijo nekaterih ostalih funkcij.
+	\item pomožne funkcije: nekatere dodatne funkcije, ki ne pripadajo direktno nobeni izmed ostalih komponent, 
+	vendar poenostavijo implementacijo ostalih funkcij.
 
 	\item kodirnik: funkcije, ki skupaj sestavljajo kodirnik, kot je opisan v algoritmu \ref{algoritem-encode}.
 
 	\item funkcije za konstrukcijo kodirnega vektorja: 
-	funkcije, ki so namenjene konstrukciji primernega kodirnega vektorja in skupaj sledijo postopku opisanem v algoritmu \ref{algoritem-find-encoding}.
+	funkcije, ki so namenjene konstrukciji čim boljšega kodirnega vektorja in sledijo postopku opisanem v algoritmu \ref{algoritem-find-encoding}.
 
 	\item dekodirnik: funkcije, ki skupaj sestavljajo dekodirnik, kot je opisan v algoritmu \ref{algoritem-decode}.
 
 	\item funkcije za testiranje: funkcije, ki izvedejo postopek učenja samokodirnika ter ovrednotijo njegovo delovanje, ponavadi z več ponovitvami.
 
-	\item funkcije za branje in zapis datotek: skupina funkcij, ki opravlja branje množic podatkov iz datotek, zapisuje rezultate in zapisnik (ang. log) poskusov, itd. % podatkovnih množic, logov, csv-jev z rezultati,...
+	\item funkcije za branje in zapis datotek: skupina funkcij, ki opravljajo branje podatkovnih množic iz datotek, zapisujejo rezultate in zapisnik (ang. log) poskusov, itd.
 
 	\item skripta za risanje grafov: v R-ju napisana skripta, ki prebere datoteke z rezultati in ustvari graf rezultatov.
 \end{itemize}
@@ -1266,25 +1327,27 @@ Celotno koda je možno pregledati v prilogi. Sestavljena je iz sledečih kompone
 % cilj pri daljših opisih: bralcu dati vpogled v kodo, da se lahko malo bolje znajde, če želi, kaj preveriti v prilogi
 % poudariti pomembne komponente/rešitve - ki se morda razlikujejo od ideje v algoritmih
 
-
 % =================== KONSTRUKCIJA KODIRNEGA VEKTORJA =================== %
 % Opis funkcije za konstrukcijo kodirnega vektorja. Opišemo, v kakšno strukturo shranimo kodiranje. Bolj splošno opišemo postopek.
 Funkcije za konstrukcijo kodirnega vektorja okvirno sledijo postopku opisanem v algoritmu \ref{algoritem-find-encoding}.
-Cilj postopka je konstruirati tak kodirni vektor, da bo samokodirnik, ki deluje na osnovi tega kodirnega vektorja, čim boljši. % TODO: čim bolj točen? boljši -> ???
+Cilj postopka je konstruirati kodirni vektor, ki bo omogočil čim boljše delovanje samokodirnika, ki deluje na osnovi tega kodirnega vektorja. % TODO: čim bolj točen? boljši -> ???
 
-V razdelku 3.3.3 smo kot mero kvalitete \textit{quality} določili delež listu pripadajočih primerov iz učne množice. 
-Funkcija \texttt{max\_coverage} v danem odločitvenem drevesu poišče liste, katerim pripada največje število primerov iz učne množice, in jih uredi glede na kvaliteto.
-Vrne \texttt{n\_leaves} dolg seznam parov, ki vsebujejo delež pripadajočih listov in indeks lista. 
-Parameter \texttt{n\_leaves} je privzeto nastavljen na 1.
+V razdelku 3.3.3 smo kot mero kvalitete listov \textit{quality} določili delež listu pripadajočih primerov iz učne množice. 
+Funkcija \texttt{max\_coverage} v danem odločitvenem drevesu poišče najbolj kvalitetne liste, tj. tiste, katerim pripada največje število primerov iz učne množice, in jih uredi glede na kvaliteto.
+Vrne \texttt{n\_leaves} dolg seznam parov, ki vsebujejo delež listu pripadajočih primerov in indeks lista. 
+Parameter \texttt{n\_leaves} je privzeto nastavljen na 1, kar pomeni, da funkcija vrne zgolj najbolj kvaliteten list iz odločitvenega drevesa.
 
-Funkcija \texttt{find\_different\_candiates} (ali alternativno \texttt{find\_naive\_candidates}) za vsako drevo iz danega naključnega gozda pregleda najboljše liste, ki jih vrne funkcija \texttt{max\_coverage}, in jih združi v seznam najboljših listov gozda.
-Posamezen list doda v seznam \texttt{candidates}, če je bolj kvalitetni od nekega lista, ki je že v seznamu in ni preveč podoben nobenemu izmed listov v seznamu.
-To pomeni, da funkcija preveri \texttt{code\_similarity} med novim primerom in vsakim listom v candidates - nov list dodamo samo v primeru, ko je njegova podobnost s poljubnim elementom seznama candidates manjša od \texttt{measure\_of\_difference}.
+Funkcija \texttt{find\_different\_candiates} (ali alternativno \texttt{find\_naive\_candidates}) za vsako drevo iz danega naključnega gozda pregleda najboljše liste, 
+ki jih vrne funkcija \texttt{max\_coverage}, in jih združi v seznam \texttt{candidates}, za katerega želimo, da ob koncu postopka vsebuje čim boljše kandidate za kodirni vektor.
+Posamezen list doda v seznam, če je bolj kvalitetni od nekega lista, ki je že vsebovan v seznamu in ni preveč podoben nobenemu izmed listov seznama.
+To pomeni, da funkcija izračuna \texttt{code\_similarity} med novim listom in vsakim kandidatom v candidates - nov list dodamo samo v primeru, ko je njegova podobnost s poljubnim elementom seznama candidates manjša od \texttt{measure\_of\_difference}.
 Privzeta vrednost parametra \texttt{measure\_of\_difference} je parameter \texttt{default\_measure\_of\_diff}, ki je nastavljen na $0.1$.
+Če je dolžina seznama že enaka želeni razsežnosti kodirnega vektorja, se nove liste doda tako, da se hkrati izbriše najmanj kvaliteten list vsebovan v seznamu.
+% TODO: možnost izboljšave - način, kako se pregleda in preverja podobnost med listi. Morda bi loh najprej izbrali vse najboljše in od njih izločili podmnožico s čim manj podobnosti.
 
 Funkcijo \texttt{find\_different\_candiates} nato ovijemo še s funkcijo \texttt{encoding\_naive} (ali alternativno \texttt{encoding}), da seznam najdenih kandidatov ''razpakira``.
 Kandidate shrani v kodirni vektor in jim doda podatke, ki so potrebni v nadaljnji obdelavi. % TODO
-Kodirni vektor shranimo kot seznam trojic, ki vsebujejo delež listu pripadajočih primerov, opis poti do lista in napoved vrednosti, ki jo list napove pripadajočim primerom.
+Kodirni vektor shranimo v obliki seznama trojic, ki vsebujejo delež listu pripadajočih primerov, opis poti do lista in vrednost, ki jo list napove njemu pripadajočim primerom.
 
 % TODO: prebrat in popravit, zmanjšat število odstavkov
 % Sem spadajo funkcije: encoding, encoding\_naive, find\_naive\_candidates, find\_different\_candidates, max\_coverage
@@ -1299,7 +1362,7 @@ Kodirni vektor shranimo kot seznam trojic, ki vsebujejo delež listu pripadajoč
 Funkcije za opis kodirnika so namenjene implementaciji kodirnika, kot je opisan v algoritmu \ref{algoritem-encode}.
 Postopek kodiranja enega primera izvede funkcija \texttt{encode\_sample}, ki deluje s pomočjo pomožne funkcije \texttt{check\_condition\_for\_sample}.
 Pomožno funkcijo \texttt{check\_condition\_for\_sample} uporabimo, da preveri, ali logični pogoj drži za dan primer iz podatkovne množice.
-Funkcija \texttt{encode\_set} pa z uporabo \texttt{encode\_sample} zakodira celo podatkovno množico primerov.
+Funkcija \texttt{encode\_set} z uporabo \texttt{encode\_sample} zakodira celo podatkovno množico primerov, da za uporabnika poenostavi kodiranje podatkov.
 
 % =================== DEKODIRNIK =================== %
 
@@ -1307,33 +1370,35 @@ Funkcija \texttt{encode\_set} pa z uporabo \texttt{encode\_sample} zakodira celo
 % Sem spadajo funkcije: decode\_sample, decode\_set, 
 % feature\_in\_list, prune\_formula, choose\_literal, replace\_literal, check\_for\_unit\_clause, check\_for\_pure\_literal, dpll, find\_negation\_candidate
 
-Dekodirnik implementiramo s funkcijo \texttt{decode\_sample} po postopku, ki je opisan v algoritmu TODO: ref.
+Dekodirnik implementiramo s funkcijo \texttt{decode\_sample} po postopku, ki je opisan v algoritmu \ref{algoritem-decode}.
 Pri dekodiranju se držimo načela, ki smo ga opisali v poglavju o dekodirniku.
 Zakodiranim primerom, ki pripadajo vsaj enemu listu iz kodirnega vektorja, napovemo vrednost, ki bi jo ta list napovedal pripadajočim primerom.
 Če najdemo v kodirnem vektorju več primernih listov, uporabimo napoved zadnjega najdenega, 
-saj je to iz vidika implementacije najbolj preprosto in pri združevanju napovedi več listov nismo opazili izboljšave natančnosti.
-Pri primerih, ki ne pripadajo nobenemu listu iz kodirnega vektorja, uporabimo DPLL algoritem po razmisleku, ki je bil zapisan v poglavju ... TODO: sklic na poglavje, sklic na DPLL ref.
-Pomožna funkcija \texttt{find\_negation\_candidate} pokliče funkcijo \texttt{dpll}, ki z uporabo več pomožnih funkcij izvede DPLL algoritem. % in vrne primer, ki ustreza rezultatu algoritma.
-Rezultat DPLL algoritma funkcija \texttt{find\_negation\_candidate} nato uporabi, da poišče in vrne primer, ki se s tem rezultatom ujema.
-Za bolj enostavno uporabo funkcija \texttt{decode\_set} dekodira celo množica zakodiranih primerov z uporabo funkcije \texttt{decode\_sample}.
+saj pri združevanju napovedi več listov nismo opazili izboljšave natančnosti in je to iz vidika implementacije najbolj preprosto.
+Pri primerih, ki ne pripadajo nobenemu listu iz kodirnega vektorja, uporabimo DPLL algoritem. % TODO sklic na razdelek 3.3.3 (?)
+Pomožna funkcija \texttt{find\_negation\_candidate} inicializira funkcijo \texttt{dpll}, ki z uporabo pomožnih funkcij izvede postopek DPLL algoritma. % in vrne primer, ki ustreza rezultatu algoritma.
+Rezultat DPLL algoritma funkcija \texttt{find\_negation\_candidate} nato uporabi, da poišče in vrne primer, ki se ujema z rezultatom algoritma.
+Za bolj enostavno uporabo s strani uporabnika funkcija \texttt{decode\_set} dekodira celo množico zakodiranih primerov hkrati z uporabo funkcije \texttt{decode\_sample}.
 
 % TODO: odločit se ali se vse DPLL funkcije uvrstimo k dekodirniku
 
 Pomožne funkcije se delijo na par podskupin, ki imajo skupen namen:
 % ekstra stavek ali dva opisa
 \begin{itemize}
-	\item funkcije za tiskanje izpisov: \texttt{print\_path}, ki za uporabnika izpiše pot do vozlišča v drevesu, in 
-	\texttt{print\_encoding}, ki za uporabnika izpiše kodirni vektor z dodatnimi podatki o deležu pripadajočih primerov in napovedih posameznih listov.
+	\item funkcije za tiskanje izpisov: Sem spadata \texttt{print\_path}, ki za v urejeni obliki izpiše pot do izbranega vozlišča v drevesu, in 
+	\texttt{print\_encoding}, ki v urejeni obliki izpiše kodirni vektor z dodatnimi podatki o deležu pripadajočih primerov in napovedih posameznih listov.
 
-	\item implementacija DPLL algoritma: \texttt{dpll}, \texttt{feature\_in\_list}, \texttt{prune\_formula, choose\_literal}, \texttt{replace\_literal}, \texttt{check\_for\_unit\_clause} in \texttt{check\_for\_pure\_literal}
+	\item implementacija DPLL algoritma: Sem spadajo funkcije \texttt{dpll}, \texttt{feature\_in\_list}, \texttt{prune\_formula, choose\_literal}, \texttt{replace\_literal}, \texttt{check\_for\_unit\_clause} in \texttt{check\_for\_pure\_literal}.
 	
-	\item funkcije za poiskati vrednost, ki jo napove določen list odločitvenega drevesa: \texttt{leaf\_label}, \texttt{convert\_labels}
+	\item funkciji za poiskati vrednost, ki jo pripadajočim primerom napove določen list odločitvenega drevesa: \texttt{leaf\_label} in \texttt{convert\_labels}.
 	
-	\item funkcije za računanje mere podobnosti listov $sim$ uporabljene v algoritmu \ref{algoritem-find-encoding}: 
-	funkcija \texttt{node\_to\_vector} izbrano vozlišče zakodira s pripadajočimi primeri iz podatkovne množice. TODO: sklic na opis tega kodiranja v prejšnjem poglavju % TODO: node\_to\_vector, code\_similarity
-	Funkcija \texttt{code\_similarity} izračuna mero podobnosti dveh danih primerov iz podatkovne množice.
+	\item funkcije za računanje mere podobnosti listov $sim$ (uporabljene v algoritmu \ref{algoritem-find-encoding}): 
+	Sem spadata funkciji \texttt{node\_to\_vector} in \texttt{code\_similarity}.
+	Funkcija \texttt{node\_to\_vector} izbrano vozlišče odločitvenega drevesa zakodira s pripadajočimi primeri iz podatkovne množice, % TODO: sklic na opis tega kodiranja v prejšnjem poglavju % TODO: node\_to\_vector, code\_similarity
+	funkcija \texttt{code\_similarity} pa izračuna mero podobnosti dveh danih listov.
 	
-	\item funkcije za obdelavo poti: \texttt{path\_to}, ki v danem odločitvenem drevesu poišče pot do izbranega vozlišča in \texttt{find\_path}, ki je pomožna funkcija, ki ta postopek poenostavi.
+	\item funkcije za obdelavo poti: Sem spadata \texttt{path\_to}, ki v danem odločitvenem drevesu poišče pot do izbranega vozlišča, 
+	in \texttt{find\_path}, ki je pomožna funkcija namenjena lažji implementaciji funkcije \texttt{path\_to}.
 \end{itemize}
 
 % ===================
@@ -1341,37 +1406,38 @@ Pomožne funkcije se delijo na par podskupin, ki imajo skupen namen:
 \subsection{Različice algoritma}
 
 % Uvod/pregled razdelka (kolikor alternativ bo ostalo v končni implementaciji - ali sploh kakšna razen pri iskanju kodiranja?).
-V razdelku bomo opisali dele samokodirnika, kjer je implementiranih več različnih funkcij z enakim namenom.
+V tem razdelku bomo opisali dele samokodirnika, pri katerih je implementiranih več različnih funkcij z enakim namenom.
 Povedali bomo, katere funkcije so v delovanju privzete in zakaj je lahko uporabna alternativna implementacija.
 Različice funkcij bomo tudi kratko opisali in poudarili razlike med njimi.
 
-Več alternativnih implementacij je predvsem pri funkcijah za konstrukcijo kodirnega vektorja.
-Obstajata dve različni funkciji, ki konstruirata kodirni vektor:
+Privzeto je za konstrukcijo kodirnega vektorja uporabljena funkcija \texttt{encoding\_naive},
+implementirani pa sta dve različni funkciji, ki konstruirata kodirni vektor:
 
 % TODO: katero privzeto uporabljamo???
 \begin{itemize}
 	\item \texttt{encoding\_naive}: funkcija, ki naivno pregleda kandidate listov za kodirni vektor. 
-	Privzeto je ta funkcija uporabljena za konstrukcijo kodirnega vektorja. 
 	Da je delovanje hitrejše, pregleda zgolj najbolj kvaliteten list iz vsakega odločitvenega drevesa, ki ga nato potencialno doda v kodirni vektor.
 
 	\item \texttt{encoding}: funkcija, ki liste pregleda manj naivno.
-	Ker funkcija \texttt{encoding\_naive} veliko potencialnih kandidatov ne pregleda, bi lahko dobili boljši rezultat z upoštevanjem več kandidatov.
-	V drevesih, katerih najbolj kvaliteten list je dovolj dober za vključiti v kodiranje, pregleda funkcija \texttt{encoding} tudi drugi najboljši list.
-	S takim delovanjem nadaljuje in za vsak list, ki ga vključi v kodirni vektor, preveri, ali je tudi po kvaliteti naslednji list dovolj dober kandidat.
+	Ker lahko funkcija \texttt{encoding\_naive} veliko potencialnih kandidatov pri pregledovanju izpusti, bi lahko dobili boljši rezultat z upoštevanjem več kandidatov.
+	V drevesih, katerih najbolj kvaliteten list je dovolj dober za vključiti v kodirni vektor, pregleda funkcija \texttt{encoding} tudi drugi najboljši list.
+	Postopek nadaljuje na podoben način in za vsak list, ki ga vključi v kodirni vektor, preveri, ali je tudi po kvaliteti naslednji list dovolj dober kandidat.
+	Če list ni dovolj kvaliteten za vključiti v kodirni vektor, tudi drugi manj kvalitetni listi ne bojo, torej se lahko pregled drevesa zaključi.
+	Na tak način so v kodirni vektor res vključeni vsi po kvaliteti najboljši kandidati.
 \end{itemize}
 
 Pri konstrukciji kodirnega vektorja se uporabi pomožna funkcija, ki pregleda naključni gozd in izbere seznam listov, ki so dobri kandidati.
-Za iskanje kandidatov sta implementirani dve različni funkciji:
+Za iskanje kandidatov sta implementirani dve različni funkciji, privzeto pa se uporablja funkcija \texttt{find\_different\_candidates}.
 
 \begin{itemize}
 	\item \texttt{find\_naive\_candidates}: pregleda liste dreves naključnega gozda in ustvari seznam najbolj kvalitetnih kandidatov.
 	Deluje hitro vendar naivno, ker upošteva zgolj najbolj kvaliteten list vsakega odločitvenega drevesa.
-	Poleg tega lahko v seznam kandidatov doda zelo podobne liste, saj ne preverja njihove medsebojne mere podobnosti.
+	Poleg tega lahko v seznam kandidatov doda med seboj zelo podobne liste, saj ne preverja njihove medsebojne mere podobnosti.
 
 	\item \texttt{find\_different\_candidates}: pregleda liste dreves naključnega gozda, 
 	pri dodajanju kandidatov pa preveri mero podobnosti, da med kandidate ne vključi preveč podobnih listov.
 	Nov list doda v seznam kandidatov samo, če ima dovolj majhno mero podobnosti z vsemi že vključenimi kandidati.
-	Tako v seznamu kandidatov ni odvečnega prekrivanja. Privzeto je v samokodirniku uporabljena ta funkcija.
+	Tako v seznamu kandidatov ni odvečnega prekrivanja.
 \end{itemize}
 
 % TODO: opomba da iskanje kodirnih vektorjev ni exhaustive??? vsaj ponavadi definitivno ne
@@ -1380,9 +1446,31 @@ Za iskanje kandidatov sta implementirani dve različni funkciji:
 
 \subsection{Možne izboljšave}
 
-TODO: premislit vse očitne pomanjkljivosti in možne nadgradnje
+% TODO: premislit očitne pomanjkljivosti in možne (ambiciozne) nadgradnje
 
-Izboljšava mere za vrednotenje listov $quality$ iz algoritma \ref{algoritem-find-encoding} s tem, da upoštevamo lokalno natančnost napovedi listov.
+Ta razdelek je namenjen kratkemu pregledu možnih izboljšav našega samokodirnika.
+V implementaciji bi se s pozornim premislekom in uporabo bolj optimalnih metod zagotovo dalo izboljšati prostorsko in časovno zahtevnost.
+S tem se bomo ukvarjali v prihodnosti, če bomo samokodirnik želeli uporabiti v praksi.
+Obstaja tudi nekaj drugih idejnih izboljšav samokodirnika, ki bi potencialno lahko izboljšale delovanje.
+
+% Izboljšava mere za vrednotenje listov $quality$ iz algoritma \ref{algoritem-find-encoding} s tem, da upoštevamo lokalno natančnost napovedi listov.
+Način na katerega definiramo mero kvalitete listov, ki so kandidati za kodirni vektor, tj. količino $quality$ iz algoritma \ref{algoritem-find-encoding},
+bi lahko priredili, da upošteva lokalno natančnost napovedi listov.
+Domnevamo, da bi z vključevanjem čim bolj natančnih listov v kodirni vektor lahko dosegli boljšo natančnost samokodirnika.
+Za implementacijo tega bi kot mero kvalitete listov izbrali formulo, ki združuje trenutno mero, tj. delež pripadajočih primerov, in lokalno natančnost lista.
+Preizkusiti bi bilo vredno tudi mero, ki upošteva zgolj lokalno natančnost lista.
+
+% Drugi načini pregledovanja kandidatov za kodirni vektor. % wtf sploh hočem s tem? xD
+% TODO
+Spremenili bi lahko tudi način na katerega uporabimo mero podobnosti med listi, ki so kandidati za kodirni vektor.
+Trenutno se list v kodirnem vektorju zamenja z novim, boljšim kandidatom zgolj, če nov list nima previsoke mere podobnosti s katerimkoli že vključenim listom.
+Tak pristop je ``greedy'' in delovanje samokodirnika bi lahko morda izboljšali z bolj temeljito primerjavo podobnosti.
+V tem primeru bi se najprej izbral nabor določenega števila najbolj kvalitetnih listov v gozdu.
+Nato pa bi iz tega nabora želeli izbrati podmnožico kandidatov, ki bi imeli med seboj čim manjšo prekrivanje - torej čim manjšo mero podobnosti.
+Tako izbrano podmnožico listov bi uporabili kot kodirni vektor.
+
+Samokodirnik bi z nekaj dela lahko usposobili tudi za delovanje na slikah.
+Zaenkrat v ta namen še ni bil testiran.
 
 % ==================== VREDNOTENJE  ==================== %
 

@@ -224,6 +224,7 @@ def encode_set(code, X):
 
 
 # TODO: maybe delete
+# TODO: kaj je sploh že poanta tega??
 def path_to_vector(path, number_of_features):
     """ Converts a list that describes a path to a vector.
     The i-th element of the vector is:
@@ -258,9 +259,10 @@ def node_to_vector(path, training_set):
 
 def code_similarity(x, y, training_set):
     """ The function calculates a 'normalized' similarity
-    measure for the two given code entries. """
+    measure for the two given encoding vector entries. """
+    # TODO: rename to leaf_similarity, code_candidate_similarity or some such
 
-    # we extract vectors to represent the codes
+    # we extract vectors to represent the nodes
     # x = (cover, path, prediction)
 
     v1 = node_to_vector(x[1], training_set)
