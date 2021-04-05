@@ -26,6 +26,7 @@
 %\newtheorem{izrek}[theorem]{Izrek}
 %\newtheorem{posledica}[theorem]{Posledica}
 \newtheorem{definicija}{Definicija}
+\newtheorem{opomba}{Opomba}
 %\newtheorem{domneva}[theorem]{Domneva}
 \newtheorem{primer}{Primer}
 
@@ -877,7 +878,7 @@ posamezna drevesa napovedovala vrednosti posameznih spremenljivk, ki bi se potem
 Tak primer se ne bi ujemal z našo definicijo ansambla in posledično naključnega gozda, zanj pa v splošnem tudi ne bi veljale lastnosti, s katerimi smo utemeljili naključni gozd npr.\ manjše preprileganje. 
 % ki so bile motivacija za uvedbo?
 Če bi uspeli naključni gozd razdeliti na dva dela, bi lahko model razumeli kot samokodirnik, vendar bomo model naključnega gozda raje vzeli za izhodišče in na tej osnovi sestavili nov samokodirnik. 
-Prvi izziv s katerim se moramo soočiti je, kako bi iz naključnega gozda ustvarili čim boljše kodiranje.
+Prvi izziv, s katerim se moramo soočiti, je, kako bi iz naključnega gozda ustvarili čim boljše kodiranje.
 
 \begin{definicija}
 \label{def-pripadnost-listu}
@@ -886,85 +887,87 @@ Naj bo $l$ list iz $T$, do katerega vodi pot $q$ skozi vozlišča $v_1, v_2, \ld
 Za bolj jasno formulacijo označimo še vozlišče $v_{k+1} = l$.
 Za $i=1,2,\ldots,k$ definiramo logično izjavo $q_i$ s sledečim predpisom:
 \[
-q_i(x) =
+q_i(l,x) =
 \begin{cases}
 x_{f_{v_i}} > t_{v_i} &;\ v_{i+1} \text{ je element desnega poddrevesa od } v_i \\
 x_{f_{v_i}} \leq t_{v_i} &;\ v_{i+1} \text{ je element levega poddrevesa od } v_i\ \ .
 \end{cases}
 \]
-Pravimo, da primer $x$ \textbf{pripada} listu $l$, če so za $i=1,\ldots,k$ izjave $q_i(x)$ resnične.
+Definiramo še logično formulo $Q(l,x)=q_1(l,x) \land q_2(l,x) \land \cdots \land q_k(l,x)$, ki je konjunkcija vseh izjav $q_i$.
+Pravimo, da primer $x$ \textbf{pripada} listu $l$, če velja logična formula $Q(l,x)$.
 \end{definicija}
-% TODO: mal premislit definicijo, če se da polepšat. Dodat še simple razlago?
+% TODO: je logična formula pravilen izraz?
 
-Vsak list odločitvenega drevesa opiše neko lastnost podatkovne množice. Množico jasno razdeli na dva dela - na tiste primere, ki listu pripadajo, in tiste, ki mu ne. 
-Primeri, ki listu pripadajo, pa morajo ustrezati množici pogojev, ki sestavljajo pot do lista, in so si tako v nekaterih lastnostih podobni. 
-Porodi se ideja za kodiranje: iz gozda izberemo množico ``dobrih'' listov $l_1, l_2, \ldots, l_c$, za katere želimo, da bi skupaj čim bolje zajeli lastnosti množice podatkov. 
+Vsak list odločitvenega drevesa opiše neko lastnost podatkovne množice. Množico jasno razdeli na dva dela - na tiste primere, ki listu pripadajo, in tiste, ki mu ne.
+Primeri, ki listu pripadajo, pa morajo ustrezati množici pogojev, ki sestavljajo formulo $Q(l,x)$, in so si tako v nekaterih lastnostih podobni. % TODO: uštulit izjavo, da te pogoji tvorijo pot do lista? prebrat še enkrat vse skupej za preverit, če je dovolj jasno
+Porodi se ideja za kodiranje: iz gozda izberemo množico ``dobrih'' listov $l_1, l_2, \ldots, l_c$, za katere želimo, da bi skupaj čim bolje zajeli lastnosti množice podatkov.
+
 % definicija kodirni vektor + kako deluje kodirnik na osnovi tega kodirnega vektorja
 \begin{definicija}
 \label{def-kodiranje}
-	% TODO: je treba poudariti, da niso vsi listi iz gozda? najbrž ne
-	Vektor $v=(l_1,\ldots,l_c)$, katerega elementi so listi dreves naključnega gozda (oz.~njihove oznake), imenujemo \textbf{kodirni vektor}.
-	Kodirnik $\phi_v: \omega \rightarrow \{0,1\}^c$, ki deluje na osnovi kodirnega vektorja $v=(l_1,\ldots, l_c)$, definiramo s predpisom $\psi_v(x) = (b_1, b_2, \ldots, b_c)$, kjer za $i=1,2,\ldots,c$ velja:
+	% TODO: oz. njihove oznake?? je tu nujno??
+	Vektor $\kappa=(l_1,\ldots,l_c)$, katerega elementi so listi dreves naključnega gozda (oz.~njihove oznake), imenujemo \textbf{kodirni vektor}.
+	Kodirnik $\phi_\kappa: \omega \rightarrow \{0,1\}^c$, ki deluje na osnovi kodirnega vektorja $\kappa=(l_1,\ldots, l_c)$, definiramo s predpisom $\psi_\kappa(x) = (b_1, b_2, \ldots, b_c)$, kjer za $i=1,2,\ldots,c$ velja:
 	$$
 	b_i = 
 	\begin{cases}
-	1 &;\ x \text{ pripada listu } l_i \\
+	1 &;\ \text{ če je formula } Q(l_i,x) \text{ resnična} \\
 	0 &; \text{ sicer}\ \ .
 	\end{cases}
 	$$
 \end{definicija}
-Primere torej zakodiramo z dvojiškimi vrednostmi glede na to, katerim listom pripadajo. Dolžina zakodirane predstavitve primerov je $c$, enako kot število listov. 
+Primere torej zakodiramo z dvojiškimi vrednostmi glede na to, katerim listom pripadajo. Dolžina zakodirane predstavitve primerov je $c$, enako kot število listov.
 
 % TODO: preverit algoritem + dodat komentarje
 \begin{algorithm}[h!]
   \caption{Algoritem konstrukcije kodirnega vektorja iz modela naključnega gozda}
   \label{algoritem-find-encoding}
   \raggedright
-  \textbf{Vhod: naključni gozd $m_{rf}$, razsežnost kode $d_{code}$, mera kvalitete listov $quality$, mera podobnosti listov $sim$, meja dovoljene podobnosti $t_{sim}$}  \\
-  \textbf{Izhod: kodirni vektor $K$} % TODO: preimenovat kodirni vektor, morda je lahko v_K ?
+  \textbf{Vhod: naključni gozd $m_{rf}$, razsežnost kode $d_{code}$, mera kvalitete listov $\rho$, mera podobnosti listov $sim$, meja dovoljene podobnosti $t_{sim}$}  \\
+  \textbf{Izhod: kodirni vektor $\kappa$} % TODO: preimenovat kodirni vektor, morda je lahko v_K ?
   \begin{algorithmic}[1]
-	\State $K = [\ ]$
+	\State $\kappa = [\ ]$
 	% we want to init K
 	% alternativa: sproti brišemo drevesa/liste iz množice, da lahko v drugi zanki vzamemo preostanek?
 	\For{$t$ in $m_{rf}$.trees}
 		\For{$leaf$ in $t$.leaves()}
-			\If{length($K$) $< d_{code}$}
-				\State $K$.append($leaf$)
+			\If{length($\kappa$) $< d_{code}$}
+				\State $\kappa$.append($leaf$)
 			\EndIf
 		\EndFor
 	\EndFor
 	\For{$t$ in $m_{rf}$.trees}
 		\For{$l_{new}$ in $t$.leaves()}
-			\If{$l_{new} \notin K $}
-				\State $K$.sort\_by\_quality()
-				\State $l_{last}$ = $K$.pop()
+			\If{$l_{new} \notin \kappa $}
+				\State $\kappa$.sort\_by\_quality()
+				\State $l_{last}$ = $\kappa$.pop()
 				% TODO: premislit ali je boljši način za reševat podobnost
-				\If{$quality(l_{new}) > quality(l_{last})$}
-					\If{$\forall l \in K : sim(l, l_{new}) < t_{sim}$}
-						\State $K$.append$(l_{new}$)
+				\If{$\rho(l_{new}) > \rho(l_{last})$}
+					\If{$\forall l \in \kappa : sim(l, l_{new}) < t_{sim}$}
+						\State $\kappa$.append$(l_{new}$)
 					\Else
-						\State $K$.append$(l_{last}$)
+						\State $\kappa$.append$(l_{last}$)
 					\EndIf
 				\EndIf
 			\EndIf
 		\EndFor
 	\EndFor	
-	\State return $K$
+	\State return $\kappa$
   \end{algorithmic}
 \end{algorithm}
 
 Z algoritmom \ref{algoritem-find-encoding} konstruiramo kodirni vektor, ki ga nato uporabimo v algoritmu \ref{algoritem-encode}, 
 da dobimo kodirnik kot je opisan v definiciji \ref{def-kodiranje}.
-V algoritmu \ref{algoritem-find-encoding} želimo konstruirati dober kodirni vektor $K$. Postopek poteka tako, da pregledamo vsa drevesa v gozdu. 
+V algoritmu \ref{algoritem-find-encoding} želimo konstruirati dober kodirni vektor $\kappa$. Postopek poteka tako, da pregledamo vsa drevesa v gozdu. 
 Pri vsakem drevesu pregledamo vse liste in za posamezen list $l_{new}$ storimo sledeče: 
 če kodirni vektor še ne vsebuje dovolj elementov, list dodamo med kandidate za kodirni vektor, sicer preverimo druge kriterije, da odločimo, ali je $l_{new}$ dober kandidat za kodirni vektor. 
-Z mero kvalitete $quality$ primerjamo, ali je $l_{new}$ bolj kvaliteten kandidat od najslabšega trenutno vključenega v kodirni vektor. 
-Če je $l_{new}$ bolj kvaliteten kot vsaj en izmed trenutnih kandidatov in ni preveč podoben ostalim že vključenim kandidatom kodirnega vektorja, ga dodamo v kodirni vektor $K$ namesto najslabšega kandidata.
+Z mero kvalitete $\rho$ primerjamo, ali je $l_{new}$ bolj kvaliteten kandidat od najslabšega trenutno vključenega v kodirni vektor. 
+Če je $l_{new}$ bolj kvaliteten kot vsaj en izmed trenutnih kandidatov in ni preveč podoben ostalim že vključenim kandidatom kodirnega vektorja, ga dodamo v kodirni vektor $\kappa$ namesto najslabšega kandidata.
 
 % Kako pa določimo, kateri listi so "dobri"? Glede na mešanico kriterijev: število pokritih primerov, lokalno točnost, podobnost med listi - ne želimo, da se preveč prekrivajo
 
 % Splošen razmislek o dobrih kandidatih: podobnost, quality itd.
-Pojavi se ključno vprašanje, kako določimo, kateri listi so dobri kandidati. Ne želimo, da bi si bili kandidati v kodirnem vektorju $K$ med seboj preveč podobni. 
+Pojavi se ključno vprašanje, kako določimo, kateri listi so dobri kandidati. Ne želimo, da bi si bili kandidati v kodirnem vektorju $\kappa$ med seboj preveč podobni. 
 Če dva lista v kodirnem vektorju opišeta podobno (ali enako) lastnost, bi lahko enega izmed njiju odstranili iz nabora listov za kodirni vektor brez škode, in tako dobili kodirni vektor manjše razsežnosti. 
 Ker je razsežnost kodirnega vektorja fiksirana, pa v primeru, da sta si dva lista med seboj preveč podobna, enega raje zamenjamo z nekim drugim listom, tudi če je nadomestni list glede na ostala merila slabši.
 Zato vpeljemo mero podobnosti $sim$ in podobnost listov preverjamo v algoritmu preden naredimo zamenjavo. Če je nov kandidat preveč podoben nekemu že vključenemu, ga ne dodamo.
@@ -973,63 +976,59 @@ Vpeljati moramo pa tudi neko mero kvalitete listov, ki za posamezen list neodvis
 % opis mere podobnosti
 Mera podobnosti $sim$ liste primerja glede na primere, ki jim pripadajo. 
 Če listoma $l_1$ in $l_2$ iz množice učnih primerov pripada enaka podmnožica primerov, lahko sklepamo, da lista opišeta zelo podobno ali celo enako lastnost.
-Definiramo preslikavo $\sigma_{\mathit{pripadnost}}: V(G) \rightarrow \mathcal{P}(V(G))$, s katero list predstavimo z množico primerov, ki mu pripada.
-% ===================== CUT
-Preslikava list $l$ preslika v podmnožico $\sigma_{\mathit{pripadnost}}(l) = \{v_1,v_2\ldots,v_{n_l}\}$, kjer $n_l$ označuje število primerov, ki pripadajo listu $l$.
+Definiramo preslikavo $\sigma_{\mathit{pripadnost}}: V(G) \rightarrow \mathcal{P}(S)$, s katero list predstavimo z množico primerov, ki mu pripadajo.
+Preslikava list $l$ preslika v podmnožico $\sigma_{\mathit{pripadnost}}(l) = \{x\ | formula Q(l,x) je resnična \}$.
 Mero podobnosti definiramo s sledečim predpisom:
 \[
 	sim(l_1, l_2) = \frac{|\sigma_{pripadnost}(l_1) \cap \sigma_{pripadnost}(l_2)|}{|\sigma_{pripadnost}(l_1) \cup \sigma_{pripadnost}(l_2)|}.
 \]
-% TODO: preveriti, ali v skripti to res deluje tako.
-Kot mero torej vzamemo normirano razmerje med številom primerov, ki pripadajo obema listoma hkrati, in številom vseh primerov, ki pripadajo enemu ali drugemu listu.
-% ===================== END CUT
-Preslikava list $l$ preslika v vektor $\sigma_{pripadnost}(l) = (b_1,\ldots, b_n$), kjer so za $i=1,\ldots,n$ elementi $b_i$ določeni s sledečim predpisom:
-$$
-b_i =
-\begin{cases}
-	1 ;& \text{če $x_i \in X$ pripada listu $l$} \\
-	0 ;& \text{sicer}
-\end{cases}
-$$
-Mero podobnosti definiramo s sledečim predpisom:
-$$
-sim(l_1, l_2) = \frac{\sigma_{pripadnost}(l_1) \cdot \sigma_{pripadnost}(l_2)}{max(sum(\sigma_{pripadnost}(l_1)), sum(\sigma_{pripadnost}(l_2)))},
-$$
-kjer operacija $\cdot$ označuje skalarni produkt, operacija $sum$ pa označuje vsoto elementov vektorja.
-Kot mero torej vzamemo normirano razmerje med številom primerov, ki pripadajo obema listoma hkrati, in številom vseh primerov, ki pripadajo enemu ali drugemu listu.
+% TODO: preveriti, ali v skripti mera podobnosti res deluje tako. najbrž ne -> fix it!!!
+Kot mero torej vzamemo razmerje med številom primerov, ki pripadajo obema listoma hkrati, in številom vseh primerov, ki pripadajo enemu ali drugemu listu.
 
 % opis mere kvalitete
-Definirati moramo še mero kvalitete lista $quality$. Listi, ki vsebujejo večji delež primerov opišejo pogostejšo lastnost, ki jo lahko zato razumemo kot bolj pomembno. 
-Drug podatek, ki ga v listih lahko opazujemo je lokalna natančnost napovedi - kako natančna je napoved, ki jo devo priredi primerom, ki pripadajo listu. 
-Sedaj, ko smo opisali možni lastnosti za določanje kvalitete kandidatov, lahko mero $quality$ definiramo na dva načina. 
-Bodisi izberemo eno izmed teh dveh meril in ga uporabimo kot mero kvalitete, bodisi združimo obe vrednosti v eno mero, ki upamo, da bo bolj uravnotežena. 
-V prvotni različici algoritma smo za mero kvalitete uporabili kar delež listu pripadajočih primerov.
+% TODO: uskladiti oznake in poimenovanja: ang vs. slo, dolžino imen itd.
+Definirati moramo še mero kvalitete lista $\rho$. 
+Listi, ki vsebujejo večji delež primerov opišejo pogostejšo lastnost, ki jo lahko zato razumemo kot bolj pomembno. 
+Drug podatek, ki ga v listih lahko opazujemo, je lokalna natančnost napovedi $\mathit{accuracy}$.
+Pove nam, kako natančna je napoved, ki jo drevo priredi primerom, ki pripadajo listu.
+Mero kvalitete tako v splošnem definiramo kot linearno kombinacijo teh dveh vrednosti:
+\[
+\rho_{\gamma}(l) = \gamma \frac{|\sigma_{\mathit{pripadnost}}(l)|}{|S|} + (1-\gamma) \mathit{accuracy}(l)
+\]
+Mera kvalitete je odvisna od parametra $\gamma \in [0,1]$.
+Če privzamemo, da je vrednost $\gamma$ enaka $1$, je mera kvalitete $\rho_1(l)$ enaka deležu listu $l$ pripadajočih primerov iz učne množice.
+Analogno lahko privzamemo, da je vrednost $\gamma$ enaka $0$, v tem primeru, pa je mera kvalitete $\rho_0(l)$ enaka lokalni natančnosti $\mathit{accuracy}(l)$ v listu $l$.
+Zaenkrat bomo privzeli, da je mera kvalitete v besedilu uporabljena mera kvalitete s parametrom $\gamma=0.5$, saj želimo, da se upoštevata oba člena.
+V poglavju o vrednotenju delovanja samokodirnika bomo preverili, kako dobro deluje samokodirnik pri različnih nastavitvah parametra $\gamma$,
+med drugim tudi zato, da ugotovimo, če v splošnem obstaja najboljša nastavitev, ki bi jo nato nastavili kot privzeto.
 
 % TODO: pozorno prebrati ta razdelek - da niso vključeni popravki pokvaril poteka besedila
 Opisali smo postopek s katerim določimo kodirni vektor. Zapisati pa moramo še postopek delovanja kodirnika na osnovi tega kodiranja.
-Algoritem \ref{algoritem-encode} opiše delovanje kodirnika kot je definiran v definiciji \ref{def-kodiranje}. Kodiranje, ki ga konstruiramo z algoritmom \ref{algoritem-find-encoding} mu podamo kot argument.
-Opiše torej, kako kodirnik $\phi_K$, ki deluje na osnovi kodiranja $K$, zakodira podatkovno množico $S$. Z zanko gremo čez podatkovno množico in vsakemu primeru priredimo vektor vrednosti, kot je določen v definiciji \ref{def-kodiranje}.
+Algoritem \ref{algoritem-encode} opiše delovanje kodirnika kot je definiran v definiciji \ref{def-kodiranje}. 
+Kodirni vektor, ki ga konstruiramo z algoritmom \ref{algoritem-find-encoding} mu podamo kot argument.
+Opiše torej, kako kodirnik $\phi_K$, ki deluje na osnovi kodirnega vektorja $\kappa$, zakodira podatkovno množico $S$. 
+Z zanko gremo čez podatkovno množico in vsakemu primeru priredimo vektor vrednosti, kot je določen v definiciji \ref{def-kodiranje}.
 Za vsak primer iz množice $S$ gremo z zanko čez vse elemente kodiranja. 
-Če primer pripada $i$-temu listu v kodiranju, za $i$-ti člen zakodirane predstavitve določimo $1$, sicer za $i$-ti člen zakodirane predstavitve določimo $0$.
+Če primer pripada $i$-temu listu kodirnega vektorja, za $i$-ti člen zakodirane predstavitve določimo $1$, sicer za $i$-ti člen zakodirane predstavitve določimo $0$.
 Tako zakodirane primere združimo v zakodirano podatkovno množico $S'$, ki jo algoritem vrne.
 
 % algoritem delovanja kodirnika
 \begin{algorithm}[ht]
-  \caption{Algoritem kodiranja množice podatkov z danim kodiranjem}
+  \caption{Algoritem kodiranja primera z danim kodiranjem}
   \label{algoritem-encode}
   \raggedright
-  \textbf{Vhod: primer $v$ iz podatkovne množice, kodirani vektor $K$}  \\
-  \textbf{Izhod: zakodiran primer $v'$} 
+  \textbf{Vhod: primer $x$ iz podatkovne množice, kodirni vektor $\kappa$}  \\
+  \textbf{Izhod: zakodiran primer $x'$} 
   \begin{algorithmic}[1]
-	\State $v'$ $\gets [\ ]$
-	\For{leaf in $K$} % TODO: lepši zapis
-		\If{$v \in$ leaf}
-			\State $v'$.append($1$)
+	\State $x'$ $\gets [\ ]$
+	\For{leaf in $\kappa$} % TODO: lepši zapis
+		\If{$x \in$ leaf}
+			\State $x'$.append($1$)
 		\Else
-			\State $v'$.append($0$)
+			\State $x'$.append($0$)
 		\EndIf
 	\EndFor
-	\State return $v'$
+	\State return $x'$
   \end{algorithmic}
 \end{algorithm}
 
@@ -1042,101 +1041,45 @@ Da bo določen celoten samokodirnik, moramo konstruirati in opisati še dekodirn
 
 \subsection{Dekodirnik}
 
-V tem razdelku se bomo posvetili konstrukciji dekodirnika.
-
+% bljeh, TODO: spolirat definicijo.
 \begin{definicija}
 	\label{def-dekodiranje}
-	Dekodirnik $\phi: \{0,1\}^c \rightarrow \omega$ je preslikava, ki preslika zakodiran primer nazaj v element množice $\omega$.
+	Dekodirnik $\theta: \{0,1\}^c \rightarrow \omega$ je preslikava, ki preslika zakodiran primer nazaj v element množice $\omega$.
 \end{definicija}
+Če je dekodirnik nenatančen, ne moremo biti prepričani, da smo izbrano kodiranje dobro ovrednotili, saj so napake lahko krivda dekodirnika in ne pomanjkljivosti kodiranja.
+Zato je naš cilj konstruirati čim bolj natančen dekodirnik, ki zakodiran primer preslika v dober približek njegove prvotne vrednosti.
+Pri konstrukciji se bomo cel čas opirali na kodirni vektor, katerega elementi so listi, ki opišejo kodiranje.
+Na razpolago imamo dva glavna podatka - poti do listov v kodirnem vektorju, ki vsebujejo pogoje o vrednosti primerov, in v listih shranjene napovedi. 
 
-Če je dekodirnik nenatančen, ne moremo biti prepričani, da smo izbrano kodiranje dobro ovrednotili, saj so napake lahko krivda dekodirnika in ne pomanjkljivosti kodiranja samega.
-Zaradi tega je naš cilj konstruirati čim bolj natančen dekodirnik, ki preslika zakodiran primer v dober približek njegove prvotne vrednosti.
-V ta namen želimo izkoristiti vse podatke o zakodiranem primeru, ki jih poznamo.
-Pri tem pa si moramo pomagati predvsem s kodirnim vektorjem, kjer so shranjeni podatki o kodiranju.
+% napeljemo na SAT formulacijo
+Najprej se bomo posvetili temu, kaj lahko o vrednosti prvotnega primera ugotovimo iz poti do listov, ki jim primer pripada.
+Kot smo povedali v definiciji \ref{def-pripadnost-listu}, velja, da primer $x$ iz podatkovne množice pripada listu $l$ natanko tedaj, ko velja pogoj $Q(l,x)$.
+Naj bo $\kappa=\{l_1, l_2, \ldots, l_c\}$ kodirni vektor.
+Za vsak $x \in \omega$ za nek $j \in \{1,2,\ldots,c\}$ velja bodisi $Q(l_j,x)$ bodisi $\lnot Q(l_j,x)$.
+Z upoštevanjem vrednosti zakodiranega primera, ki je argument podan dekodirniku, lahko ugotovimo, katera izmed teh dveh trditev je resnična.
+Tako dobimo nabor $c$ logičnih izjav, ki veljajo za primer $x$.
+Za primer $x=(x_1,\ldots,x_p)$ posledično velja tudi konjunkcija teh logičnih izjav, ki jo označimo z $\Delta_{l_1,\ldots,l_c}(x_1,\ldots,x_p)$.
 
+% TODO: reread in urejanje
+% mal spravit tole v red
+Želimo poiskati nabor vrednosti, za katerega bo veljala formula $\Delta_{l_1,\ldots,l_c}(x_1,\ldots,x_p)$, saj sklepamo, da bo dobra aproksimacija primera $x$.
+Izkaže se, da v logiki obstaja znan problem, ki je formuliran na podoben način.
 
-% OLD ----------------------------------------
-% Povemo katere podatke imamo glede kodirnega vektorja - napeljemo na SAT formulacijo
-Elementi kodirnega vektorja so listi, primeri pa lahko tem listom pripadajo kot smo defi
-
-Pri primerih, ki ne pripadajo nobenemu listu kodiranja, pa moramo napoved določiti na drug način.
-Primere podatkovne množice lahko torej razdelimo na tiste, ki pripadajo nekemu elementu kodiranja in tiste, ki ne pripadajo nobenemu.
-
-% ================================ STARO POGLAVJE - work in progress ================================ %
-
-Želimo poiskati dekodirnik, ki bo čim bolje uporabil vse podatke o kodiranju, ki jih ima na razpolago, in vrnil čim bolj točno napoved.
-Če je dekodirnik nenatančen, ne moremo biti prepričani, da smo izbrano kodiranje dobro ovrednotili, saj so napake lahko krivda dekodirnika in ne pomanjkljivosti kodiranja samega.
-Najprej bomo primere razdelili v dve skupini glede na to, koliko podatkov imamo o njih, nato pa bomo podrobno opisali postopek dekodiranja v vsakem primeru.
-
-% TODO: umestit definicijo v tekst
+% definicija SAT problema
 \begin{definicija}
-	% \label{def-dekodiranje}
-		% TODO: fix
-		% NOTE: tole bo bolj komplicirano kot se zdi
-		% def. preslika zakodirane primere pač v nekaj. Je sploh treba omenit kodirni vektor???
-		% Če omenimo, da deluje na osnovi kodirnega vektorja, kako opišemo dekodiran primer?
-		% Zahtevamo: če primer pripada nekemu listu iz kodirnega vektorja, pol je napoved narejena z upoštevanjem vsaj enega primernega lista...?
-
-		% alternativno: bi napisal definicijo na osnovi SAT formulacije???
-		% ================================================ %
-		Dekodirnik $\phi: \{0,1\}^c \rightarrow \omega$ je preslikava iz množice zakodiranih primerov v prvotno podatkovno množico $\omega$.
-
-		% TODO: probat napisat, da deluje na osnovi kodirnega vektorja v
-		% ne moremo napisat enega pogoja, ki bi ustrezal SAT in tudi uporabi shranjenih napovedi...
-		% če ne bo šlo z uredu formulacijo, se lahko naše želje omeni v okoliškem tekstu
-
-		% ================================================ %
-		% Dekodirnik $\phi_v: \{0,1\}^c \rightarrow \omega$, ki deluje na osnovi kodirnega vektorja $v=(l_1,\ldots, l_c)$, 
-		% definiramo s predpisom $\psi_v(x) = (b_1, b_2, \ldots, b_d)$, kjer za $i=1,2,\ldots,d$ velja:
-		% $$
-		% b_i = 
-		% \begin{cases}
-		% 1 &;\ x \text{ pripada listu } l_i \\
-		% 0 &; \text{ sicer}\ \ .
-		% \end{cases}
-		% $$
+	Naj bo $\phi(x_1,\ldots,x_k)$ logična formula.
+	Če obstaja tak vektor logičnih vrednosti $(v_1, \ldots, v_k)$, da je izraz $\phi(v_1, \ldots, v_k)$ resničen,
+	pravimo, da je formula $\phi$ \textbf{zadovoljiva} (ang.~satisfiable).
+	Problem, ki se ukvarja s tem, ali je logična formula zadovoljiva, imenujemo SAT problem. % TODO: citat
 \end{definicija}
+% z rešitvijo SAT problema si lahko pomagamo, ampak je slow as FUCK.
+Če najdemo vektor logičnih vrednosti, pri katerem logična formula drži, smo pokazali, da je formula zadovoljiva.
+Ponavadi se SAT problem rešuje z iskanjem takega vektorja in tak algoritem lahko izkoristimo za rekonstrukcijo primera $x$ iz logične formule $\Delta_{l_1,\ldots,l_c}(x_1,\ldots,x_p)$.
+V splošnem je reševanje SAT problema žal zelo neučinkovito - problem je NP-poln (TODO:citat).
+Pri nekaterih podproblemih pa se da SAT problem reševati mnogo hitreje. 
+V ta namen bomo uvedli posebno vrsto logičnih formul.
 
-% Povemo katere podatke imamo glede kodiranja. Želimo uporabiti napovedi, ki jih drevesa pripišejo posameznim listom, iz katerih smo sestavili kodiranje.
-Elementi kodirnega vektorja so listi in za vsak list lahko ugotovimo napoved, ki jo drevo, v katerem je vsebovan, priredi primerom, ki listu pripadajo.
-To lahko izkoristimo pri dekodiranju primerov, ki pripadajo vsaj enemu listu kodiranja. 
-Njihovo rekonstruirano vrednost lahko določimo kot napoved primernega lista.
-Pri primerih, ki ne pripadajo nobenemu listu kodiranja, pa moramo napoved določiti na drug način.
-Primere podatkovne množice lahko torej razdelimo na tiste, ki pripadajo nekemu elementu kodiranja in tiste, ki ne pripadajo nobenemu.
-
-% Ideja, kaj bomo naredil z primeri, ki ne pripadajo nobenemu listu
-Slednjim primerom bi lahko kot napoved priredili kar naključni vektor, vendar želimo izkoristiti podatke, ki jih o tem primeru iz kodiranja lahko pridobimo.
-Po definiciji \ref{def-pripadnost-listu} vemo, da primer $x$ pripada listu $l$, če za $i=1,\ldots,k$ veljajo izjave $q_i(x)$. 
-To velja natanko tedaj, ko velja konjunkcija $q_1(x)\land \ldots \land q_k(x)$. 
-Če primer $x$ listu $l$ ne pripada, prejšnja izjava ne velja, oz.~velja njeno zanikanje $\lnot q_1(x) \lor \ldots \lor \lnot q_k(x)$.
-Če primer $x$ ne pripada nobenemu izmed listov kodiranja, vemo, da mora zanj veljati množica disjunkcij takšne oblike.
-Tako smo določili množico pogojev, ki jih je prvotni vektor vrednosti zagotovo izpolnjeval.
-Ta podatek lahko izkoristimo tako, da izločimo napovedi, ki množici pogojev ne ustrezajo, saj vemo, da ne morejo biti točne.
-
-% TODO: razmislek: a bi bilo treba uporabljat bolj korektne izraze za pripadnost: primere, katerih prvotna vrednost pripada nekemu listu
-% Opis, kaj naredimo z vsako skupino
-S tem razmislekom smo se odločili, da primere iz podatkovne množice delimo na dve skupini in z njimi storimo sledeče:
-\begin{enumerate}
-	\item Za primere, ki pripadajo vsaj enemu listu kodiranja, 
-	uporabimo napoved, ki jo drevo, v katerem se ta list nahaja, priredi primerom, ki pripadajo listu.
-	Če primer pripada več kot enemu listu, imamo na izbiro več napovedi.
-	Odločimo se lahko za eno izmed njih, ali pa jih uporabimo več, npr.\ 
-	tako, da za rekonstruirano vrednost primera izberemo povprečno vrednost vseh primernih napovedi.
-
-	\item Za primere, ki ne pripadajo nobenemu listu kodiranja, 
-	razberemo množico logičnih pogojev, ki jih je prvotni vektor izpolnjeval, iz poti, ki vodijo do listov kodiranja.
-	Nato poiščemo vektor vrednosti, ki ustreza tej množici pogojev, in ga izberemo kot napoved.
-\end{enumerate}
-
-% NOTE: 3 načini: simple, averaging, fixed values.
-Določiti moramo še postopek, s katerim bomo poiskali primer, ki izpolnjuje množico pogojev.
-Izkaže se, da je to znan problem v logiki. Uvedli bomo nekaj osnovnih logičnih definicij, 
-da bomo problem lahko formulirali v primerni obliki in se sklicali na algoritem \emph{DPLL}, s katerim lahko problem rešimo.
-
-% Kratek opis sat-problema in CNF. Za reševanje uporabimo solver: TODO: citat ali zapis algoritma?
-% TODO: preveriti izraze v definicijah: iz kakšnega zvezka o logiki
-% TODO: dodati kratke primere?
-
+% vpeljemo KNO fromule
 \begin{definicija}
 	\textbf{Literal} je logična spremenljivka ali negacija logične spremenljivke.
 \end{definicija}
@@ -1155,40 +1098,90 @@ da bomo problem lahko formulirali v primerni obliki in se sklicali na algoritem 
 	Logična formula $(x \lor \lnot y) \land (\lnot x \lor y \lor \lnot z) \land (x \lor z)$ je v konjunktivni normalni obliki.
 \end{primer}
 
-\begin{definicija}
-	Naj bo $\phi(x_1,\ldots,x_k)$ logična formula.
-	Če obstaja tak vektor logičnih vrednosti $(v_1, \ldots, v_k)$, da je izraz $\phi(v_1, \ldots, v_k)$ resničen,
-	pravimo, da je formula $\phi$ \textbf{zadovoljiva} (ang.~satisfiable).
-	Problem, ki se ukvarja s tem, ali je logična formula zadovoljiva, imenujemo SAT problem.
-\end{definicija}
+% SAT problem za KNO formule se da reševati uredu z DPLL - torej želimo KNO formule. Premislimo, da je naša formula v KNO
+Za KNO formule lahko SAT problem rešujemo z DPLL (Davis--\-Putnam--\-Logemann--\-Loveland) algoritmom (TODO: sklic), kar je mnogo bolj učinkovito od reševanja v splošnem. %TODO: dodat break v ime DPLL
+Videli bomo, da je $\Delta_{l_1,\ldots,l_c}(x_1,\ldots,x_p)$ KNO formula in lahko tako na njej uporabimo DPLL algoritem.
+Povedali smo, da je $\Delta_{l_1,\ldots,l_c}$ konjunkcija $c$ izjav, ki so za $j \in \{1,2,\ldots,c\}$ bodisi $Q(l_j,x)$ bodisi $\lnot Q(l_j,x)$.
+Pokazati moramo, da so izjave vsebovane v konjunkciji klavzule ali pa KNO formule - saj je v tem primeru tudi $\Delta_{l_1,\ldots,l_c}$ KNO formula.
+Spomnimo se definicije \ref{def-pripadnost-listu} - izraz $Q(l_j,x)$ je konjunkcija izrazov $q_i(l_j,x)$.
+%
+\begin{opomba}
+	Izraze $q_i(l_j,x)$ lahko razumemo kot literale.
+	Definirani so kot $x_{f_{v_i}} > t_{v_i}$ ali $x_{f_{v_i}} \leq t_{v_i}$.
+	Definiramo logično spremenljivko $r_{f_{v_i}} = x_{f_{v_i}} > t_{v_i}$ in opazimo, 
+	da je izraz $q_i(l_j,x)$ enak tej logični spremenljivki ali njeni negaciji, torej je literal.
+\end{opomba}
+% TODO: premislit ali je res RES pravilno implementirano tole
+% TODO: premislit, ali se da to povedati bolj preprosto.
+% 
+Izraz $Q(l_j,x)$ je torej konjunkcija literalov.
+Posamezni literali pa so klavzule, saj so disjunkcija enega literala, in zato je izraz $Q(l_j,x)$ tudi konjunkcija klavzul.
+To je natanko definicija KNO formule in izraz oblike $Q(l_j,x)$ je torej KNO formula.
 
-Obstajajo standardne metode za poiskati rešitev SAT problema. Ena izmed takih metod je DPLL (Davis--Putnam--Logemann--Loveland) algoritem, ki ga bomo uporabili tudi mi. (TODO: citat!)
-DPLL algoritem vrne logično vrednost $True$, če je formula zadovoljiva, sicer pa vrne $False$. 
-Če je formula zadovoljiva sicer v postopku odkrije množico pogojev, katere morajo spremenljivke izpolnjevati, da formula velja.
-Uporabili bomo prirejen DPLL algoritem $DPLL\_example$, ki v primeru, če je formula zadovoljiva, vrne vektor vrednosti, pri katerih formula velja. 
-% uporabimo funkcijo find\_negation\_candidate, ki jo ovijemo okoli DPLL algoritma in vrne vektor vrednosti, pri katerih formula velja
-% maybe preimenovanje: DPLL\_example -> DPLL\_wrapper al neki
-Če tak vektor ne obstaja, mora vsak primer podatkovne množice pripadati vsaj enemu listu in tako ne bomo nikoli rabili uporabiti algoritma DPLL\_example. % TODO: premisliti, razložiti malo bolj temeljito
+% obravnava zanikanih členov
+Pokazati moramo še to, da je tudi izraz oblike $\lnot Q(l,x)$ KNO formula ali klavzula.
+Negacija konjunkcije $q_1(l,x) \land q_2(l,x) \land \ldots \land q_k(l,x)$ je disjunkcija $\lnot q_1(l,x) \lor \lnot q_2(l,x) \lor \ldots \lor \lnot q_k(l,x)$.
+Če literal zanikamo, še vedno ostane literal, zato z negacijo konjunkcije literalov dobimo disjunkcijo literalov, oz. klavzulo.
+Ugotovili smo, da so vsi izrazi v $\Delta_{l_1,\ldots,l_c}$ KNO formule ali klavzule in je zato tudi konjunkcija teh izrazov KNO formula.
+Formulo $\Delta_{l_1,\ldots,l_c}(x_1,\ldots,x_p)$ lahko torej podamo DPLL algoritmu, da najdemo vrednosti argumentov, pri katerih formula velja.
+
+% Rešujemo torej DPLL, imamo pa še en podatek - shranjene napovedi, ki ga definitivno želimo izkoristiti (celo mera kvalitete je zasnovana glede na to)
+Nismo še upoštevali podatka, da odločitveno drevo primerom, ki pripadajo določenemu listu, napove vrednost.
+Če za liste kodirnega vektorja pripadajočim primerom napovedane vrednosti shranimo, lahko pri konstrukciji dekodirnika tudi te podatke preprosto uporabimo.
+Pričakujemo, da so shranjene napovedi sorazmerno natančne, saj je natančnost napovedi glavni cilj pri izgradnji odločitvenega drevesa.
+Premisliti želimo prednosti in slabosti uporabe shranjenih napovedi v primerjavi z DPLL algoritmom, zanima pa nas tudi, kako bi obe informaciji izkoristili v postopku konstrukcije dekodirnika.
+
+% ni nujno, da iz DPLL-a dobimo vse vrednosti. 
+% Če je več možnih vektorjev, ki zadovoljijo formulo podano DPLL algoritmu, ni dobrega zagotovila za natančnost napačnega vektorja
+% hitreje je uporabiti shranjene napovedi
+% za nekatere primere nimamo shranjenih napovedi
+% izkoristimo lahko sort of kombinacijo: napoved + pot do listov, katerim primer pripada.
+Algoritem DPLL vrne en možen nabor vrednosti, pri katerem velja logična formula, ponavadi pa to ni edina možna rešitev.
+Nimamo zagotovila, da je rešitev DPLL algoritma zares bližje prvotni vrednosti primera kot shranjena napoved, čeprav shranjena napoved morda ne bi bila veljavna rešitev algoritma.
+Pri reševanju SAT problema se lahko zgodi, da je vrednost fiksirana zgolj za nekaj spremenljivk - če želimo vrniti primer, je treba dopolniti tudi vrednosti ostalih spremenljivk, npr. z naključnim izbiranjem.
+Pri uporabi shranjenih napovedi pa dobimo napoved za vrednosti vseh spremenljivk.
+Uporaba shranjene napovedi je tudi hitrejša, saj zahteva samo to, da iz zakodiranega primera razberemo, kateremu listu pripada in nato klic shranjene napovedi tega lista.
+Problem z uporabo shranjene napovedi pa nastopi pri primerih, ki ne pripadajo nobenemu listu iz kodirnega vektorja.
+
+% TODO: OPOMBA!!! - mi uporabljamo faking prirejen DPLL algoritem, moramo ga poimenovat, ni samo basic verzija
+
+% dobimo jasno delitev primerov: tiste, ki pripadajo kakšnemu listu in tiste, ki nobenemu. To utemeljimo
+Če upoštevamo ta razmislek, je smiselno primere razdeliti na dve skupini in pri vsaki ravnati drugače.
+\begin{enumerate} % TODO: popravit
+	\item Za primere, ki ne pripadajo nobenemu listu iz kodirnega vektorja,
+	uporabimo logično formulo $\Delta_{l_1,\ldots,l_c}$, za katero vemo, da je veljala za prvotni primer.
+	S pomočjo prilagojenega postopka DPLL algoritma poiščemo primer, pri katerem te formula velja, in ga izberemo kot vektor, ki ga bo vrnil dekodirnik.
+
+	\item Za primere, ki pripadajo vsaj enemu listu iz kodirnega vektorja, uporabimo shranjeno napoved primernega lista.
+	Uporabiti DPLL algoritem hkrati bi bilo zamudno in pričakujemo, da s tem rezultata ne bi bistveno izboljšali, vseeno pa lahko uporabimo podatke o poteh do listov, katerim primer pripada.
+	Če primer listu $l_j$ iz kodirnega vektorja, vemo, da za primer velja logična formula $Q(l_j,x) = q_1(l,x) \land q_2(l,x) \land \cdots \land q_k(l,x)$. % TODO: so v takem primeru \ldots ali \cdots???
+	Če upoštevamo izraze $q_i(l,x)$, lahko za rekonstruirani primer fiksiramo vrednosti $k$ spremenljivk.
+	Za te vrednosti vemo, da so pravilne, saj so podatki o pripadnosti listom bili določeni na osnovi prvotnega primera.
+	Tako lahko z upoštevanjem dejstva, katerim listom primer pripada, določimo vrednosti nekaterih spremenljivk, za določiti vrednosti preostalih spremenljivk pa uporabimo shranjene napovedi.
+	Ker lahko en primer pripada več listom kodirnega vektorja, lahko zanj velja več shranjenih pripovedi.
+	V tem primeru se lahko odločimo, ali napovedi združimo in uporabimo njihovo povprečje, ali uporabimo zgolj eno.
+	% Privzeto delovanje dekodirnika je, da se uporabi zgolj ena napoved - tista, ki je shranjena v zadnjem primernem listu, ki ga algoritem najde. % TODO: je treba tukej napisat, da povprečje ni dalo izboljšave? Je to primerno mesto za to napisat?
+\end{enumerate}
 
 V algoritmu \ref{algoritem-decode} je zapisan postopek rekonstrukcije zakodirane podatkovne množice.
-Algoritem pregleda vse primere v množici in sledi idejam za dekodiranje, ki smo jih opisali.
-Za primer preveri, ali pripada kateremu listu kodiranja $K$, in shrani vse liste, ki jim primer pripada, v seznam prediction\_candidates.
+Algoritem pregleda vse primere v množici in sledi načrtu za dekodiranje, ki smo jih opisali.
+Za primer preveri, ali pripada kateremu listu kodirnega vektorja $\kappa$, in shrani vse liste, ki jim primer pripada, v seznam prediction\_candidates.
 Če pripada vsaj enemu listu, tj.~seznam prediction\_candidates ni prazen, se rekonstrukcijo prvotne vrednosti primera določi z metodo $select\_prediction$, ki združi primerne napovedi.
-Če primer ne pripada nobenemu listu, algoritem pretvori poti do listov kodiranja v logične izjave in jih združi v formulo.
-Nato pa algoritmu $DPLL\_example$ poda to formulo in rekonstrukcijo $\hat{x}$ določi kot vektor, ki ga vrne $DPLL\_example$ algoritem.
+Če primer ne pripada nobenemu listu, algoritem pretvori poti do listov kodirnega vektorja v logične izjave in jih združi v formulo $\Delta_{l_1,\ldots,l_c}$.
+Nato pa algoritmu $DPLL\_example$ poda to formulo in rekonstrukcijo $\hat{x}$ določi kot vektor, ki ga vrne $DPLL\_example$ algoritem. % TODO: popravit tale stavek
 % oh boi OH BOI... te oznake se z implementacijo sploh ne poklapajo - za preverit - TODO
 
 \begin{algorithm}[h!]
-	\caption{Algoritem dekodiranja zakodirane podatkovne množice}
+	\caption{Algoritem dekodiranja zakodiranega primera}
 	\label{algoritem-decode}
 	\raggedright
-	\textbf{Vhod: zakodiran primer $v'$, kodirani vektor $K$, razsežnost kodiranja $c$, metoda združevanja napovedi $select\_prediction$}  \\
-	\textbf{Izhod: rekonstruirana primer $\hat{v}$} 
+	\textbf{Vhod: zakodiran primer $x'$, kodirni vektor $\kappa$, razsežnost kodiranja $c$, metoda združevanja napovedi $select\_prediction$}  \\
+	\textbf{Izhod: rekonstruirana primer $\hat{x}$} 
 	\begin{algorithmic}[1]
 		\For{$j = 1,\ldots,c$}
 			\State prediction\_candidates $\gets$ [ ]
-			\If{$v[j] = 1$}
-				\State prediction\_candidates.append($K$[$j$])
+			\If{$x[j] = 1$}
+				\State prediction\_candidates.append($\kappa$[$j$])
 			\EndIf
 		\EndFor
 		\If{length(prediction\_candidates) > $0$}
@@ -1196,16 +1189,16 @@ Nato pa algoritmu $DPLL\_example$ poda to formulo in rekonstrukcijo $\hat{x}$ do
 			\For{leaf in prediction\_candidates}
 				\State valid\_predictions.append(leaf.prediction())
 			\EndFor
-			\State $\hat{v} \gets select\_prediction$(valid\_predictions) 
+			\State $\hat{x} \gets select\_prediction$(valid\_predictions) 
 		\Else
 			\State formula = [ ]
 			\For{leaf in prediction\_candidates}
 				\State path $\gets$ path\_to(leaf)
 				\State formula.append($\lnot$ path)
 			\EndFor
-			\State $\hat{v} \gets DPLL\_example$(formula)
+			\State $\hat{x} \gets DPLL\_example$(formula)
 		\EndIf
-		\State return($\hat{v}$)
+		\State return($\hat{x}$)
 	\end{algorithmic}
 \end{algorithm}
 
