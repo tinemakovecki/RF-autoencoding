@@ -26,10 +26,10 @@ global_seed = 42
 # IMPORTANT: fix code_size or coverage_sum_threshold NOT BOTH!
 # the threshold that the sum of all coverages in the encoding should exceed
 coverage_sum_threshold = "NA"
-code_size = 7 # 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 done
+code_size = 7
 
 # default measure used to exclude leaves that are too similar
-default_measure_of_diff = 0.1
+default_measure_of_diff = 1
 
 # random forest parameters
 default_n_estimators = 100
@@ -194,7 +194,7 @@ def check_condition_for_sample(condition, sample):
     # check if all parts of the condition are true
     fits_condition = all(checklist)
 
-    return fits_condition
+    return int(fits_condition)
 
 
 def encode_sample(code_paths, sample):
@@ -560,6 +560,99 @@ def stdev(data):
 # ============================== #
 
 
+def leaf_accuracy(tree_model, data_set):
+    # TODO: opis
+
+    # save lists with predictions and which leaf each sample belongs to
+    predictions = tree_model.predict(data_set)
+    leaf_belonging = tree_model.apply(data_set)
+
+    n_samples = len(leaf_belonging)
+    n_leaves = tree_model.get_n_leaves()
+
+    # init dictionaries to keep track of samples belonging to each leaf
+    leaf_samples_dict = {}
+
+    for i in range(n_samples):
+        leaf_samples_dict[leaf_belonging[i]] = []
+
+    for i in range(n_samples):
+        leaf_samples_dict[leaf_belonging[i]].append(data_set[i]) # we add samples to the leaf they belong to
+    # NOTE: to se zagotovo da lepš napisat
+
+    leaf_acc_dict = {}
+    for leaf_id in leaf_samples_dict.keys():
+        # we init values and then calculate the mean squared error of the samples vs the prediction in the leaf
+        distance_sum = 0
+        leaf_samples = leaf_samples_dict[leaf_id]
+        leaf_predictions = [predictions[leaf_id] for _ in range(len(leaf_samples))]
+
+        leaf_acc_dict[leaf_id] = mean_squared_error(leaf_samples, leaf_predictions, squared=False)
+        # TODO: implement normalised mean_squared_error
+
+    # what do we return?
+    # najbrž vrnemo urejen seznam? Nekej takega anyway
+
+    # vrnemo dict z (leaf_id, leaf_acc)
+    # NOTE: preveriti, da se leaf id tukaj in v max_coverage ujema
+    return leaf_acc_dict
+
+
+def leaf_coverage(tree_model, data_set):
+    # TODO: opis
+
+     # prep for leaf analysis
+    leaf_belonging = tree_model.apply(data_set)
+    n_samples = len(leaf_belonging)
+    n_leaves = tree_model.get_n_leaves()
+
+    # init dictionaries to keep track of samples belonging to each leaf
+    leaf_n_sample_dict = {}
+
+    # we calculate how many samples are in each leaf
+    for i in range(n_samples):
+        leaf_n_sample_dict[leaf_belonging[i]] = 0
+
+
+    for i in range(n_samples):
+        leaf_n_sample_dict[leaf_belonging[i]] += 1
+
+    # calculate coverage in a dictionary
+    leaf_coverage_dict = {}
+    for leaf_id in leaf_n_sample_dict.keys():
+        leaf_coverage_dict[leaf_id]= leaf_n_sample_dict[leaf_id]/n_samples
+    
+    return leaf_coverage_dict
+
+
+def leaf_quality(tree_model, data_set, gamma=0.99):
+    # TODO: opis
+
+    # poklicemo funkciji za izračun pokritja in natančnosti
+    leaf_acc_dict = leaf_accuracy(tree_model, data_set)
+    leaf_cover_dict = leaf_coverage(tree_model, data_set)
+
+    # izracunamo kvaliteto in shranimo v seznam
+    quality_leaf_list_temp = []
+    for leaf_id in leaf_cover_dict.keys():
+        quality = gamma*leaf_cover_dict[leaf_id] + (1-gamma)*leaf_acc_dict[leaf_id]
+        quality_leaf_list_temp.append((quality, leaf_id))
+
+    # seznam uredimo po kvaliteti in ga obrnemo, da so ključi spet na prvem mestu
+    quality_leaf_list_temp.sort(reverse=True)
+    quality_leaf_list = map(lambda x_pair: (x_pair[1], x_pair[0]), quality_leaf_list_temp)
+
+    return list(quality_leaf_list)
+
+
+def best_leaf_candidates(tree_model, data_set, n_candidates=1):
+    # TODO: docs
+    # get tree leaves sorted by quality, select the first n_candidates
+    quality_leaf_list = leaf_quality(tree_model, data_set)
+    best_candidates = quality_leaf_list[0:n_candidates]
+    return best_candidates
+
+
 def max_coverage(tree_model, test_set, n_leaves=1):
     """ Returns a list of pairs with coverage percentages and indices of
         leaves which covers the most samples from test_set. The parameters are:
@@ -580,7 +673,7 @@ def max_coverage(tree_model, test_set, n_leaves=1):
         leaf_sample_count[leaf] += 1
 
     # TODO: decide: Should a list is_leaf be a parameter of the function???
-    # check which leaves have the largest coverage
+    # check which leaves have the largest coverage 
     first_leaf = leaves_classified[0]
     best_leaves = [(leaf_sample_count[first_leaf], first_leaf)]
 
@@ -589,16 +682,16 @@ def max_coverage(tree_model, test_set, n_leaves=1):
             # we only count leaves that cover at least 1 sample
             if leaf_sample_count[node] > 0:
                 best_leaves.append((leaf_sample_count[node], node))
-                best_leaves.sort()  # could be moved to optimize a little
+                best_leaves.sort(reverse=True)  # could be moved to optimize a little
         else:
             # compare node with the worst example currently included
             if leaf_sample_count[node] >= best_leaves[-1][0]:
                 # switch the last element and sort
                 best_leaves[-1] = (leaf_sample_count[node], node)
-                best_leaves.sort()
+                best_leaves.sort(reverse=True)
 
     # returns an ordered list of best leaves containing:
-    # coverage percentage and id of leaf
+    # (coverage percentage, id of leaf)
     best_leaves = map(lambda pair: (pair[0]/n_samples, pair[1]), best_leaves)
     best_leaves = list(best_leaves)
 
@@ -672,7 +765,11 @@ def find_different_candidates(forest, n_candidates, X_set, measure_of_difference
     for i in range(n_trees):
         # find the best leaf in current tree
         tree = forest.estimators_[i]
-        cover, candidate_leaf = max_coverage(tree, X_set)[0]
+
+        # TODO: include this choice in parameters - probably with gamma param
+        # quality, candidate_leaf = max_coverage(tree, X_set)[0]
+        candidate_leaf, quality = best_leaf_candidates(tree, X_set)[0]
+
         # init
         difference_check = True
         # check the similarity with other entries
@@ -686,14 +783,15 @@ def find_different_candidates(forest, n_candidates, X_set, measure_of_difference
                 # TODO: this should be rewritten
                 # convert format to work for code_similarity()
                 old_path = path_to(tree, candidate[1])
-                sim = code_similarity((cover, new_path, candidate_leaf), (candidate[0], old_path, candidate[2]), X_set)
+                sim = code_similarity((quality, new_path, candidate_leaf), (candidate[0], old_path, candidate[2]), X_set)
+                print(sim)
                 
                 if sim > measure_of_difference:
                     difference_check = False
 
             # we add the new candidate if it isn't too similar and sort the list
             if difference_check:
-                candidates.append((cover, i, candidate_leaf))
+                candidates.append((quality, i, candidate_leaf))
                 candidates.sort(reverse=True)
 
         else:
@@ -701,15 +799,16 @@ def find_different_candidates(forest, n_candidates, X_set, measure_of_difference
                 # TODO: this should be rewritten
                 # convert format to work for code_similarity()
                 old_path = path_to(tree, candidate[1])
-                sim = code_similarity((cover, new_path, candidate_leaf), (candidate[0], old_path, candidate[2]), X_set)
+                sim = code_similarity((quality, new_path, candidate_leaf), (candidate[0], old_path, candidate[2]), X_set)
+                print(sim)
 
                 if sim > measure_of_difference:
                     difference_check = False
 
-            if cover > candidates[-1][0]:
+            if quality > candidates[-1][0]:
                 if difference_check:
                     # we replace the last element and sort
-                    candidates[-1] = (cover, i, candidate_leaf)
+                    candidates[-1] = (quality, i, candidate_leaf)
                     candidates.sort(reverse=True)
 
     return candidates
@@ -959,7 +1058,7 @@ def read_set(file_name):
 
 def save_results(original_set, decoded_set, encoded_set, file_name):
     """ Save the given results including the original set, the encoded set
-    and extra info into a txt file. """
+    and extra info into a csv file. """
     # TODO: add extra info to save, like recon error, etc.
 
     with open(file_name, mode='w') as csv_file:
@@ -969,6 +1068,29 @@ def save_results(original_set, decoded_set, encoded_set, file_name):
         n = len(original_set)
         for i in range(n):
             row = list(original_set[i]) + ['|'] + list(decoded_set[i]) + ['|'] + list(encoded_set[i])
+            data_writer.writerow(row)
+
+
+def save_data_set(train_set, test_set, n_iteration):
+    """ Save the training set and the test set. """
+
+    train_file_name = "./generated_data/train_set_" + str(n_iteration) + ".csv"
+    test_file_name = "./generated_data/test_set_" + str(n_iteration) + ".csv"
+
+    with open(train_file_name, mode='w') as csv_file:
+        data_writer = csv.writer(csv_file, delimiter=' ')
+
+        m = len(train_set)
+        for k in range(m):
+            row = train_set[k]
+            data_writer.writerow(row)
+    
+    with open(test_file_name, mode='w') as csv_file:
+        data_writer = csv.writer(csv_file, delimiter=' ')
+
+        m = len(test_set)
+        for j in range(m):
+            row = test_set[j]
             data_writer.writerow(row)
 
 
@@ -1011,10 +1133,53 @@ def write_log(seed, original_set_dim, code_size, coverage_sum_threshold, measure
         csv_log_writer = csv.writer(csv_log, delimiter=' ')
 
         # write header
-        csv_log_writer.writerow(["code_size", "original_set_dim", "average_forest_error", "forest_std", "average_nn_error", "nn_std"])
+        csv_log_writer.writerow(["code_size", "original_set_dim", "n_trees", "average_forest_error", "forest_std", "average_nn_error", "nn_std"])
         # write data
-        csv_log_writer.writerow([code_size, original_set_dim, average_forest_error, forest_std, average_nn_error, nn_std])
+        csv_log_writer.writerow([code_size, original_set_dim, n_estimators, average_forest_error, forest_std, average_nn_error, nn_std])
 
+
+def write_forest_log(seed, original_set_dim, code_size, coverage_sum_threshold, measure_of_diff, n_estimators, n_of_repeats, metric, average_forest_error, forest_std):
+    """ Writes a log of the conducted experiment """
+
+    # create a name for log file
+    sec_count = time.time()
+    log_name = "./logs/execution_log" + str(sec_count) + ".txt"
+
+    # record data to log file
+    with open(log_name, mode='w') as log:
+
+        log.write("On {} a run of the autoencoder script was performed. \n".format(time.ctime()))
+        log.write("THIS IS A RANDOM FOREST ONLY TEST")
+
+        log.write("\n")
+        log.write("=== The initial data ===  \n")
+        log.write("random seed (is not used ATM): {} \n".format(seed))
+        log.write("original set dimension: {} \n".format(original_set_dim))
+        log.write("encoded set dimension: {} \n".format(code_size))
+
+        log.write("\n")
+        log.write("=== The learning parameters === \n")
+        log.write("coverage_sum_threshold: {} \n".format(coverage_sum_threshold))
+        log.write("measure_of_diff: {} \n".format(measure_of_diff))
+        log.write("n_estimators: {} \n".format(n_estimators)) # TODO: clearer name
+        log.write("n_of_repeats: {} \n".format(n_of_repeats))
+
+        log.write("\n")
+        log.write("=== The results === \n")
+        log.write("the metric used: {} \n".format(metric))
+        log.write("average error with forest based reconstruction: {} \n".format(average_forest_error))
+    
+    # create another log that is in .csv so it's easier to process further
+    # 
+    csv_log_name = "./logs/log" + str(sec_count) + ".csv"
+
+    with open(csv_log_name, mode='w') as csv_log:
+        csv_log_writer = csv.writer(csv_log, delimiter=' ')
+
+        # write header
+        csv_log_writer.writerow(["code_size", "original_set_dim", "n_trees", "average_forest_error", "forest_std", "average_nn_error", "nn_std"])
+        # write data
+        csv_log_writer.writerow([code_size, original_set_dim, n_estimators, average_forest_error, forest_std, "NA", "NA"])
 
 
 # ============================== #
@@ -1052,6 +1217,7 @@ def estimate_reconstruction_error(file, n_of_repeats, metric):
         test_set_samples = [1 for _ in range(set_size)]
         test_set = []
 
+        # TODO: training set in test set size se spreminja??????????
         for sample_id in training_set_samples:
             # maybe deep copy?
             training_set.append(X[sample_id])
@@ -1095,11 +1261,11 @@ def estimate_reconstruction_error(file, n_of_repeats, metric):
 
         # ===== train the neural network ===== #
 
-        nn_rmse = encode_with_nn(training_set, test_set, code_size)
-        print("NN model trained!")
+        # nn_rmse = encode_with_nn(training_set, test_set, code_size)
+        # print("NN model trained!")
 
         # save the result
-        nn_error_history.append(nn_rmse)
+        # nn_error_history.append(nn_rmse)
 
         # ===== using the encodings on the test set ===== #
 
@@ -1121,6 +1287,9 @@ def estimate_reconstruction_error(file, n_of_repeats, metric):
         # print("The reconstruction error for the forest autoencoder is:")
         # print(forest_rmse)
 
+        # save test & train sets
+        save_data_set(training_set, test_set, i)
+
         # save results
         forest_error_history.append(forest_rmse)
 
@@ -1129,29 +1298,33 @@ def estimate_reconstruction_error(file, n_of_repeats, metric):
 
     # calculate the average error
     average_forest_error = sum(forest_error_history)/len(forest_error_history)
-    average_nn_error = sum(nn_error_history)/len(nn_error_history)
+    # average_nn_error = sum(nn_error_history)/len(nn_error_history)
 
     # calculate standard deviation
     print("Here it is, bitch!")
     print(forest_error_history)
 
     forest_std = stdev(forest_error_history)
-    nn_std = stdev(nn_error_history)
+    # nn_std = stdev(nn_error_history)
 
     # show results
     print("The average reconstruction error for the forest autoencoder is:")
     print(average_forest_error)
     print("with the standard deviation: {}".format(forest_std))
 
-    print("The average reconstruction error for the neural network autoencoder is:")
-    print(average_nn_error)
-    print("with the standard deviation: {}".format(nn_std))
+    # print("The average reconstruction error for the neural network autoencoder is:")
+    # print(average_nn_error)
+    # print("with the standard deviation: {}".format(nn_std))
 
     # write log
     # TODO: check if anything's missing
-    write_log(global_seed, original_set_dim, code_size, coverage_sum_threshold, 
+    # write_log(global_seed, original_set_dim, code_size, coverage_sum_threshold, 
+    #         default_measure_of_diff, default_n_estimators, n_of_repeats, metric, 
+    #         average_forest_error, forest_std, average_nn_error, nn_std)
+
+    write_forest_log(global_seed, original_set_dim, code_size, coverage_sum_threshold, 
             default_measure_of_diff, default_n_estimators, n_of_repeats, metric, 
-            average_forest_error, forest_std, average_nn_error, nn_std)
+            average_forest_error, forest_std)
 
     return None
 
