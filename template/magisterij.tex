@@ -329,16 +329,16 @@ the content and not the structure of your work.
 Strojno učenje je področje umetne inteligence posvečeno preučevanju algoritmov, ki izboljšujejo svoje delovanje skozi čas.
 Pogost izziv pri strojnem učenju je delo z množicami visokih razsežnosti, pri katerem pride do pojava imenovanega ``prekletstvo razsežnosti''.
 Rešujemo ga z manjšanjem razsežnosti množic ob čim manjši izgubi informacij.
-Eba izmed popularnih metod za manjšanje razsežnosti množic je uporaba samokodirnikov.
+Ena izmed popularnih metod za manjšanje razsežnosti množic je uporaba samokodirnikov.
 
 % === Kaj so samokodirniki in kako pomagajo? === %
 % Samokodirniki pa standardno temeljijo na uporabi modela nevronskih mrež.
 % Nevronske mreže imajo nekatere slabosti, ki se izrazijo tudi pri takih samokodirnikih.
 % Želimo implementirati različico samokodirnika, ki bi se soočila z nekaterimi izmed teh slabosti.
-Samokodirnik je model, ki podatkovno množico preslika v prostor manjše razsežnosti, nato pa jo ponovno preslika v prvotni prostor. % TODO: bolj formalno
+Samokodirnik je model, ki podatkovno množico preslika v prostor manjše razsežnosti, nato pa jo ponovno preslika v prvotni prostor. % TODO: je to sploh res?
 Če je rekonstruirana množica dober približek prvotne množice, sklepamo, da vmesni prostor ohrani večino informacij v množici in lahko vmesno množico uporabimo namesto prvotne. % razbit na dve povedi
 Standardni samokodirniki so zgrajeni iz modela (usmerjene) nevronske mreže.
-Nevronske mreže in posledično standardni samokodirniki imajo nekaj velikih slabosti: so časovno neučinkovite, iz vidika uporabnika so ``črna škatla'', ...
+Nevronske mreže, in posledično standardni samokodirniki, imajo nekaj velikih slabosti: so časovno neučinkovite, iz vidika uporabnika so ``črna škatla'', ...
 
 % === cilj === %
 % cilj dela je razvoj in implementacija bolj jasnega, itd. samokodirnika.
@@ -357,14 +357,13 @@ Model naključnega gozda je dobra osnova, saj v splošnem dosega dobro natančno
 Model naključnega gozda naučimo napovedovati vrednost svojih vhodnih spremenljivk, na osnovi tega modela pa želimo zgraditi samokodirnik.
 Primeri, ki v odločitvenem drevesu iz gozda pripadajo istemu listu, so si v neki lastnosti podobni.
 Primere lahko opišemo s pripadnostjo listom, zato želimo izbrati kodirni vektor najpomembnejših listov iz gozda, ki skupaj čim bolje opišejo množico.
-S tem kodirnim vektorjem zakodiramo primere iz podatkovne množice, konstruirati pa moramo še postopek za dekodiranje.
+S tem kodirnim vektorjem zakodiramo primere iz podatkovne množice.
 Pri dekodiranju izkoristimo podatke o poteh do listov kodirnega vektorja in napovedi, ki jih drevesa v gozdu tem listom napovejo.
-Novo različico samokodirnika nato še testiramo, da določimo dobre privzete vrednosti parametrov in njeno delovanje ovrednotimo v primerjavi s standardnim pristopom.
+% Novo različico samokodirnika nato še testiramo, da določimo dobre privzete vrednosti parametrov in njeno delovanje ovrednotimo v primerjavi s standardnim pristopom.
 
 % ===== PREGLED POGLAVJI ===== %
 
 % strojno učenje
-% TODO: skrajšati, preveriti, da res vse omenimo.
 V poglavju~\ref{pogl:strojno_ucenje} pregledamo osnove strojnega učenja in definiramo standardne pojme, ki jih uporabljamo v preostanku besedila. 
 Najprej opišemo delitev na področji nadzorovanega in nenadzorovanega učenja.
 Nato obravnavamo problematiko učenja iz podatkovnih množic visokih razsežnosti, kjer se pojavi problem t.~i.~``prekletstva razsežnosti'' (ang.~curse of dimensionality). 
@@ -376,7 +375,7 @@ Opišemo tudi glaven način soočanja s to problematiko - manjšanje razsežnost
 % Opis standardnega samokodirnika.
 V poglavju~\ref{pogl:nn_samokodirniki} podrobno definiramo pojem samokodirnika ter način, kako ga vrednotimo.
 Definiramo model usmerjene nevronske mreže, njegovo uporabo ter prednosti in slabosti.
-Nato opišemo še najbolj razširjeno vrsto samokodirnikov, ki so zgrajeni iz nevronskih mrež, in nekaj različnih podvrst takih samokodirnikov.
+Nato opišemo še najbolj razširjeno vrsto samokodirnikov, ki so zgrajeni iz nevronskih mrež, in nekaj različnih podvrst takšnih samokodirnikov.
 
 % samokodirnik zgrajen iz naključnega gozda
 % Definiramo odločitveno drevo in nato naključni gozd.
@@ -397,7 +396,7 @@ Na koncu razdelka še opišemo postopek dekodiranja s pomočjo shranjenih napove
 % Različice algoritmov in možne izboljšave.
 Za implementacijo samokodirnika smo izbrali Python, pri obdelavi podatkov pa uporabimo tudi R.
 V poglavju~\ref{pogl:implementacija}, ki je namenjeno implementaciji, opišemo knjižnice, ki smo jih uporabili, in najpomembnejše parametre samokodirnika.
-Prikažemo shemo delovanja implementirane različice samokodirnika in jo opišemo.
+Prikažemo shemo delovanja implementacije in jo opišemo.
 Podrobneje predstavimo tudi komponente, na katere je samokodirnik razdeljen, in naredimo pregled pomembnejših funkcij.
 Nato opišemo še alternativne različice algoritma, ki smo jih implementirali, in možne izboljšave implementacije.
 
@@ -533,12 +532,10 @@ Cilj pri tem postopku je, da bi vektor, ki vsebuje vrednosti napovednih spremenl
 	\]
 \end{definicija}
 
-% TODO: previdno ponovno branje - ali v tekstu okej teče rdeča nit? JE metoda strojnega učenja tukaj okej umeščena v besedilo?
-
 % Povemo, da želimo način vrednotenja modelov, da bomo lahko iskali čim boljše/da bomo vedli, kako naj se usmerja metoda strojnega učenja
 Napovedni model je algoritem, ki ga uporabimo za napovedovanje vrednosti, konstruiramo pa ga z metodo strojnega učenja.
 Metoda strojnega učenja $A$ podatkovni množici priredi nek napovedni model. 
-Ta postopek pogosto opišemo z izrazom, da model naučimo na podatkovni množici. % TODO: rephrase
+Za model, ki ga vrne metoda strojnega učenja pri podatkovni množici $S$, pravimo, da je bil naučen na podatkovni množici $S$.
 V nadaljevanju bomo podrobneje opisali, kako nadzorujemo metode strojnega učenja, da dobimo dober model.
 Naj bo $(x_1, \ldots, x_p,y) \in S$ točka iz podatkovne množice.
 Model $m$ vektorju izmerjenih vrednosti napovednih spremenljivk $x=(x_1, \ldots, x_p)$ priredi oceno vrednosti ciljne spremenljivke $\hat{y}=m(x)$.
@@ -574,9 +571,8 @@ Vrednost funkcije izgube je $0$, če sta argumenta enaka, in $1$ sicer.
 Pri taki definiciji funkcija upošteva zgolj to, ali sta dva elementa enaka.
 \end{primer}
 
-% TODO: še enkrat napisat odstavek
-Vemo torej, da vrednost $L(\hat{y}, y)$ predstavlja napako napovedi modela, vendar modela ne želimo vrednotiti zgolj glede na točnost napovedi pri enem primeru. 
-Da bi model lahko bolje vrednotili, bomo združili vrednosti funkcije izgube pri več različnih primerih.
+Vemo torej, da vrednost $L(\hat{y}, y)$ predstavlja napako napovedi modela, vendar za vrednotenje modela ne uporabimo zgolj enega podatka, temveč t.~i.\ testno množico podatkov. 
+Za vsakega od podatkov izračunamo funkcijo izgube, in dobljene vrednosti združimo v oceno napake.
 
 \begin{definicija}
 \label{def-funkcija-napake}
@@ -607,7 +603,6 @@ Vrednost funkcije napake imenujemo napaka modela $m$ na množici $S$.
 % Metoda strojnega učenja je torej preslikava, ki množici podatkov priredi nek model. 
 % Želimo pa seveda, da bi ta model bil čim bolj točen - dosegal čim manjšo vrednost funkcije napake. 
 % Ponavadi za izgradnjo takšnega modela uporabimo kakšen standardni optimizacijski algoritem. 
-% (TODO: sklic na vir o kakšni standardni metodi učenja, npr.\ gradient descent)
 
 % Odstavek o metodah strojnega učenja
 Spomnimo se definicije metode strojnega učenja iz definicije~\ref{def:model_metoda}.
@@ -615,20 +610,24 @@ Spomnimo se definicije metode strojnega učenja iz definicije~\ref{def:model_met
 Denimo, da imamo podano množico podatkov, ki jo želimo uporabiti, da zgradimo model, ki bo čim bolje napovedoval vrednosti ciljne spremenljivke.
 Pri postopku izgradnje modela kot vodilo uporabimo funkcijo napake.
 Metoda začne z osnovno obliko modela in ga prilagaja s ciljem, da minimizira funkcijo napako modela na podatkovni množici.
-Podrobnosti metode strojnega učenja so zelo odvisne od vrste napovednega modela, zato obstaja veliko različnih, ki jih ne moremo združiti v enotno obliko.
+Podrobnosti metode strojnega učenja so zelo odvisne od vrste napovednega modela, zato obstaja veliko različnih, ki jih ne moremo združiti v eno enotno metodo.
 
 % TODO: premisliti & popraviti!
 % Želimo model, ki je splošno točen, zato množico podatkov ločimo na testno in učno, da lahko rezultate dobro ocenimo.
-Predpostavimo, da imamo neko množico podatkov in želimo zgraditi model za napovedovanje porazdelitve, s katero so bili podatki generirani. 
-Lahko bi celo množico uporabili, da z metodo strojnega učenja zgradimo primeren model. 
-Vendar lahko v tem primeru naletimo na težavo, da ima model na novih izmerjenih primerih iz iste porazdelitve precej večjo napako. 
-To se zgodi v primeru, ko je model učni množici pretirano prilagojen in je zaradi tega na ostalih primerih manj natančen. 
-Mi pa želimo, da bi model bil splošno veljaven in bi čim boljšo natančnost dosegal tudi na novih primerih. 
-Zaradi tega množico primerov razdelimo na dva dela - na učno množico in na testno množico. 
-Učno množico se uporabi za izgradnjo modela, na testni množici pa lahko preverimo napako modela na podatkih, ki niso bili uporabljeni pri izgradnji. 
-S tem dobimo perspektivo, če se napovedi modela dobro posplošijo na nove primere ali pa je model morda preveč prilagojen učni množici.
+Za vrednotenje delovanja modela podatkovno množico razdelimo na dva dela -- na učno in testno množico.
+Pri učenju se lahko model namreč pretirano prilagodi učni množici, kar pomeni, da bo pri novih primerih dosegal mnogo manjšo natančnost kot pri primerih iz učne množice.
+Zato del primerov iz podatkovne množice izključimo iz učne množice, da lahko testiramo natančnost modela na primerih, ki jih v postopku učenja ni ``videl''.
+Iz primerjave natančnosti na učni in testni množici lahko sklepamo, ali je model morda preveč prilagojem učni množici ali pa so njegove napovedi splošno veljavne .
 
-% TODO: sklic na to, da ne obstaja model, ki bi bil univerzalno najboljši?
+% Predpostavimo, da imamo neko množico podatkov in želimo zgraditi model za napovedovanje porazdelitve, s katero so bili podatki generirani. 
+% Lahko bi celo množico uporabili, da z metodo strojnega učenja zgradimo primeren model. 
+% Vendar lahko v tem primeru naletimo na težavo, da ima model na novih izmerjenih primerih iz iste porazdelitve precej večjo napako. 
+% To se zgodi v primeru, ko je model učni množici pretirano prilagojen in je zaradi tega na ostalih primerih manj natančen. 
+% Mi pa želimo, da bi model bil splošno veljaven in bi čim boljšo natančnost dosegal tudi na novih primerih. 
+% Zaradi tega množico primerov razdelimo na dva dela - na učno množico in na testno množico. 
+% Učno množico se uporabi za izgradnjo modela, na testni množici pa lahko preverimo napako modela na podatkih, ki niso bili uporabljeni pri izgradnji. 
+% S tem dobimo perspektivo, če se napovedi modela dobro posplošijo na nove primere ali pa je model morda preveč prilagojen učni množici.
+
 
 % ==================== %
 
@@ -658,7 +657,7 @@ Namesto tega si bomo raje podrobno ogledali primer postopka razvrščanja $k$-vo
 % NOTE: bolj podroben opis algoritma je v elements of statistical learning
 Naj bo $S \subseteq \omega$ podatkovna množica razsežnosti $p$. 
 Cilj algoritma je elemente množice razvrstiti v $k$ skupin med seboj podobnih elementov.
-
+Da lahko postopek izvedemo, morajo točke iz podatkovne množice biti vstavljene v evklidski prostor.
 % TODO: image???
 
 V prostoru naključno izberemo $k$ točk $\mu_1, \mu_2, \ldots , \mu_k$. 
@@ -666,7 +665,6 @@ Nato za vsako točko $x$ v podatkovni množici $S$ izračunamo, kateri $\mu_i$ l
 Po tem, ko so vse točke razvrščene v skupine, izračunamo nove vrednosti $\mu_1, \ldots , \mu_k$ tako, da za $i=1,\ldots,k$ določimo $\mu_i$ kot povprečje vseh elementov $i$-te skupine. 
 Nato vse točke množice $S$ ponovno razvrstimo v skupine glede na novo izračunane vrednosti $\mu_1, \ldots, \mu_k$.
 Ta postopek nadaljujemo dokler rezultat ne konvergira. 
-TODO: opomba, da morajo točke biti vstavljene v evklidski prostor (da lahko izračunamo povprečje)
 
 Slabost takega pristopa je, da zaradi preprostosti ne zajame veliko nians podatkovne množice. 
 Glede na različne začetne vrednosti $\mu_1, \ldots, \mu_k$ je možno primere razdeliti na več različnih, veljavnih, skupin primerov. 
@@ -720,18 +718,17 @@ Ta primer bo za naš namen zadoščal, saj obnašanje primerov znotraj krogle na
 % ================================================================================================================================ %
 % NOVA FORMULACIJA TRDITVE IN DOKAZA
 
-% TODO: posvet z ljupčotom, kako bi ugotovili uradni prevod?
 \begin{definicija}
 \label{def:statistika}
 	Naj bodo $X_1, X_2, \ldots, X_n$ zvezno porazdeljene slučajne spremenljivke.
 	Naj bodo $Y_1, Y_2, \ldots, Y_n$ slučajne spremenljivke, ki jih dobimo, če $X_1, \ldots, X_n$ uredimo po velikosti, kjer $Y_1$ predstavlja najmanjšo izmed $X_i$, $Y_2$ predstavlja drugo najmanjšo, itd.
-	Za $i=1,\ldots,n$ imenujemo $Y_i$ \emph{statistika $i$-tega reda} naključnega vzorca $X_1, \ldots, X_n$.
+	Za $i=1,\ldots,n$ imenujemo $Y_i$ \emph{statistika $i$-tega ranga} naključnega vzorca $X_1, \ldots, X_n$.
 \end{definicija}
 
 \begin{trditev}
 \label{trd:prekletstvo_dim}
 	V enotski krogli v prostoru $\mathbb{R}^p$ enakomerno naključno izberemo $n$ točk.
-	Naj slučajna spremenljivka $R_i$ označuje oddaljenost $i$-te točke od izhodišča in naj bo $Y$ statistika prvega reda naključnega vzorca $R_1, \ldots, R_n$. % to se da zagotovo lepše povedati
+	Naj slučajna spremenljivka $R_i$ označuje oddaljenost $i$-te točke od izhodišča in naj bo $Y$ statistika prvega ranga naključnega vzorca $R_1, \ldots, R_n$. % to se da zagotovo lepše povedati
 	Mediana slučajne spremenljivke $Y$ je:
 	\[
 		d(p,n) = (1 - \frac{1}{2^{\frac{1}{n}}})^{\frac{1}{p}}.
@@ -747,7 +744,6 @@ Ta primer bo za naš namen zadoščal, saj obnašanje primerov znotraj krogle na
 	kjer $\Gamma$ označuje gama funkcijo~\cite[enačba~5.4.1]{nist_dlmf}. % TODO: poiskat citat, kjer je definiran tut gamma za argumente, ki niso cela števila (predvsem za 0,5)
 	Naj bo $x \in (0,1)$ neko pozitivno število.
 
-	% TODO: kako razdeliti odstavke???
 	Zanima nas verjetnost, da je enakomerno naključno izbrana točka od izhodišča oddaljena za $x$ ali manj, oz.~da velja $R_i \leq x$.
 	To velja v primeru, ko se točka nahaja v krogli $B_x$ s centrom v izhodišču in polmerom $x$.
 	Ker je bila točka enakomerno naključno izbrana v enotski krogli, je verjetnost, da se nahaja znotraj krogle $B_x$, enaka razmerju volumna krogle $B_x$ in enotske krogle.
@@ -780,7 +776,7 @@ Ta primer bo za naš namen zadoščal, saj obnašanje primerov znotraj krogle na
 	\end{equation}
 	%
 	%
-	Gostoto porazdelitve statistike prvega reda \cite[pogl.~4.6]{hogg2005introduction} opiše formula:
+	Gostoto porazdelitve statistike prvega ranga \cite[pogl.~4.6]{hogg2005introduction} opiše formula:
 	\begin{equation*}
 		f_Y(y) = n(1 - F_{R_i}(y))^{n-1} f_{R_i}(y).
 	\end{equation*}
@@ -896,7 +892,6 @@ Ta primer bo za naš namen zadoščal, saj obnašanje primerov znotraj krogle na
 
 % ================================================================================================================================ %
 
-% prestavljeno. TODO: urediti vrstni red
 % Razlaga trditve, kjer se navežemo na že omenjene probleme in pojasnimo, kako jih trditev utemelji.
 Oglejmo si formulo iz trditve \ref{trd:prekletstvo_dim}.
 Z večanjem števila točk $n$ se mediana vrednosti slučajne spremenljivke $Y$ manjša, torej se manjša pričakovana oddaljenost izhodišču najbližje točke.
@@ -918,12 +913,12 @@ Vrednost $R_i'$ je manjša ali enaka $r$ natanko tedaj, ko se $i$-ta točka naha
 
 To je situacija zelo podobna tisti v dokazu trditve \ref{trd:prekletstvo_dim}, vendar krogla $B_{r}(x_1)$ nima središča v izhodišču in možno je, da ni cela vsebovana v prvotni enotski krogli.
 Zato moramo obravnavati dva primera v odvisnosti od položaja krogle.
-Če je krogla $B_r(x_1)$ vsebovana v enotski krogli, lahko verjetnost $P(Y' \leq r)$ enako kot v dokazu trditve \ref{trd:prekletstvo_dim} opišemo z razmerjem volumna dveh krogel.
+Če je krogla $B_r(x_1)$ vsebovana v enotski krogli, lahko verjetnost $P(Y' \leq r)$ tako kot v dokazu trditve \ref{trd:prekletstvo_dim} opišemo z razmerjem volumna dveh krogel.
 
 Če krogla $B_r(x_1)$ ni v celoti vsebovana v enotski krogli s središčem v izhodišču, pa moramo znova premisliti, kakšna je verjetnost dogodka $R_i' \leq r$.
 Zveza $R_i' \leq r$ velja, če je točka, ki smo jo enakomerno naključni izbrali v enotski krogli, vsebovana v krogli $B_r(x_1)$.
 Točka pa je izbrana znotraj enotske krogle, torej ne more ležati v delu $B_r(x_1)$, ki ni vsebovan v enotski krogli.
-Zveza $R_i' \leq r$ torej velja, če točka leži v preseku $B_r(x_1)$ in enotske krogle, ki ima manjši volumen kot $B_r(x_1)$.
+Zveza $R_i' \leq r$ torej velja, če točka leži v preseku $B_r(x_1)$ in enotske krogle, ta presek pa ima manjši volumen kot $B_r(x_1)$.
 V tem primeru za verjetnost velja neenakost:
 \begin{equation}
 \label{eq:presek_krogel}
@@ -931,20 +926,17 @@ V tem primeru za verjetnost velja neenakost:
 	\frac{r^p \left( \frac{\pi^{\frac{p}{2}}}{\Gamma (\frac{p}{2}+1)} \right)}{1^p \left( \frac{\pi^{\frac{p}{2}}}{\Gamma (\frac{p}{2}+1)} \right)}
 \end{equation}
 
-% TODO: moramo še sklepati, kako iz tega izhaja, da je mediana večja od nečesa
-Neki neki - vsaka posamezna točka je manj verjetno blizu -> najbližja točka je najbrž dlje stran.
+Torej je v obeh primerih porazdelitvena funkcija spremenljivke $R_i'$ manjša ali enaka porazdelitveni funkciji iz dokaza.
+To pomeni, da je verjetnost, da je $i$-ta izbrana točka od $x_1$ oddaljena manj kot $r$ manjša od verjetnosti, da je manj kot $r$ oddaljena od izhodišča.
+To velja za poljuben $r \in (0,1)$ in poljuben $i \in \{2,\ldots,n\}$, torej za vse izbrane točke velja, da so od $x_1$ verjetno oddaljene vsaj toliko kot od izhodišča.
+Iz tega sklepamo, da je statistika prvega ranga slučajnih spremenljivk $R_2'\ldots, R_n'$ večja ali enaka statistiki prvega ranga spremenljivk $R_2,\ldots,R_n$, ki je po trditvi~\ref{trd:prekletstvo_dim} enaka $(1 - \frac{1}{2^{\frac{1}{n-1}}})^{\frac{1}{p}}$.
 
-Lahko pa se zgodi, da del krogle ni vsebovan v enotski krogli. 
-V tem primeru, je del prostora, v katerem mora ležati naključno izbrana točka, da velja $D' \leq r$, manjši. 
-S tem se števec v ulomku zmanjša in se celotna verjetnost zmanjša - lahko pa jo navzgor omejimo z razmerjem, ki je bilo uporabljeno v dokazu. 
-Ugotovili smo, da za poljuben argument $x$ iz enotske krogle velja $F_{D'}(x) \leq F_D(x)$. To mejo uporabimo in nato sledimo enakemu postopku kot prej.
-
-Vidimo, da je mediana oddaljenosti najbližje točke večja ali enaka $(1 - \frac{1}{2^{\frac{1}{n-1}}})^{\frac{1}{p}}$, kar pomeni, 
-da se razdalja od $x_1$ do najbližje točke veča z razsežnostjo. 
+Premislili smo, da se razdalja od $x_1$ do najbližje druge izbrane točke se veča z razsežnostjo prostora. 
 Podoben razmislek pa velja za poljubno točko v množici, torej se razdalja med vsemi točkami iz nabora izbranih točk z razsežnostjo povečuje.
 
 \begin{primer}
-Ogledali si bomo vrednosti mediane iz trditve pri dveh različnih fiksnih vrednostih $n$, da opazujemo, kako se razdalja spreminja glede na razsežnost prostora. Najprej fiksiramo vrednost $n=500$ in si ogledamo graf mediane oddaljenosti do izhodišča v odvisnosti od razsežnosti.
+Ogledali si bomo vrednosti mediane iz trditve pri dveh različnih fiksnih vrednostih $n$, da opazujemo, kako se razdalja spreminja glede na razsežnost prostora. 
+Najprej fiksiramo vrednost $n=500$ in si ogledamo graf vrednosti statistike prvega ranga slučajnih spremenljivk $R_!,\ldots,R_{500}$ v odvisnosti od razsežnosti.
 
 \begin{center}
 \includegraphics[width=0.5\textwidth]{graf_oddaljenosti_500}
@@ -994,7 +986,6 @@ analiza kanonične korelacije (ang.~ canonical correlations analysis, krajše CC
 Obstajajo pa tudi raziskave, ki stremijo k združitvi in posplošitvi različnih metod linearnega manjšanja razsežnosti. 
 Pregled in primerjavo različnih pristopov lahko bralec najde v članku~\cite{JMLR:cunningham2015a}.
 
-% TODO: na hitro o nelinearnih pristopih
 % komentar o tem, da se pogosto uporablja nenadzorovane metode. Samokodirniki so pa nadzorovana metoda?
 Obstajajo tudi metode za nelinearno manjšanje razsežnosti, ki so pogosto nadgradnja nekaterih metod za linearno manjšanje razsežnosti. 
 Omogočajo bolj kompleksno preslikavo v množico manjše razsežnosti, nekatere izmed teh metod pa so npr.\ Sammonova projekcija, 
@@ -1004,13 +995,9 @@ V preostanku dela se bomo osredotočili na samokodirnike.
 
 % ====================  SAMOKODIRNIKI ==================== %
 
-% TODO: dodati angleške prevode ob prvi omembi pojmov
-% TODO: upoštevat popravke!!!
-
 \section{Samokodirnik zgrajen iz nevronske mreže} % Samokodirnik z nevronsko mrežo
 \label{pogl:nn_samokodirniki}
 
-% TODO: premisliti izraz "standarden" samokodirnik - in prilagoditi tekst/naslov razdelka
 Samokodirniki so ena izmed najbolj razširjenih in zmogljivih metod za manjšanje razsežnosti podatkovnih množic~\cite{charte2018autoencoders}.
 V tem poglavju bomo formalno definirali pojem samokodirnika in predstavili standardne samokodirnike, ki so sestavljeni iz usmerjenih nevronskih mrež.
 Zato bomo tudi formalno definirali model usmerjene nevronske mreže in opisali prednosti in slabosti njihove uporabe.
@@ -1039,7 +1026,8 @@ Zato bomo v naslednjem poglavju nadaljevali s konstrukcijo drugačnega samokodir
 \begin{definicija}
 \label{def-samokodirnik}
 % množica primerov -> množica podatkov???
-Naj bo $\omega_p$ podatkovna množica razsežnosti $p$. Naj bosta $m_e: \omega_p \rightarrow \omega_k$ in $m_d: \omega_k \rightarrow \omega_p$ modela, kjer je $\omega_k$ množica razsežnosti $k$, ki jo imenujemo \textbf{zaloga vrednosti kode}. \textbf{Samokodirnik} je kompozitum modelov s sledečim predpisom:
+Naj bo $\omega_p$ podatkovna množica razsežnosti $p$. 
+Naj bosta $m_e: \omega_p \rightarrow \omega_k$ in $m_d: \omega_k \rightarrow \omega_p$ modela, kjer je $\omega_k$ množica razsežnosti $k$, ki jo imenujemo \textbf{zaloga vrednosti kode}. \textbf{Samokodirnik} je kompozitum modelov s sledečim predpisom:
 \[
 m_{s k} = m_d \circ m_e : \omega_p \rightarrow \omega_p .
 \]
@@ -1048,8 +1036,7 @@ Podatkovna množica $S$ za učenje samokodirnika je oblike $S = \{(v, v), v \in 
 % NOTE: pazit je treba, da bo definicija ustrezala našemu samokodirniku - ker štartamo z učenjem modela, pol ga pa predelamo
 
 % prestavljen odstavek, da je za definicijo.
-% TODO: rephrase, da je bolj jasno
-% TODO: pazit, da se ne bo tekst ponavljal z ostalim v poglavju
+% TODO: pazit, da se ne bo tekst ponavljal z ostalim v poglavju?
 Samokodirnik je kompozitum dveh modelov, ki napoveduje lastne vhodne spremenljivke. 
 Njegovemu delovanju dodamo še določene omejitve ali parametre, da preslikava, ki jo izvede, ne more biti identiteta. 
 Želimo, da bi s transformacijo vhodnih spremenljivk in njihovo rekonstrukcijo samokodirnik ujel pomembnejše lastnosti podatkovne množice. 
@@ -1075,8 +1062,8 @@ Nekaj različic omenimo v kasnejšem razdelku, pred tem pa želimo opisati stand
 
 \subsection{Samokodirnik}
 % Opis standardnega samokodirnika/povzetek razdelka: uporablja feed-forward nevronske mreže, ki jih moramo definirati. Uči se z back propagation. 
-Standardni samokodirniki so zgrajeni iz usmerjenih nevronskih mrež.
-% TODO: dokončat!!!
+% Standardni samokodirniki so zgrajeni iz usmerjenih nevronskih mrež.
+% TODO: bi sem spadal še kkšev "uvodni" odstavek?
 
 
 % ========================= %
@@ -1128,7 +1115,6 @@ Povedali smo že, da je usmerjena nevronska mreža sestavljena iz nevronov, ki s
 V arhitekturi usmerjene nevronske mreže je torej vsako vozlišče povezano z vsemi iz predhodne in sledeče plasti.
 Arhitektura opiše strukturo mreže, definirati pa moramo, kako nevronska mreža z določeno arhitekturo deluje.
 
-% TODO: definicija za indeks vektor al nekej takega???
 \begin{definicija}
 \label{def:model-nn}
 	
@@ -1185,19 +1171,19 @@ Arhitektura opiše strukturo mreže, definirati pa moramo, kako nevronska mreža
 katere vhodna plast je sestavljena iz $p$ elementov, izhodna plast pa iz $dim(D_Y)$ elementov.
 \end{definicija}
 
-% TODO: človeški opis tega, kaj se dogaja v definiciji
+% človeški opis tega, kaj se dogaja v definiciji
 Definicija \ref{def:model-nn} vsebuje seznam različnih pogojev, ki določajo, kakšna arhitektura opiše usmerjeno nevronsko mrežo. 
 Za lažje razumevanje definicije lahko pogoje zapišemo tudi v manj formalni obliki.
 S prvima dvema pogojema zahtevamo, da je velikost vhodne plasti enaka številu vhodnih spremenljivk in velikost izhodne plasti enaka razsežnosti ciljne spremenljivke podatkovne množice.
 S pogojem~3.\ določimo lastnosti nevronov vhodne plasti, ki skupaj pomenijo, da bodo nevroni vhodne plasti lahko sprejeli vrednosti vhodnih spremenljivk in jih naprej poslali nespremenjene.
 V pogoju~4.\ zahtevamo, da nevroni vseh ostalih plasti sprejmejo število vrednosti, ki je enako velikosti predhodne plasti.
 Z zadnjim pogojem definiramo, kako model nevronske mreže (z določeno arhitekturo) izračuna napoved.
-Nevroni vhodne plasti sprejemejo vrednosti vhodnih spremenljivk, ki jih nato podamo kot argument nevronom naslednje plasti, rezultat, ki ga izračunajo, pa je argument nevronov naslednje plasti, itd.
+Nevroni vhodne plasti sprejmejo vrednosti vhodnih spremenljivk, ki jih nato podamo kot argument nevronom naslednje plasti, rezultat, ki ga izračunajo, pa je argument nevronov naslednje plasti, itd.
 Vrednosti, ki jih izračunajo nevroni izhodne plasti so napoved modela.
 
 % lastnost: majhne spremembe v utežeh/bias-u naredijo majhne spremembe v rezultatu, ker je funkcija gladka
 % Lastnost: velikost spremembe rezultata je linearno odvisna od velikosti spremembe parametrov.
-Če je nevronska mreža sestavljena iz sigmoidnih nevronov, oz.~nevronov z dovolj "lepimi" aktivacijskimi funkcijami, ima lepe lastnosti za učenje. 
+Če je nevronska mreža sestavljena iz sigmoidnih nevronov, oz.~nevronov z dovolj ``lepim'' aktivacijskimi funkcijami, ima lepe lastnosti za učenje. 
 Če parametre mreže, tj.~uteži in pristranskost, spremenimo za majhno količino, se tudi izhodna vrednost spremeni za majhno količino. 
 To velja, ker je nevron zvezen kot funkcija uteži in pristranskosti in je velikost spremembe izhodne vrednosti linearno odvisna od velikosti sprememb uteži in pristranskosti~\cite[pogl.\ 1]{nielsen2015neural}.
 % TODO: je to dovolj formalno gradivo za citirat?
@@ -1206,7 +1192,7 @@ To velja, ker je nevron zvezen kot funkcija uteži in pristranskosti in je velik
 Parametre nevronske mreže lahko popravljamo tako, da postaja rezultat pri izbranem argumentu bolj točen, s tem pa točnosti napovedi pri drugih argumentih ne pokvarimo preveč. 
 Algoritem torej prilagaja uteži in pristranskost nevronov v mreži, dokler ni razlika med napovedjo in resničnim rezultatom čim manjša. 
 Pri učenju usmerjenih nevronskih mrež za optimizacijo uporabimo gradientni spust~\cite[pogl.\ 1]{nielsen2015neural}.
-Računanje gradienta funkcije izgube, ki ga algoritem potrebuje, pa je za nevronske mreže zelo zamudno - za to uporabimo postopek \emph{vzvratnega širjenja napake} (ang.~backpropagation), ki je bolj učinkovit od direktnega izračuna. % TODO: vprašat ljupčota ali je to veljaven izraz - dat v emph
+Računanje gradienta funkcije izgube, ki ga algoritem potrebuje, pa je za nevronske mreže zelo zamudno - za to uporabimo postopek \emph{vzvratnega širjenja napake} (ang.~backpropagation), ki je bolj učinkovit od direktnega izračuna. 
 Bolj podroben opis nevronskih mrež in postopka, s katerim jih učimo, lahko bralec najde v delu~\cite[pogl.\ 2]{nielsen2015neural}.
 
 % Prednosti in slabosti nevronskih mrež
@@ -1221,8 +1207,7 @@ Model je namreč sestavljen iz nabora med seboj poveznih funkcij in zato že pri
 
 \subsubsection{Samokodirnik iz nevronskih mrež}
 
-% TODO: se pogovoriti z ljupčotom o: več ciljnih spremenljivk VS. ena cilja spremenljivka, ki ima več kot eno razsežnost
-% TODO: tukaj je treba pojasniti, da je kodirnik posebne vrste UNM, ki napoveduje več (k) numeričnih spremenljivk hkrati. 
+% TODO
 % Lahko bi tudi pojasnili, da je UNM kodirnika simetrična UNM dekodirnika: 
 % če uporabimo notacijo iz 3.2.1, bi lahko predpisali, da veljajo enakosti |N^(e)_1| = |N^(d)_l| = p, |N^(e)_2| = |N^(d)_(l-1)|, ... |N^(e)_l| = |N^(d)_1| = k.
 
@@ -1254,10 +1239,14 @@ V tem primeru je možna identična preslikava, ki je ne želimo, zato se taki sa
 % TODO: še ena shema???
 
 % opomba: z linearnimi preslikavami je to PCA
-TODO: Obravnava vrst samokodirnikov, predvsem bolj posebnih vrst (sklici na vire)
+% TODO: Obravnava vrst samokodirnikov, predvsem bolj posebnih vrst (sklici na vire)
 % LITERATURA NEEDED
+Poznamo tudi druge vrste samokodirnikov, pri katerih so prisotne drugačne omejitve kot pri podpopolnih.
+Pri nadpopolnih samokodirnik se lahko omeji število neničelnih elementov v zakodiranih podatkih -- zahtevamo, da je srednja plast ``sparse''.
+Poznamo tudi samokodirnike za odstranjevanje šuma, pri katerih vhodnim podatkom dodamo šum, da onemogočimo identične preslikave, ne da bi omejili razsežnost kodirne plasti.
 
-TODO: Zaključek, da se slabosti nevronskih mrež prenesejo na take samokodirnike -> alternativa.
+
+% TODO: Zaključek, da se slabosti nevronskih mrež prenesejo na take samokodirnike -> alternativa. Bi blo to fajn dodati? maybe.
 
 % TODO: !!!
 % PRIPOMBA od ljupčota
@@ -1281,7 +1270,6 @@ V prvem podrazdelku bomo predstavili modele odločitvenih dreves, v drugem pa mo
 V nadaljnjih podrazdelkih bomo predstavili postopek kodiranja in dekodiranja na osnovi naključnega gozda ter lastnosti in prednosti takšnega pristopa.
 
 % ========================= %
-% TODO: bi morda združili odločitveno drevo in naključni gozd kot podrazdelka v skupni razdelek?
 
 \subsection{Odločitveno drevo}
 
@@ -1290,7 +1278,7 @@ Odločitveno drevo je dvojiško drevo, ki v notranjih vozliščih vsebuje logič
 Napoved je matematično gledano zlepek konstantnih funkcij.
 Njihovo učenje zahteva zelo malo procesorskega časa, njihova struktura pa je razumljiva za uporabnika, zato služijo kot dobro izhodišče za izgradnjo samokodirnika.
 
-% ============================= % TODO: prestavit za definicijo odločitvenega drevesa
+% ============================= % TODO: prestavit za definicijo odločitvenega drevesa, je to sploh kej važnega?
 % Iščemo namreč ravno te lastnosti - dobro razumevanje in hitrost. Slabost odločitvenih dreves je v tem, da imajo preveč preprosto strukturo, 
 % da bi lahko napovedovala kompleksno porazdeljene množice podatkov s tako natančnostjo kot nekateri drugi modeli. 
 % Zaradi tega bomo najprej definirali model odločitvenega drevesa, nato pa idejo nadgradili v model naključnega gozda. 
@@ -1336,12 +1324,11 @@ Ko postopek doseže list, primeru napove vrednost, ki je shranjena v listu.
 % popravit primer, da se ujema
 \end{definicija}
 
-TODO: optimalno drevo je freaking težko najt - uporabimo požrešen algoritem - top down induction
-(TODO: citat o tem, kako se dreves učijo/gradijo, npr.\ Understanding random forests: from theory to practice)
+Izgradnja optimalnega odločitvenega drevesa je težek optimizacijski problem, zato v praksi uporabljamo požrešne algoritme. 
+Najpogosteje uporabljen algoritem za gradnjo dreves je ``top down induction''. (TODO: poiskati vir)
 Zapisali smo definicijo odločitvenega drevesa, za lažje razumevanje pa opišimo delovanje modela še na preprostem primeru.
 
 \begin{primer}
-% TODO: dinamičen sklic na sliko
 Na sliki \ref{fig:odlocitveno-drevo} je primer grafa odločitvenega drevesa. 
 Denimo, da to drevo prejme primer $x=(1,1)$, tj. $X_1=1$ in $X_2=1$. 
 Ker velja $f_1 = 2$, v prvem vozlišču preverimo vrednost druge spremenljivke. 
@@ -1403,14 +1390,14 @@ V splošnem se izkaže za zelo uspešno in bolj natančno kot posamezno odločit
 Če je ciljna spremenljivka numerična, je napoved ansambla dreves povprečje napovedi posameznih dreves. 
 Če je ciljna spremenljivka diskretna, pa je napoved ansambla določena izmed napovedi odločitvenih dreves tako, da se izbere napoved, ki jo napove največje število odločitvenih dreves.
 % TODO: kako definiramo modus? -> vprašat
-% TODO: spremenit definicijo v enačbe, ne tekst
+% TODO: spremenit definicijo v enačbe, ne tekst. Maybe???
 \end{definicija}
 
 Poudariti je treba, da je ansambel posebna vrsta modela. 
 Poleg ansambla dreves lahko gradimo tudi ansamble drugih vrst modelov. 
 Ansamble bi lahko obravnavali kot celo zvrst modelov, ki jih zgradimo z združevanjem različnih vrst posameznih modelov. 
 S tem želimo izboljšati točnost in zmanjšati preprileganje~\cite{zhou2012ensemble}. 
-Naključni gozd je posebna vrsta ansambla dreves. % TODO: dopolniti stavek
+Naključni gozd je posebna vrsta ansambla dreves, ki se izkaže za zelo uspešno. % TODO: dopolniti stavek?
 
 \begin{definicija}
 Naj bo $S \subseteq \omega$ podatkovna množica razsežnosti $p$.
@@ -1492,19 +1479,17 @@ Prvi izziv je, kako bi iz naključnega gozda ustvarili čim boljše kodiranje.
 	Definiramo še logično formulo $Q(l,x)=q_1(l,x) \land q_2(l,x) \land \cdots \land q_k(l,x)$, ki je konjunkcija vseh izjav $q_i$.
 	Pravimo, da primer $x$ \textbf{pripada} listu $l$, če velja logična formula $Q(l,x)$.
 \end{definicija}
-% TODO: je logična formula pravilen izraz?
 
 % TODO: preveriti, če bi moral v besedilu uporabljat dvojne pomišljaje
 Vsak list odločitvenega drevesa opiše neko lastnost podatkovne množice. 
 Množico razdeli na dva dela - na primere, ki listu pripadajo, in tiste, ki mu ne.
 Primeri, ki listu pripadajo, ustrezajo množici pogojev, ki sestavljajo formulo $Q(l,x)$, in so si tako v nekaterih lastnostih podobni. % TODO: uštulit izjavo, da te pogoji tvorijo pot do lista? prebrat še enkrat vse skupej za preverit, če je dovolj jasno
 Porodi se ideja za kodiranje: iz gozda izberemo množico ``dobrih'' listov $l_1, l_2, \ldots, l_c$, za katere želimo, da bi skupaj čim bolje zajeli lastnosti množice podatkov.
-% TODO: poudarek, da vzamem liste iz GOZDA, ne nujno iz istega drevesa
+Poudarimo, da izbiramo liste iz celega gozda in ni nujno, da izbrani listi pripadajo istemu drevesu.
 
 % definicija kodirni vektor + kako deluje kodirnik na osnovi tega kodirnega vektorja
 \begin{definicija}
 \label{def-kodiranje}
-	% TODO: oz. njihove oznake?? je tu nujno??
 	Vektor $\kappa=(l_1,\ldots,l_c)$, katerega elementi so listi dreves naključnega gozda, imenujemo \textbf{kodirni vektor}.
 	Kodirnik $\phi_\kappa: \omega \rightarrow \{0,1\}^c$, ki deluje na osnovi kodirnega vektorja $\kappa=(l_1,\ldots, l_c)$, definiramo s predpisom $\phi_\kappa(x) = (b_1, b_2, \ldots, b_c)$, kjer za $i=1,2,\ldots,c$ velja:
 	$$
@@ -1524,7 +1509,7 @@ Dolžina zakodirane predstavitve primerov je $c$, enako kot število listov.
   \label{algoritem-find-encoding}
   \raggedright
   \textbf{Vhod: naključni gozd $m_{rf}$, razsežnost kode $d_{code}$, mera kvalitete listov $\rho$, mera podobnosti listov $sim$, meja dovoljene podobnosti $t_{sim}$}  \\
-  \textbf{Izhod: kodirni vektor $\kappa$} % TODO: preimenovat kodirni vektor, morda je lahko v_K ?
+  \textbf{Izhod: kodirni vektor $\kappa$}
   \begin{algorithmic}[0]
 	\State $\kappa = [\ ]$
 	% we want to init K
@@ -1541,7 +1526,6 @@ Dolžina zakodirane predstavitve primerov je $c$, enako kot število listov.
 			\If{$l_{new} \notin \kappa $}
 				\State $\kappa$.sort\_by\_quality()
 				\State $l_{last}$ = $\kappa$.pop()
-				% TODO: premislit ali je boljši način za reševat podobnost
 				\If{$\rho(l_{new}) > \rho(l_{last})$}
 					\If{$\forall l \in \kappa : sim(l, l_{new}) < t_{sim}$}
 						\State $\kappa$.append$(l_{new}$)
@@ -1584,7 +1568,7 @@ Mero podobnosti definiramo s sledečim predpisom:
 \[
 	sim(l_1, l_2) = \frac{|\sigma_{pripadnost}(l_1) \cap \sigma_{pripadnost}(l_2)|}{|\sigma_{pripadnost}(l_1) \cup \sigma_{pripadnost}(l_2)|}.
 \]
-% TODO: preveriti, ali v skripti mera podobnosti res deluje tako. najbrž ne -> fix it!!!
+
 Kot mero torej vzamemo razmerje med številom primerov, ki pripadajo obema listoma hkrati, in številom vseh primerov, ki pripadajo enemu ali drugemu listu.
 
 % opis mere kvalitete
@@ -1600,19 +1584,18 @@ Mero kvalitete tako v splošnem definiramo kot linearno kombinacijo teh dveh vre
 \label{mera-kvalitete}
 Mera kvalitete je odvisna od parametra $\gamma \in [0,1]$.
 % TODO: opisali smo linearno kombinacijo, to se da skrajšat
-Če privzamemo, da je vrednost $\gamma$ enaka $1$, je mera kvalitete $\rho_1(l)$ enaka deležu listu $l$ pripadajočih primerov iz učne množice.
-Analogno lahko privzamemo, da je vrednost $\gamma$ enaka $0$, v tem primeru, pa je mera kvalitete $\rho_0(l)$ enaka lokalni natančnosti $\mathit{accuracy}(l)$ v listu $l$.
-%
-V nadaljevanju privzamemo $\gamma = 1$ kot privzeto vrednost. % TODO: comment
+% Če privzamemo, da je vrednost $\gamma$ enaka $1$, je mera kvalitete $\rho_1(l)$ enaka deležu listu $l$ pripadajočih primerov iz učne množice.
+% Analogno lahko privzamemo, da je vrednost $\gamma$ enaka $0$, v tem primeru, pa je mera kvalitete $\rho_0(l)$ enaka lokalni natančnosti $\mathit{accuracy}(l)$ v listu $l$.
+% %
+V nadaljevanju zaenkrat privzamemo $\gamma = 1$ kot privzeto vrednost in kot mero kvalitete upoštevamo zgolj delež listu pripadajočih primerov.
 V poglavju o vrednotenju delovanja samokodirnika bomo preverili, kako dobro deluje samokodirnik pri različnih nastavitvah parametra $\gamma$,
 med drugim tudi zato, da ugotovimo, če v splošnem obstaja najboljša nastavitev, ki bi jo nato nastavili kot privzeto.
 
 % TODO: še enkrat napisat/premislit ta odstavek
-Opisali smo postopek s katerim določimo kodirni vektor. Zapisati pa moramo še postopek delovanja kodirnika na osnovi tega kodiranja.
-Algoritem \ref{algoritem-encode} opiše delovanje kodirnika kot je definiran v definiciji \ref{def-kodiranje}. 
-Kodirni vektor, ki ga konstruiramo z algoritmom \ref{algoritem-find-encoding} mu podamo kot argument.
-Opiše torej, kako kodirnik $\phi_K$, ki deluje na osnovi kodirnega vektorja $\kappa$, zakodira podatkovno množico $S$. 
-Z zanko gremo čez podatkovno množico in vsakemu primeru priredimo vektor vrednosti, kot je določen v definiciji \ref{def-kodiranje}.
+
+Opisali smo postopek s katerim določimo kodirni vektor, delovanje kodirnika pa je opisano v algoritmu~\\ref{algoritem-encode}.
+Kot argument mu podamo kodirni vektor konstruiran z algoritmom~\ref{algoritem-find-encoding}.
+Z zanko gremo čez podatkovno množico in vsakemu primeru priredimo vektor vrednosti, ki se ujema z opisom iz definicije~\ref{def-kodiranje}.
 Za vsak primer iz množice $S$ gremo z zanko čez vse elemente kodiranja. 
 Če primer pripada $i$-temu listu kodirnega vektorja, za $i$-ti člen zakodirane predstavitve določimo $1$, sicer za $i$-ti člen zakodirane predstavitve določimo $0$.
 Tako zakodirane primere združimo v zakodirano podatkovno množico $S'$, ki jo algoritem vrne.
@@ -1803,9 +1786,6 @@ Nismo še upoštevali podatka, da odločitveno drevo primerom, ki pripadajo dolo
 Če za liste kodirnega vektorja pripadajočim primerom napovedane vrednosti shranimo, lahko pri konstrukciji dekodirnika tudi te podatke uporabimo.
 Primere lahko torej rekonstruiramo na dva načina: z uporabo shranjenih napovedi ali pa z algoritmom \texttt{find\_\-negation\_\-candidate}.
 Premisliti želimo prednosti in slabosti teh dveh pristopov ter možnosti, kako bi v postopku dekodiranja izkoristili obe informaciji.
-% leftover v komentarju. TODO: yeet out?
-% Pričakujemo, da so shranjene napovedi sorazmerno natančne, saj je natančnost napovedi glavni cilj pri izgradnji odločitvenega drevesa.
-% Premisliti želimo prednosti in slabosti uporabe shranjenih napovedi v primerjavi z DPLL algoritmom, zanima pa nas tudi, kako bi obe informaciji izkoristili v postopku konstrukcije dekodirnika.
 
 % Če je več možnih vektorjev, ki zadovoljijo formulo podano DPLL algoritmu, ni dobrega zagotovila za natančnost napačnega vektorja
 % hitreje je uporabiti shranjene napovedi
@@ -1817,8 +1797,6 @@ Nimamo zagotovila, da je rešitev algoritma zares bližje prvotni vrednosti prim
 Pri uporabi shranjenih napovedi dobimo napoved za vrednosti vseh spremenljivk, pri uporabi DPLL algoritma pa to ni zagotovljeno.
 Uporaba shranjene napovedi je tudi hitrejša, saj zahteva zgolj, da iz zakodiranega primera razberemo, kateremu listu pripada in nato branje shranjene napovedi tega lista.
 Problem uporabe shranjene napovedi pa nastopi pri primerih, ki ne pripadajo nobenemu listu iz kodirnega vektorja -- za take liste shranjene napovedi nimamo.
-
-% TODO: z ljupčotom se pogovorit o numeričnih vs. diskretnih vs. boolovih spremenljivkah
 
 % dobimo jasno delitev primerov: tiste, ki pripadajo kakšnemu listu in tiste, ki nobenemu. To utemeljimo
 Če upoštevamo ta razmislek, je smiselno primere razdeliti na dve skupini in pri vsaki ravnati drugače.
@@ -1888,25 +1866,23 @@ Nato formulo poda algoritmu \texttt{find\_\-negation\_\-candidate} in za napoved
 
 % Uvod v poglavje, pregled razdelkov.
 Različico samokodirnika, ki smo jo predstavili v prejšnjem poglavju, smo implementirali v programskem jeziku Python.
-Najprej bomo opisali parametre, ki so uporabljeni v implementaciji, nato pa komponente, na katere je razdeljena koda.
-Opisali bomo tudi nekaj funkcij, ki smo implementirali v več različicah, in pri katerih lahko posledično izbiramo nekoliko različne načine delovanja za samokodirnik.
-Nato bomo našteli še nekaj možnih izboljšav implementacije samokodirnika.
+Najprej opišemo parametre, ki so uporabljeni v implementaciji, nato pa komponente, na katere je razdeljena koda.
+Opišemo tudi nekaj funkcij, ki smo jih implementirali v več različicah, in pri katerih lahko posledično izbiramo nekoliko različne načine delovanja za samokodirnik.
+Nato naštejemo še nekaj možnih izboljšav implementacije samokodirnika.
 
 % Komentar in utemeljitev za izbiro programskih jezikov, ki smo jih uporabili - python in R
 Python ima veliko število knjižnic s področja strojnega učenja in koda napisana v Pythonu je sorazmerno kratka in pregledna, zaradi česar je Python dobra izbira za implementacijo idej.
-Uporabili smo implementacijo modelov strojnega učenja iz knjižnice Sklearn.
-% Komentar o knjižnicah, ki smo jih uporabili? npr.\ keras, sklearn
-Knjižnica Sklearn, oz.\ Scikit-learn je odprtokodna knjižnica, ki vsebuje nabor različnih orodij in modelov za strojno učenje.
-V našem samokodirniku smo uporabili implementacijo odločitvenih dreves, naključnega gozda ter funkcije za računanje razdalje med primeri iz knjižnice Sklearn~\cite{scikit-learn}.
+Uporabili smo knjižnico Sklearn, oz.\ Scikit-learn, ki je odprtokodna knjižnica, ki vsebuje nabor različnih orodij in modelov za strojno učenje.
+V našem samokodirniku smo iz knjižnice Sklearn~\cite{scikit-learn} uporabili implementacijo odločitvenih dreves, naključnega gozda ter funkcije za računanje razdalje med primeri.
 % TODO: odločitev; koliko je v tem poglavju smiselno pisati o nevronskih mrežah. Z opisi bi se morda posvetili predvsem naši alternativni implementaciji?
 
-% TODO: ali bo R uporabljen še za kej? najbrž. UPDATE
+% TODO: ali bo R uporabljen še za kej? najbrž. UPDATEs
 % Tudi programski jezik R ima na razpolago veliko število knjižnic in paketov za statistično analizo in strojno učenje.
 Skripte za generiranje podatkovnih množic, testiranje samokodrinkov iz nevronskih mrež in izris grafov, ki prikazujejo rezultate testov, so napisane v programskem jeziku R.
 Za to smo se odločili zaradi velikega števila paketov in knjižnic za statistično analizo podatkov, ki jih ima R na razpolago.
 % samokodirnik iz nevronskih mrež smo nardili v R
 Za primerjavo z našim samokodirnikom smo uporabili implementacijo samokodirnika z nevronskimi mrežami iz knjižnice Deepnet~\cite{deepnet}.
-Knjižnica Deepnet je odprtokodna knjižnica, ki vsebuje implementacije nekaterih standardnih nevronskih mrež in samokodirnikov.
+Knjižnica Deepnet je odprtokodna knjižnica, ki vsebuje implementacije standardnih nevronskih mrež in samokodirnikov.
 % TODO: kej dopisat ???
 % Za primerjavo smo uporabili standardno implementacijo nevronskih mrež iz knjižnice Keras (TODO: citat). % TODO: ali je to sploh res??? najbrž ne bo ostalo
 % Iz teh nevronskih mrež smo sestavili standarden samokodirnik, ki ga bomo uporabili za primerjavo z alternativno implementacijo.
@@ -1915,28 +1891,27 @@ Knjižnica Deepnet je odprtokodna knjižnica, ki vsebuje implementacije nekateri
 \subsection{Parametri}
 \label{razdelek-parametri}
 
-V tem razdelku bomo opisali pomembnejše parametre samokodirnika. 
-V poglavju o vrednotenju samokodirnika bomo tudi analizirali učinek spreminjanja večine teh parametrov na delovanje samokodirnika.
+V tem razdelku opišemo pomembnejše parametre samokodirnika. 
+V poglavju o vrednotenju samokodirnika tudi analiziramo učinek spreminjanja večine teh parametrov na delovanje samokodirnika.
 
 \begin{itemize}
 	\item \texttt{global\_seed}: Parameter, ki določi seme (angl. ``seed''), ki se uporabi za simulacijo naključnosti.
 	Postopek učenja in vrednotenja samokodirnika se večkrat ponovi, zato je \texttt{global\_seed} seznam, katerega dolžina je enaka številu iteracij.
 	Tako ima postopek v vsaki iteraciji novo seme. 
 	Privzeta vrednost tega parametra je seznam $[1,2,\ldots,100]$.
-	% TODO: nastavit parameter za seed, ki bo vseboval toliko elementov, kot je ponovitev vzorčenja/učenja, in ga tu opisati.
+	% TODO: nastavit parameter za seed, ki bo vseboval toliko elementov, kot je ponovitev vzorčenja/učenja
 
 	\item \texttt{code\_size}: Parameter, ki označuje razsežnost zakodiranih primerov, oz.\ razsežnost kodirnega vektorja. 
 	Veljavne vrednosti so naravna števila manjša ali enaka razsežnosti podatkovne množice.
 	Primer, ko je \texttt{code\_size} enak ali večji od razsežnosti podatkovne množice, pa je načeloma trivialen.
 	Parameter \texttt{code\_size} je v algoritmu \ref{algoritem-decode} označen z oznako $c$ in v algoritmu \ref{algoritem-find-encoding} označen z $d_{code}$. 
 	% TODO: pregledati algoritme
-	% TODO: poenotiti oznake parametrov v različnih algoritmih
+	% TODO: poenotiti oznake parametrov v različnih algoritmih!!!!
 	
 	\item \texttt{diff\_th}: Parameter, ki določa dovoljeno mero podobnosti med listi, ki so vsebovani v kodirnem vektorju.
-	Meja dovoljene podobnosti je uporabljena tako, kot je opisano v algoritmu \ref{algoritem-find-encoding}, kjer je označena s $t_{\mathit{sim}}$.
-	Iz nabora kandidatov vsebovanih v kodirnem vektorju, ima poljuben par listov mero podobnosti praviloma manjšo od \texttt{diff\_th}, 
-	saj pri privzetem delovanju samokodirnika bolj podobnih parov v kodirni vektor ne vključimo.
-	Zaenkrat je privzeta vrednost parametra \texttt{diff\_th} enaka $1$, kar pomeni, da se pri vključevanju novih kandidatov v kodirni vektor ne oziramo na njihovo podobnost ostalim elementom. 
+	Uporaba meje podobnosti je opisana v algoritmu \ref{algoritem-find-encoding}, kjer je označena s $t_{\mathit{sim}}$.
+	Iz nabora kandidatov vsebovanih v kodirnem vektorju, ima poljuben par listov mero podobnosti manjšo od \texttt{diff\_th}, saj bolj podobnih parov v kodirni vektor ne vključimo.
+	Privzeta vrednost parametra \texttt{diff\_th} je enaka $1$, kar pomeni, da se pri vključevanju novih kandidatov v kodirni vektor ne oziramo na njihovo podobnost ostalim elementom. 
 
 	\item \texttt{rf\_size}: Parameter, ki opiše število odločitvenih dreves, ki sestavljajo naključni gozd. 
 	V algoritmu~\ref{algoritem-construct-RF} je ta parameter označen s $q$. 
@@ -1955,28 +1930,31 @@ Pomembnejše pomožne parametre bomo našteli pri opisu funkcij v naslednjem raz
 \begin{figure}[h!]
 
 	\begin{center}
-	\includegraphics[width=\textwidth]{shema delovanja placeholder}
+	\includegraphics[width=\textwidth]{images/shema delovanja placeholder.png}
 	\end{center}
 	
 	\caption{(začasna) Shema delovanja samokodirnika}
+	\label{fig:shema_delovanja}
 \end{figure}
 
-% TODO: skrajšati/preoblikovati preostali tekst po žiga navodilih
 
-% TODO: opisati shemo delovanja
-V nadaljevanju se bomo podrobneje posvetili posameznim komponentam samokodirnika.
+% opisati shemo delovanja
+Na sliki~\ref{fig:shema_delovanja} je prikazana shema implementacije samokodirnika.
+Najprej na učni množici naučimo naključni gozd, nato pa iz tega naključnega gozda konstruiramo kodirni vektor.
+Kodirni vektor podamo kot argument kodirniku in dekodirniku, ki skupaj tvorita naš samokodirnik.
+Kodirniku lahko nato podamo druge (testne) množice, da jih zakodira, zakodirane množice pa rekonstruiramo z dekodirnikom.
+
 
 % Skripta, s katero smo implementirali samokodirnik, je razdeljena na komponente.
 % Nekatere komponente so glavni deli samokodirnika, druge pa so samo skupine dodatnih funkcij, ki smo jih umestili skupaj za boljšo organizacijo kode.
 % V tem razdelku bomo najprej našteli komponente iz katerih je skripta sestavljena, nato pa bomo pomembnejše komponente še podrobneje opisali.
 % Celotno kodo je možno pregledati v prilogi, sestavljena pa je iz sledečih komponent. 
 
+Implementacija samokodirnika je razdeljena na sledeče komponente:
+
 \begin{itemize}
 	\item skripta za generiranje podatkovnih množic: z njo generiramo množice za testiranje delovanja samokodirnika. 
 	Implementirana je v R-ju, več pozornosti pa ji bomo namenili v poglavju o vrednotenju. % TODO: uskladiti s poglavjem o vrednotenju
-	
-	\item pomožne funkcije: nekatere dodatne funkcije, ki ne pripadajo direktno nobeni izmed ostalih komponent, 
-	vendar poenostavijo implementacijo ostalih funkcij.
 
 	\item kodirnik: funkcije, ki skupaj sestavljajo kodirnik, kot je opisan v algoritmu \ref{algoritem-encode}.
 
@@ -1986,10 +1964,6 @@ V nadaljevanju se bomo podrobneje posvetili posameznim komponentam samokodirnika
 	\item dekodirnik: funkcije, ki skupaj sestavljajo dekodirnik, kot je opisan v algoritmu \ref{algoritem-decode}.
 
 	\item funkcije za testiranje: funkcije, ki izvedejo postopek učenja samokodirnika ter ovrednotijo njegovo delovanje, ponavadi z več ponovitvami.
-
-	\item funkcije za branje in zapis datotek: skupina funkcij, ki opravljajo branje podatkovnih množic iz datotek, zapisujejo rezultate in zapisnik (ang. log) poskusov, itd.
-
-	\item skripta za risanje grafov: v R-ju napisana skripta, ki prebere datoteke z rezultati in ustvari graf rezultatov.
 \end{itemize}
 
 % vsebina opisa pri posamezni komponenti: namen, iz česa je sestavljeno, referenca na prejšnje dele naloge, če se ujema
@@ -2002,7 +1976,7 @@ V nadaljevanju se bomo podrobneje posvetili posameznim komponentam samokodirnika
 % Opis funkcije za konstrukcijo kodirnega vektorja. Opišemo, v kakšno strukturo shranimo kodiranje. Bolj splošno opišemo postopek.
 Funkcije za konstrukcijo kodirnega vektorja okvirno sledijo postopku opisanem v algoritmu \ref{algoritem-find-encoding}.
 Nekaj ključnih razlik je predvsem v tem, da si z nekaterimi strukturami shranimo dodatne podatke za lažje obdelavo in tem, da je koda prilagojena Scikit implementaciji naključnega gozda.
-Cilj postopka je konstruirati kodirni vektor, ki bo omogočil čim boljše delovanje samokodirnika, ki deluje na osnovi tega kodirnega vektorja. % TODO: čim bolj točen? boljši -> ???
+Cilj postopka je konstruirati kodirni vektor, ki bo omogočil čim boljše delovanje samokodirnika.
 
 V razdelku 3.3.3 smo kot mero kvalitete listov \textit{quality} določili delež listu pripadajočih primerov iz učne množice. 
 Funkcija \texttt{max\_\-coverage} v danem odločitvenem drevesu poišče najbolj kvalitetne liste, tj. tiste, katerim pripada največje število primerov iz učne množice, in jih uredi glede na kvaliteto.
@@ -2010,13 +1984,13 @@ Vrne \texttt{n\_\-leaves} dolg seznam parov, ki vsebujejo delež listu pripadajo
 Parameter \texttt{n\_\-leaves} je privzeto nastavljen na 1, kar pomeni, da funkcija vrne zgolj najbolj kvaliteten list iz odločitvenega drevesa.
 
 Funkcija \texttt{find\_\-different\_\-candidates} za vsako drevo iz danega naključnega gozda pregleda najboljše liste, ki jih vrne funkcija \texttt{max\_\-coverage}, in jih združi v seznam \texttt{candidates}.
-Posamezen list doda v seznam, če je bolj kvalitetni od nekega lista, ki je že vsebovan v seznamu in ni preveč podoben nobenemu izmed listov seznama.
+Posamezen list doda v seznam, če je bolj kvaliteten od nekega lista, ki je že vsebovan v seznamu in ni preveč podoben nobenemu izmed listov seznama.
 To pomeni, da funkcija izračuna \texttt{code\_similarity} med novim listom in vsakim kandidatom v \texttt{candidates} -- nov list dodamo samo v primeru, ko je njegova podobnost s poljubnim elementom seznama candidates manjša od \texttt{diff\_th}.
-Če je dolžina seznama že enaka želeni razsežnosti kodirnega vektorja, se nove liste doda tako, da se izbriše najmanj kvaliteten list vsebovan v seznamu.
+Če je dolžina seznama že enaka želeni razsežnosti kodirnega vektorja, se izbriše najmanj kvaliteten list vsebovan v seznamu.
 % TODO: možnost izboljšave - način, kako se pregleda in preverja podobnost med listi. Morda bi lahko najprej izbrali vse najboljše in od njih izločili podmnožico s čim manj podobnosti. <- ZA V ZADNJI RAZDELEK
 
-Funkcijo \texttt{find\_\-different\_\-candidates} nato ovijemo še s funkcijo \texttt{encoding\_\-naive}, da seznam najdenih kandidatov ''razpakira``.
-Kandidate shrani v kodirni vektor in jim doda podatke, ki so potrebni v nadaljnji obdelavi. % TODO
+Funkcijo \texttt{find\_\-different\_\-candidates} nato ovijemo s funkcijo \texttt{encoding\_\-naive}.
+Le ta kandidate shrani v kodirni vektor in jim doda podatke, ki so potrebni v nadaljnji obdelavi.
 Kodirni vektor shranimo v obliki seznama trojic, ki vsebujejo delež listu pripadajočih primerov, opis poti do lista in vrednost, ki jo list napove njemu pripadajočim primerom.
 
 % TODO: prebrat in popravit, zmanjšat število odstavkov
@@ -2029,7 +2003,7 @@ Kodirni vektor shranimo v obliki seznama trojic, ki vsebujejo delež listu pripa
 % Odstavek za opis kodirnika
 % Sem spadajo funkcije: encode\_sample, encode\_set, check\_condition\_for\_sample
 
-Funkcije za opis kodirnika so namenjene implementaciji kodirnika, kot je opisan v algoritmu \ref{algoritem-encode}.
+Funkcije za opis kodirnika slediju postopku opisanem v algoritmu~\ref{algoritem-encode}.
 Postopek kodiranja enega primera izvede funkcija \texttt{encode\_sample}, ki deluje s pomočjo pomožne funkcije \texttt{check\_condition\_for\_sample}.
 Pomožno funkcijo \texttt{check\_condition\_for\_sample} uporabimo, da preveri, ali logični pogoj drži za dan primer iz podatkovne množice.
 Funkcija \texttt{encode\_set} z uporabo \texttt{encode\_sample} zakodira celo podatkovno množico primerov, da za uporabnika poenostavi kodiranje podatkov.
@@ -2041,18 +2015,17 @@ Funkcija \texttt{encode\_set} z uporabo \texttt{encode\_sample} zakodira celo po
 % feature\_in\_list, prune\_formula, choose\_literal, replace\_literal, check\_for\_unit\_clause, check\_for\_pure\_literal, dpll, find\_negation\_candidate
 
 Dekodirnik implementiramo s funkcijo \texttt{decode\_sample} po postopku, ki je opisan v algoritmu \ref{algoritem-decode}.
-Pri dekodiranju se držimo načela, ki smo ga opisali v poglavju o dekodirniku.
 Zakodiranim primerom, ki pripadajo vsaj enemu listu iz kodirnega vektorja, napovemo vrednost, ki bi jo ta list napovedal pripadajočim primerom.
 Če najdemo v kodirnem vektorju več primernih listov, uporabimo napoved zadnjega najdenega, 
 saj pri združevanju napovedi več listov nismo opazili izboljšave natančnosti in je to iz vidika implementacije najbolj preprosto.
 Pri primerih, ki ne pripadajo nobenemu listu iz kodirnega vektorja, uporabimo DPLL algoritem. % TODO sklic na razdelek 3.3.3 (?)
 Pomožna funkcija \texttt{find\_negation\_candidate} inicializira funkcijo \texttt{dpll}, ki z uporabo pomožnih funkcij izvede postopek DPLL algoritma. % in vrne primer, ki ustreza rezultatu algoritma.
-Rezultat DPLL algoritma nato uporabi, da poišče in vrne primer, ki se ujema z rezultatom algoritma.
-Za bolj enostavno uporabo s strani uporabnika funkcija \texttt{decode\_set} dekodira celo množico zakodiranih primerov hkrati z uporabo funkcije \texttt{decode\_sample}.
+Rezultat nato uporabi, da poišče in vrne ujemajoč primer.
+Za bolj enostavno uporabo funkcija \texttt{decode\_set} dekodira celo množico zakodiranih primerov hkrati z uporabo funkcije \texttt{decode\_sample}.
 
 % TODO: odločit se ali se vse DPLL funkcije uvrstimo k dekodirniku
 
-Pomožne funkcije se delijo na par podskupin, ki imajo skupen namen:
+Pomožne funkcije se delijo na par podskupin:
 % ekstra stavek ali dva opisa
 \begin{itemize}
 	\item funkcije za tiskanje izpisov: Sem spadata \texttt{print\_path}, ki za v urejeni obliki izpiše pot do izbranega vozlišča v drevesu, in 
@@ -2077,12 +2050,9 @@ Pomožne funkcije se delijo na par podskupin, ki imajo skupen namen:
 \subsection{Različice algoritma}
 
 % Uvod/pregled razdelka (kolikor alternativ bo ostalo v končni implementaciji - ali sploh kakšna razen pri iskanju kodiranja?).
-V tem razdelku bomo opisali dele samokodirnika, pri katerih je implementiranih več različnih funkcij z enakim namenom.
+Nekateri deli samokodirnika imajo več možnih implementacij, z različnimi prednostmi in pomanjkljivostmi
 Povedali bomo, katere funkcije so v delovanju privzete in zakaj je lahko uporabna alternativna implementacija.
 Različice funkcij bomo tudi kratko opisali in poudarili razlike med njimi.
-
-Za konstrukcijo kodirnega vektorja je privzeto uporabljena funkcija \texttt{encoding\_\-naive},
-implementirani pa sta funkciji, ki konstruirata kodirni vektor:
 
 % TODO: katero privzeto uporabljamo???
 \begin{itemize}
@@ -2090,19 +2060,20 @@ implementirani pa sta funkciji, ki konstruirata kodirni vektor:
 	Da je delovanje hitrejše, pregleda zgolj najbolj kvaliteten list iz vsakega odločitvenega drevesa, ki ga nato potencialno doda v kodirni vektor.
 	Ker lahko funkcija \texttt{encoding\_\-naive} veliko potencialnih kandidatov pri pregledovanju izpusti, bi lahko dobili boljši rezultat z upoštevanjem več kandidatov.
 
-	\item \texttt{encoding}: funkcija, ki liste pregleda manj naivno.
+	\item \texttt{encoding}:
 	V drevesih, katerih najbolj kvaliteten list je dovolj dober za vključiti v kodirni vektor, funkcija \texttt{encoding} pregleda tudi drugi najboljši list.
 	Postopek nadaljuje in za vsak list, ki ga vključi v kodirni vektor, preveri, ali je tudi po kvaliteti naslednji list dovolj dober kandidat.
-	Če list ni dovolj kvaliteten za vključitev v kodirni vektor, tudi drugi manj kvalitetni listi ne bodo, torej se lahko pregled drevesa zaključi.
+	Če list ni dovolj kvaliteten za vključitev v kodirni vektor, tudi manj kvalitetni listi ne bodo, torej se lahko pregled drevesa zaključi.
 	Na tak način so v kodirni vektor res vključeni vsi najkvalitetnejši kandidati.
 \end{itemize}
+% TODO: odstraniti nakladanje o tem, da ne pregledamo vseh kandidatov iz razdelka o možnih izboljšavah?
 
 Pri konstrukciji kodirnega vektorja se uporabi pomožna funkcija, ki pregleda naključni gozd in izbere seznam dobrih kandidatov.
 Za iskanje kandidatov sta implementirani dve različni funkciji, privzeto pa se uporablja funkcija \texttt{find\_\-different\_\-candidates}.
 
 \begin{itemize}
 	\item \texttt{find\_\-naive\_\-candidates}:
-	Deluje hitro vendar naivno, ker upošteva zgolj najbolj kvaliteten list vsakega odločitvenega drevesa.
+	Deluje hitro vendar upošteva zgolj najbolj kvaliteten list vsakega odločitvenega drevesa.
 	Poleg tega lahko v seznam kandidatov doda med seboj zelo podobne liste, saj ne preverja njihove medsebojne mere podobnosti.
 
 	\item \texttt{find\_\-different\_\-candidates}: pregleda liste dreves naključnega gozda, 
@@ -2121,13 +2092,12 @@ Za iskanje kandidatov sta implementirani dve različni funkciji, privzeto pa se 
 % TODO: premislit očitne pomanjkljivosti in možne (ambiciozne) nadgradnje
 
 Ta razdelek je namenjen kratkemu pregledu možnih izboljšav implementacije.
-Implementaciji bi se z uporabo bolj optimalnih metod dalo izboljšati prostorsko in časovno zahtevnost.
-Kar pa ima pomen zgolj, če bomo samokodirnik želeli uporabiti v praksi.
+Implementaciji bi se z uporabo bolj optimalnih metod dalo izboljšati prostorsko in časovno zahtevnost, kar pa ima pomen zgolj, če bomo samokodirnik želeli uporabiti v praksi.
 Ker se zavedamo, da implementacija ni zares učinkovita, bomo pri testiranju in vrednotenju izpustili meritve časa.
 
 Samokodirnik bomo v prihodnje nadgradili tudi za uporabo z numeričnimi spremenljivkami.
-Zaenkrat je namenjen zgolj diskretnim (dvojiškim) spremenljivkam, vendar lahko funkcije, ki smo jih uporabili, posplošimo, da bodo dobro delovale tudi za numerične podatke.
-S tem bomo lahko samokodirnik uporabljali tudi na množicah slik, npr.\ človeške pisave, ki so pogost primer uporabe samokodirnikov.
+Zaenkrat je namenjen zgolj diskretnim dvojiškim spremenljivkam, vendar lahko funkcije, ki smo jih uporabili, posplošimo, da bodo dobro delovale tudi za numerične podatke.
+S tem bomo lahko samokodirnik uporabljali tudi na množicah slik, npr.\ pisave, ki so pogost primer uporabe samokodirnikov.
 Do sedaj ga v ta namen še nismo testirali.
 
 % TODO: prebrati, maybe yeet out? ugotovit, če je kej še relevantnega
@@ -2208,13 +2178,13 @@ Primere, ki niso bili nikoli izbrani, dodamo v testno množico.
 % Na osnovi tega kodirnega vektorja zakodiramo podatke iz testne množice in jih nato dekodiramo (TODO: sklic).
 % Izračunamo rekonstrukcijsko napako in jo shranimo.
 Z učno množico naučimo model naključnega gozda. % TODO: naučimo - natreniramo?
-S postopkom iz algoritma \ref{algoritem-find-encoding} na osnovi tega naključnega gozda konstruiramo kodirni vektor.
-Ta kodirni vektor nato uporabimo kot argument za kodirnik iz algoritma \ref{algoritem-encode} in dekodirnik iz algoritma \ref{algoritem-decode}, ki skupaj tvorita naš samokodirnik.
+Z algoritmom~\ref{algoritem-find-encoding} na osnovi tega naključnega gozda konstruiramo kodirni vektor.
+Ta kodirni vektor nato podamo kot vhod za algoritem \ref{algoritem-encode} in dekodirnik iz algoritma \ref{algoritem-decode}, ki skupaj tvorita samokodirnik.
 Izračunamo rekonstrukcijsko napako samokodirnika na testni množici in jo shranimo.
 
-Ker želimo bolj splošen rezultat, ta postopek ponovimo večkrat (v naših testih smo uporabili 100 ponovitev) z različnimi naključnimi semeni.
-Ko zaključimo z vsemi iteracijami, izračunamo povprečje rekonstrukcijskih napak in standardno deviacijo.
-Rezultate in parametre postopka shranimo v datoteke za beleženje in nadaljnjo obdelavo.
+Ker želimo bolj splošen rezultat, ta postopek ponovimo večkrat (v testih smo uporabili 100 ponovitev) z različnimi naključnimi semeni.
+Ko zaključimo z vsemi iteracijami, izračunamo povprečje rekonstrukcijskih napak in standardno deviacijo. % TODO: prevod deviacije?
+Rezultate in parametre postopka shranimo za beleženje in nadaljnjo obdelavo.
 
 % TODO: opisat še postopek za teste z nevronskimi mrežami?
 
@@ -2226,10 +2196,10 @@ Rezultate in parametre postopka shranimo v datoteke za beleženje in nadaljnjo o
 % uvod
 Za učenje samokodirnikov želimo množico, ki se jo da predstaviti v prostoru manjše razsežnosti.
 V ta namen bomo izbrali množico primerov v prostoru manjše razsežnosti in jih s transformacijo preslikali v prostor višje razsežnosti.
-Ta postopek lahko imenujemo konstrukcija spremenljivk, podrobneje pa je opisan v~\cite[razdelek\ 10.3]{flach2012machine}.
+Ta postopek imenujemo konstrukcija spremenljivk~\cite[razdelek\ 10.3]{flach2012machine}.
 
 % formulacija
-Naj bo $q \in \N$ razsežnost prvotnega prostora, ki ga imenujemo tudi \emph{skriti prostor} (ang. ``latent space'')
+Naj bo $q \in \N$ razsežnost prvotnega prostora imenovan tudi \emph{skriti prostor} (ang. ``latent space'')
 in $p > q$ naravno število, ki je razsežnost večjega prostora.
 Naj bo v matriki $Z \in \R^{n \times q}$ zapisanih $n$ primerov iz prvotnega prostora.
 Naj bosta $W \in \R^{q \times p}$ in $X \in \R^{n \times p}$ taki matriki, da velja:
@@ -2237,20 +2207,21 @@ Naj bosta $W \in \R^{q \times p}$ in $X \in \R^{n \times p}$ taki matriki, da ve
 	X = Z \cdot W.
 \]
 Matrika $W$ je transformacijska matrika, ki primere preslika iz skritega prostora razsežnosti $q$ v večji prostor razsežnosti $p$.
-V matriki $X$ pa so zapisani preslikani primeri, predstavlja podatkovno množico razsežnosti $p$ z $n$ primeri.
+Tako konstruirana matrika $X$ predstavlja podatkovno množico razsežnosti $p$ z $n$ primeri.
 
 % primer za razumevanje
-Preprost praktičen primer podatkovne množice transformirane iz skritega prostora bi bila npr. množica uporabnikov aplikacije za gledanje filmov in njihove preference.
-Matriko $X$ lahko razumemo kot zapis preferenc uporabnikov, kjer so spremenljivke posamezni filmi, in je s boolovimi vrednostmi zapisano, ali je bil uporabniku film všeč.
+Preprost primer podatkovne množice transformirane iz skritega prostora je npr. množica uporabnikov aplikacije za gledanje filmov in njihove preference.
+Matriko $X$ lahko razumemo kot zapis preferenc uporabnikov, kjer so spremenljivke posamezni filmi, in je z logičnimi vrednostmi zapisano, ali je bil uporabniku film všeč.
 V tem primeru bi spremenljivke skritega prostora predstavljale žanre filmov, matrika $Z$ pa bi opisala, kateri žanri so všeč kateremu uporabniku.
 Transformacijska matrika $W$ definira povezavo med skritim in razširjenim prostorom in bi v tem primeru vsebovala podatke o tem, kater film pripada katerim žanrom.
+% TODO: opomba, da je ta primer mal naiven, ker preference seveda niso perfektno opisane z žanri
 
 % dodatni podatki o konstrukciji
-Podatkovno množico za testiranje konstruiramo tako, da najprej konstruiramo matriko $Z$ primerov v skritem prostoru.
-Pri primeru, kjer $q$ ni prevelik, matriko konstruiramo tako, da naštejemo vse različne kombinacije vektorjev dolžine $q$, ki vsebujejo boolove vrednosti.
-Nato naključno generiramo še transformacijsko matriko $W$ in ju pomnožimo, da dobimo podatkovno množico $X$ razsežnosti $p$, ki ima rang velikosti kvečjemu $q$.
-Pri konstrukciji lahko določimo še omejitev \textit{qs} števila enic v vrsti/stolpcu, da sta matriki dovolj ``sparse''.
-V prej opisanem primeru bi to pomenilo, da lahko film pripada največ \textit{qs} žanrom in da je uporabniku všeč kvečjemu \textit{qs} žanrov.
+Za podatkovno množico za testiranje najprej konstruiramo matriko $Z$ primerov v skritem prostoru.
+Pri primeru, kjer $q$ ni prevelik, matriko konstruiramo tako, da naštejemo vse različne kombinacije vektorjev dolžine $q$, ki vsebujejo logične vrednosti.
+Nato naključno generiramo transformacijsko matriko $W$ in ju pomnožimo, da dobimo podatkovno množico $X$ razsežnosti $p$, ki ima rang velikosti kvečjemu $q$. % TODO: kako specifično tole generiramo???
+Pri konstrukciji lahko določimo še omejitev \textit{qs} števila enic v vrsti/stolpcu, da sta matriki dovolj ``sparse''. % TODO: prevod izraza
+V prej opisanem primeru to pomeni, da lahko film pripada največ \textit{qs} žanrom in da je uporabniku všeč kvečjemu \textit{qs} žanrov.
 
 \subsection{Rezultati}
 \label{pogl:rezultati}
@@ -2294,6 +2265,7 @@ Začeli smo z grobim preverjanjem vrednosti, kjer smo $\gamma$ testirali z inter
 	samokodirnika v odvisnosti od vrednosti parametra $\gamma$ na intervalu $[0,\ 1]$, kjer smo teste izvajali pri argumentih z razmikom $0,05$. }
 	\label{fig:gamma_rough}
 \end{figure}
+% TODO: urediti pike vs. vejice pri racionalnih številih
 
 Pri grafu na sliki~\ref{fig:gamma_rough} vidimo jasen prehod, ki kaže, da se rekonstrukcijska napaka začne manjšati okoli vrednosti $\gamma=0,5$, 
 od vrednosti $\gamma=0,6$ naprej pa napaka dosega najnižje vrednosti.
@@ -2315,10 +2287,10 @@ V intervalu vrednosti $\gamma \in [0.6,\ 1]$ smo natančnost samokodirnika preve
 % Iz rezultatov vidimo, da sta v tem primeru najboljši vrednosti parametra gamma 0.65 in 0.99, 
 % dobra pa je tudi vrednost 1, ki nas zanima tudi zato, ker predstavlja bolj enostavno mero kvalitete.
 % Te tri vrednosti smo dodatno analizirali in primerjali med seboj, tako da smo teste z njimi pognali za vse code\_size razsežnosti.
-Iz grafa prikazanega na sliki~\ref{fig:gamma_fine} opazimo, da je rekonstrukcijska napaka minimalna pri argumentih $\gamma=0,65$ in $\gamma=0,99$.
-Napak je sorazmerno majhna tudi pri $\gamma=1$, ta vrednost pa je posebej zanimva, saj se mera kvalitete v tem primeru poenostavi.
+Iz grafa prikazanega na sliki~\ref{fig:gamma_fine} opazimo, da je rekonstrukcijska napaka minimalna pri argumentih $\gamma=0,65$ in $\gamma=0,99$. % TODO: komentar, da ni preveč opazne razlike
+Napaka je sorazmerno majhna tudi pri $\gamma=1$, ta vrednost pa je posebej zanimiva, saj se mera kvalitete v tem primeru poenostavi.
 Natančnost samokodirnika pri teh treh vrednostih $\gamma$ smo dodatno analizirali s testiranjem pri različnih nastavitvah razsežnosti \texttt{code\_size}.
-Zanima pa nas tudi pri kateri razsežnosti je samokodirnik najbolj natančen.
+Zanima nas tudi pri kateri razsežnosti je samokodirnik najbolj natančen.
 
 \begin{figure}[h]
 	\centering
@@ -2337,9 +2309,10 @@ Zanima pa nas tudi pri kateri razsežnosti je samokodirnik najbolj natančen.
 % Posebej izpostavimo razsežnost, s katero je množica dejansko generirana.
 % Zanima nad parameter, pri katerem dosegamo dobre razsežnosti, pričakujemo, da je boljša natančnost pri večjih dimenzijah.
 Iz grafov na sliki~\ref{fig:triple_code_size} razberemo, da se rekonstrukcijska napaka z večanjem razsežnosti \texttt{code\_size} praviloma manjša.
-Napaka pa je dosegla minimum pri vrednostih parametra od $12$ do $15$.
+Napaka je dosegla minimum pri vrednostih parametra od $12$ do $15$.
 Noben izmed grafov ni pri vseh vrednostih boljši od ostalih dveh, 
 zato želimo primerjati tudi povprečno napako in bomo za primerjavo delovanja pri različnih vrednostih parametra $\gamma$ uporabili še drugačen prikaz podatkov.
+% TODO: izsilit boljši položaj za slike
 
 % TODO: katere dimenzije je vredno upoštevati???
 \begin{figure}[h]
@@ -2347,7 +2320,7 @@ zato želimo primerjati tudi povprečno napako in bomo za primerjavo delovanja p
 	\includegraphics[width=0.6\textwidth]{images/test_brki_plot_brez15in1.png}
   % \caption[caption za v kazalo]{Dolg caption pod sliko}
 	\caption[Graf z brki.]{Shema prikazuje porazdelitev povprečne rekonstrukcijske napake pri različnih parametrih $\gamma$,
-	kjer smo iz rezultatov izpustili trivialna primera \texttt{code\_size} $\in \{1,15\}$.
+	kjer smo izpustili trivialna primera \texttt{code\_size}~$\in \{1,15\}$. % TODO: tale zapis v isto vrstico
 	Zgornji in spodnji rob navpičnih črt predstavljata maksimalno in minimalno doseženo vrednost napake,
 	škatla predstavlja interval v katerem je vsebovana (srednja) polovica doseženih vrednosti
 	in odebeljena vodoravna črta pa predstavlja mediano.}
@@ -2358,11 +2331,11 @@ zato želimo primerjati tudi povprečno napako in bomo za primerjavo delovanja p
 % Rezultati pa izpadejo tudi bolj konsistentni, saj je dobra pri višjih razsežnostih (7-15), ki jih bomo najverjetneje večinoma uporabljali.
 % Naivno je pričakovat, da lahko razsežnost množice skrčimo denimo na 3 dimenzije in ohranimo večino podatkov.
 Iz grafa na sliki~\ref{fig:boxplot} razberemo, da samokodirnik najmanjšo napako doseže pri $\gamma=0,65$, vendar imajo rezultati v tem primeru tudi največjo varianco.
-Opazimo tudi, da so rezultati vseh treh primerov primerljivi, najslabši pa so načeloma pri $\gamma=1$, kjer je mediana napake najvišja.
-Za splošno uporabo bomo izbrali $\gamma=0,99$, ki ima najboljše rezultate sicer nekoliko slabše kot $\gamma=0,65$, 
-vendar ima pri rezultatih precej manjšo varianco in ima manjšo mediano rezultatov.
-Če primerjamo še grafe iz slike~\ref{fig:triple_code_size}, opazimo, da bi se nastavitev $\gamma=0,65$ splačalo uporabljati v primerih, 
+Opazimo tudi, da so rezultati vseh treh nastavitev primerljivi, najslabši pa so pri $\gamma=1$, kjer je mediana napake najvišja.
+Za splošno uporabo bomo izbrali $\gamma=0,99$, ki ima najboljše rezultate sicer nekoliko slabše kot $\gamma=0,65$, vendar ima precej manjšo varianco in ima manjšo mediano rezultatov.
+Če primerjamo grafe iz slike~\ref{fig:triple_code_size}, opazimo, da bi se nastavitev $\gamma=0,65$ splačalo uporabljati v primerih, 
 ko je parameter \texttt{code\_size} dovolj velik, npr.\ pri tej podatkovni množici večji ali enak $10$.
+% TODO: a bi morali obriniti vrstni red slik, da se pri primerjavi prej skličemo na prvo?
 
 % do sedaj smo "uporabljali" parameter 1, kar pomeni, da se mere razlike ne uporablja (razen, da ne menjamo kandidatov v kodirnem vektorju z enakimi). 
 % v resnici je bilo to ponesreči, ampak OK
@@ -2377,12 +2350,13 @@ ko je parameter \texttt{code\_size} dovolj velik, npr.\ pri tej podatkovni množ
 \end{figure}
 Na sliki~\ref{fig:measure_of_diff} je prikazan graf povprečne rekonstrukcijske napake v odvisnosti od parametra \texttt{diff\_th}.
 Opazimo, da je minimalna napaka dosežena pri vrednosti $0,35$, vendar je dobra na zelo majhnem intervalu.
-Napaka je pri vrednostih od $0$ do $0,3$ konstantna in sklepamo, da to pomeni, da je v tem primeru kodirni vektor sestavljen i z prvih izbranih kandidatov
-- do zamenjave kandidatov ne pride, saj so vsi naslednji kandidati ``preveč'' podobni že vključenim.
+Napaka je pri vrednostih od $0$ do $0,3$ konstantna in sklepamo, da to pomeni, da je v tem primeru kodirni vektor sestavljen iz prvih izbranih kandidatov
+-- do zamenjave kandidatov ne pride, saj so vsi naslednji kandidati preveč podobni že vključenim.
 Pri vrednostih od $0,5$ do $0,9$ je napaka manjša kot pri $1$, vendar je razlika zelo majhna.
 
-Glede na zelo majhen interval, kjer je napaka blizu lokalnemu minimumu, ki je verjetno odvisen tudi od podatkovne množice, in sorazmerno majhne razlike v natančnosti pri drugih argumentih se zdi tudi \texttt{diff\_th} $=1$ sprejemljiva izbira argumenta.
-Sklepamo, da bi morali način filtriranja preveč podobnih primerov izboljšati, da bi s tem parametrom dosegli boljšo natančnost.
+Interval, kjer je napaka blizu globalnemu minimumu, je zelo majhen in ugibamo, da je odvisen od podatkovne množice, torej ga pri drugačni množici s to nastavitvijo parametra morda ne bi zadeli.
+Poleg tega pa so razlike v natančnosti pri drugih argumentih sorazmerno majhne, zato se zdi \texttt{diff\_th} $=1$ kot sprejemljiva nastavitev parametra.
+Sklepamo, da bi morali način filtriranja podobnih primerov izboljšati, da bi dosegli boljšo natančnost.
 Možne ideje za nadgradnjo tega dela algoritma so zapisane v razdelku~\ref{mozne-izboljsave}.
 % TODO: dopisati ekstra ideje v razdelek za izboljsave - popraviti sklic
 
@@ -2411,15 +2385,14 @@ Možne ideje za nadgradnjo tega dela algoritma so zapisane v razdelku~\ref{mozne
 % Morda je kriva neoptimalnost algoritma, ki iz večjega nabora kandidatov/listov ne more zagotovo izbrati boljšega kodirnega vektorja.
 % Glede na to, da večje vrednosti parametra zahtevajo več procesorskega časa in rezultat ni zagotovljeno boljši, bomo ta parameter pustili takšen kot je bil t.i. 100.
 
+% ====== OSTALO TESTIRANJE ====== %
+
 \textbf{Parameter} \texttt{rf\_size} \textbf{:} Na sliki~\ref{fig:n_trees} je prikazan graf rekonstrukcijske napake v odvisnosti od števila dreves v naključnem gozdu \texttt{rf\_size}.
 Opazimo, da večanje parametra lahko zmanjša napako, vendar to ni zagotovljeno.
 Podobno, kot pri prejšnjem primeru lahko predpostavimo, da samokodirnik ne deluje optimalno, saj ima pri večjem številu dreves na razpolago več kandidatov za kodirni vektor, vendar ne uspe zanesljivo izbrati boljšega nabora.
-Tudi to bi se lahko morda izboljšalo z nadgradnjo algoritma.
-Glede nato, da večje število dreves zahteva vse več procesorskega časa in spomina, boljša rezultat pa ni zagotovljen, bomo ta parameter privzeto pustili pri enaki vrednosti kot do sedaj, t.~j. \texttt{rf\_size} $=100$.
+Ker večje število dreves zahteva vse več procesorskega časa in spomina, boljša rezultat pa ni zagotovljen, bomo ta parameter privzeto pustili pri \texttt{rf\_size} $=100$.
 
 % TODO: skupen povzetek parameter tuninga?
-
-% ====== OSTALO TESTIRANJE ====== %
 
 \begin{figure}[h]
 	\centering
@@ -2430,14 +2403,15 @@ Glede nato, da večje število dreves zahteva vse več procesorskega časa in sp
 	\label{fig:boxplot_nn_vs_rf_15}
 \end{figure}
 
+% TODO: ustvariti podrazdelek?
 \textbf{Primerjava samokodirnikov:} Testirati želimo še delovanje našega samokodirnika v primerjavi s samokodirnikom iz nevronske mreže.
 Glede na že izvedene teste pri tem uporabimo nastavitve parametrov \texttt{rf\_size} $=100$, \texttt{diff\_th} $=1$ in $\gamma=0,99$.
-Test samokodirnika z nevronsko mrežo smo izvedli z ``deep belief network'' mrežo in privzetimi nastavitvami z učenjem v $50$ epohah.
+Test samokodirnika z nevronsko mrežo smo izvedli z \emph{deep belief network} in privzetimi nastavitvami z učenjem v $50$ epohah.
 
 % opis rezultatov za množico dim 15
-Najprej smo delovanje našega samokodirnika s samokodirnikom iz nevronske mreže primerjali na množici razsežnosti $15$, ki smo jo generirali s parametri $q=7$ in $qs=3$.
+Najprej smo delovanje samokodirnikov primerjali na množici razsežnosti $15$, ki smo jo generirali s parametri $q=7$ in $qs=3$.
 Graf na sliki~\ref{fig:boxplot_nn_vs_rf_15} prikazuje napako samokodirnika iz nevronske mreže in napako našega samokodirnika.
-Opazimo, da sta rezultate primerljiva, vendar samokodirnik iz nevronske mreže praviloma dosega mnogo manjše napake.
+Opazimo, da samokodirnik iz nevronske mreže praviloma dosega mnogo manjše napake.
 S testiranjem nadaljujemo še na množici višje razsežnosti.
 
 % TODO: komentar s kakšnimi nastavitvami/množico testiramo
@@ -2454,7 +2428,7 @@ S testiranjem nadaljujemo še na množici višje razsežnosti.
 % opis rezultatov za množico dim 20
 Na sliki~\ref{fig:boxplot_nn_vs_rf_20} je prikazan graf, ki primerja napako samokodirnika iz nevronske mreže z našim samokodirnikom.
 Test je bil izveden na množici razsežnosti $20$, ki je bila generirana z nastavitvami $q=10$ in $qs=3$.
-Opazimo, da so je v tem primeru samokodirnik iz nevronskih mrež še precej bolj natančen v primerjavi z našim.
+Opazimo, da je razlika v natančnost samokodirnikov še precej večja kot prej in je samokodirnik iz nevronskih mrež mnogo bolj natančen od našega.
 
 % sklep, da so nevronske mreže čisto preveč boljše
 Iz opravljenih testov lahko sklepamo, da je naš samokodirnik žal mnogo manj natančen od samokodirnikov iz nevronskih mrež.
@@ -2471,38 +2445,38 @@ V naslednjem razdelku se bomo posvetili možnim izboljšavam našega samokodirni
 % Povzetek vseh idej za nadaljnje izboljšave, maybe jih prej samo na hitro omenimo, tukaj pa podrobno
 
 % uvod/param tuning eksperimenti
-Imamo več idej za nadgradnje, ki bi lahko izboljšale delovanje našega samokodirnika.
+Imamo več idej za nadgradnjo našega samokodirnika.
 Nekatere ideje so precej preproste in bi zahtevale samo večjo količino nadaljnjega testiranja.
-Tako bi lahko preizkušali različne nove mere kvalitete listov za kodirni vektor, s čimer bi morda odkrili mero natančnosti, ki samokodirniku omogoča boljšo natančnost.
+Testirali bi lahko nove mere kvalitete listov za konstrukcijo kodirnega vektorja, ki samokodirniku omogoča boljšo natančnost.
 Preizkusiti bi bilo treba tudi več različnih nastavitev pri izgradnji naključnega gozda.
 
 % tree pruning - nastavitve gozda pri učenju
-Pristop, ki se zdi pri tem najbolj obetaven je ``obrezovanje'' (ang. pruning) odločitvenega drevesa. % TODO: je to post pruning? kakšen sklic za tole?
+Pristop, ki se zdi pri tem najbolj obetaven je \emph{obrezovanje} (ang. pruning) odločitvenega drevesa. % TODO: je to post pruning? kakšen sklic za tole?
 S to metodo se po izgradnji drevesa zmanjša število vozlišč drevesa.
-Opravi se pregled posameznih dreves in najmanj pomembna vozlišča se iz drevesa izločijo.
-Po postopku v drevesu ostanejo zgolj pomembnejši listi in pričakujemo, da so preostali listi boljši kandidati za kodirni vektor.
+Opravimo pregled posameznih dreves in iz njih izločimo najmanj pomembna vozlišča.
+Po končanem postopku v drevesu ostanejo zgolj pomembnejši listi in pričakujemo, da so preostali listi boljši kandidati za kodirni vektor.
 
 % opis sprememb v samem postopku - bolj globoko v drobovju samokodirnika
 Za ostale ideje izboljšav pa moramo narediti večje spremembe v delovanju samokodirnika.
-Spremenili bi lahko algoritem~\ref{algoritem-find-encoding}, ki je namenjen konstrukciji kodirnega vektorja.
-Algoritem trenutno ne pregleda vseh listov v gozdu, če bi pregledali vse kandidate, bi bilo delovanje manj naivno in bi se natančnost morda izboljšala.
-Spremenimo pa lahko tudi način na katerega med pregledanimi listi izberemo najboljše kandidate.
+Algoritem~\ref{algoritem-find-encoding} trenutno ne pregleda vseh listov v gozdu in domnevamo, da bi bolj podroben pregled gozda lahko izboljšal delovanje samokodirnika.
+Spremenimo lahko tudi način na katerega med pregledanimi listi izberemo najboljše kandidate.
 
 % manjši rework
 % boljši algoritem za menjanje kandidatov glede na podobnost - če sta si dva kandidate zelo podobna, v kodirni vektor damo boljšega izmed njiju
-V razdelku~\ref{pogl:rezultati} smo v testih opazili, da ima parameter \texttt{diff\_th} zelo majhen vpliv na natančnost.
+V razdelku~\ref{pogl:rezultati} smo opazili, da ima parameter \texttt{diff\_th} zelo majhen vpliv na natančnost.
 Podobnost med primeri bi lahko mogoče bolje izkoristili, če bi v kodirnem vektorju menjali med seboj podobne kandidate.
 Zaenkrat novega kandidata v kodirni vektor ne dodamo, če je preveč podoben že vsebovanim.
 Lahko pa bi preverili, kateremu listu v kodirnem vektorju je najbolj podoben, in ju zamenjali, če je nov kandidat bolj kvaliteten.
 
 % večji rework
 % čisto drugačna obravnava podobnosti -- najprej izberemo nabor najboljših kandidatov, nato izmed njih izberemo podmnožico takih, ki si med seboj niso preveč podobni.
-Delovanje algoritma~\ref{algoritem-find-encoding} bi lahko tudi bolj temeljito spremenili tako, da bi najprej pregledal list v gozdu in izbral nabor najbolj kvalitetnih.
-Nato pa bi iz tega nabora izbrali $d_{code}$ kandidatov tako, da je med njimi čim manj prekrivanja. % TODO: urediti to $d_{code}$ oznako, da se povsod ujema
-V razdelku~\ref{pogl:dekodirnik} smo opisali, kako napovemo vrednost primerom, ki ne pripadajo nobenemu elementu kodirnega vektorja, vendar bi lahko natančnost najbrž izboljšali, če količino takih primerov minimiziramo.
-Zato bi pri izbiranju nabora listov za kodirni vektor lahko upoštevali tudi kriterij, da je vsak primer iz učne množice vsebovan vsaj v enem listu kodirnega vektorja.
+Delovanje algoritma~\ref{algoritem-find-encoding} bi lahko tudi bolj temeljito spremenili tako, da bi najprej opravil pregled listov v gozdu in izbral nabor najbolj kvalitetnih.
+Nato pa bi iz tega nabora izbrali kandidate, med katerimi je čim manj prekrivanja. % TODO: urediti to $d_{code}$ oznako, da se povsod ujema
+V razdelku~\ref{pogl:dekodirnik} smo opisali, kako napovemo vrednost primerom, ki ne pripadajo nobenemu elementu kodirnega vektorja, vendar bi lahko natančnost morda izboljšali, če količino takih primerov minimiziramo.
+Pri izbiranju nabora listov za kodirni vektor bi lahko upoštevali tudi kriterij, da je vsak primer iz učne množice vsebovan vsaj v enem listu kodirnega vektorja.
 
 \subsection{Podobna dela}
+% TODO: prestaviti tale podrazdelek v zaključek? Kaj je pol podrazdelek za preostanek zaključka?
 
 Pri pisanju magistrskega dela sem med iskanjem literature naletel na objavljen članek o implementaciji samokodirnika z naključnim gozdom~\cite{feng2018autoencoder}.
 Delovanje samokodirnika, ki so ga zasnovali avtorji članka, se od našega razlikuje, dosegli pa so tudi mnogo boljše rezultate -- primerljive in v nekaterih primerih celo boljše od samokodirnikov z nevronskimi mrežami.
@@ -2514,16 +2488,22 @@ Sklepamo pa tudi, da je treba naš pristop izboljšati, da bi se lahko približa
 \section{Zaključek}  
 
 V magistrskem delu smo se ukvarjali s problemom strojnega učenja pri množicah visoke razsežnosti.
-Predstavili in pokazali smo ``prekletstvo razsežnosti'' nato pa smo se posvetili manjšanju razsežnosti kot načinu soočanja s tem problemom.
-Definirali smo nevronske mreže in predstavili samokodirnike zgrajene iz nevronskih mrež, ki so najpogostejša vrsta samokodirnikov.
+Uvedli smo osnovne pojme iz področja strojnega učenja in opisali nadzorovano ter nenadzorovano učenje.
+Predstavili in pokazali smo ``prekletstvo razsežnosti'', ki močno otežuje učenje pri množicah visokih razsežnosti, nato pa smo se posvetili manjšanju razsežnosti kot načinu soočanja s tem problemom.
+Definirali smo model nevronske mreže in predstavili samokodirnike zgrajene iz nevronskih mrež, ki so najpogostejša vrsta samokodirnikov.
 
-Konstruirali smo novo vrsto samokodirnika s ciljem, da bi se izognili slabostim popularnih samokodirnikov.
-Samokodirnik smo zgradili na osnovi modela naključnega gozda.
-Zgradili smo ga tako, da smo iz gozda izbrali nabor čim bolj kvalitetnih listov, ki jih shranimo v kodirni vektor, s katerim nato zakodiramo primere iz podatkovne množice.
-Zakodirane podatke smo dekodirali z uporabo napovedi listov iz kodirnega vektorja in poti do teh listov, pri tem pa uporabimo tudi prilagojeno različico DPLL algoritma.
+Konstruirali smo novo vrsto samokodirnika s ciljem, da bi se izognili slabostim nevronskih samokodirnikov.
+Uvedli smo modela odločitvenih dreves in naključnega gozda, ki imata zaželene lastnosti.
+Samokodirnik smo zgradili na osnovi modela naključnega gozda tako, da smo iz gozda izbrali nabor čim bolj kvalitetnih listov, ki jih shranimo v kodirni vektor, s katerim nato zakodiramo primere iz podatkovne množice.
+Zakodirane podatke smo dekodirali z uporabo napovedi listov iz kodirnega vektorja in poti do teh listov.
+Pri postopku dekodiranja smo se trudili uporabiti obe informaciji: tako shranjene napovedi kot poti do listov, pri tem smo uporabili tudi prilagojeno različico DPLL algoritma.
 
-Našo različico samokodirnika smo implementirali in testirali.
-Najprej smo testirali pri katerih vrednostih parametrov deluje nabolje, nato pa smo njegovo natančnost primerjali z implementacijo samokodirnika z nevronsko mrežo iz paketa ``Deepnet''.
+Našo različico samokodirnika smo implementirali v programskem jeziku Python, pri tem pa smo uporabljali knjižnico Sklearn za implementacijo modelov odločitvenih dreves, naključnega gozda, itd. 
+Opisali smo glavne parametre, ki vplivajo na delovanje samokodirnika, in izrisali shemo implementacije.
+Delovanje implementacije smo tudi opisali in pregledali glavne komponente iz katerih je sestavljena.
+Izpostavili smo par funkcij, kjer je vključena alternativna implementacija z različnimi prednostmi, nato pa smo opisali še nekaj možnih nadaljnih izboljšav implementacije.
+
+Testirali smo pri katerih vrednostih parametrov samokodirnik deluje nabolje, nato pa smo njegovo natančnost primerjali z implementacijo samokodirnika z nevronsko mrežo iz paketa ``Deepnet''.
 Žal smo ugotovili, da so samokodirniki z nevronskimi mrežami precej bolj natančni od našega.
 Magistrsko delo smo zaključili s pregledom možnih izboljšav našega samokodirnika, ki bi ga lahko naredile bolj konkurenčnega.
 
@@ -2533,9 +2513,9 @@ Magistrsko delo smo zaključili s pregledom možnih izboljšav našega samokodir
 % ================================================================================================================================================================== %
 
 
-\subsection{Kako narediti stvarno kazalo}
-Dodate ukaze \verb|\index{polje}| na besede, kjer je pojavijo, kot tukaj\index{tukaj}.
-Več o stvarnih kazalih je na voljo na \url{https://en.wikibooks.org/wiki/LaTeX/Indexing}.
+% \subsection{Kako narediti stvarno kazalo}
+% Dodate ukaze \verb|\index{polje}| na besede, kjer je pojavijo, kot tukaj\index{tukaj}.
+% Več o stvarnih kazalih je na voljo na \url{https://en.wikibooks.org/wiki/LaTeX/Indexing}.
 
 % \subsection{Navajanje literature}
 % Članke citiramo z uporabo \verb|\cite{label}|, \verb|\cite[text]{label}| ali pa več naenkrat s
