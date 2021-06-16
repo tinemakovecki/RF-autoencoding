@@ -202,17 +202,38 @@ Zahvaljujem se \dots
 \textbf{\naslovdela} \\[3mm]
 \textsc{Povzetek} \\[2mm]
 \end{center}
-Tukaj napišemo povzetek vsebine. Sem sodi razlaga vsebine in ne opis tega, kako je delo
-organizirano.
+V področju strojnega učenja so pogosti problemi z množicami visokih razsežnosti, vendar so zaradi ``prekletstva razsežnosti'' zahtevni za reševanje.
+Da take probleme lažje rešujemo, uporabljamo metode za manjšanje razsežnosti množic.
+Popularna metoda za manjšanje razsežnosti so samokodirniki, ki so ponavadi zgrajeni iz nevronskih mrež.
+Slabost nevronskih mrež je, da zahtevajo veliko procesorskega časa in da ima zaradi njihove kompleksnosti uporabnik zelo slab vpogled v njihovo delovanje.
+Zato želimo v magistrskem delu razviti samokodirnik na osnovi naključnega gozda, ki teh slabosti ne bi imel.
+%
+Za konstrukcijo samokodirnika iz naključnega gozda izberemo nabor listov, ki skupaj čim bolje opišejo podatkovno množico, in jih združimo v kodirni vektor.
+Samokodirnik je sestavljen iz kodirnika in dekodirnika, primere pa lahko zakodiramo z uporabo konstruiranega kodirnega vektorja.
+Za postopek dekodiranja imamo na razpolago dve informaciji: poti do listov v kodirnem vektorju in shranjene napovedi naključnega gozda.
+Uporabimo oba podatka, da poiščemo čim boljšo rekonstrukcijo zakodiranih primerov.
+%
+Naš samokodirnik testiramo, da določimo čim boljše nastavitve parametrov, in njegovo natančnost primerjamo s samokodirniki iz nevronskih mrež.
+Ugotovimo, da je zaenkrat manj natančen od standardnega pristopa, in premislimo možnosti, kako ga lahko v prihodnosti izboljšamo.
 
 \vfill
 \begin{center}
-\textbf{English translation of the title} \\[3mm] % prevod slovenskega naslova dela
+\textbf{Autoencoder via random forest} \\[3mm] % prevod slovenskega naslova dela
 \textsc{Abstract}\\[2mm]
 \end{center}
 
-An abstract of the work is written here. This includes a short description of
-the content and not the structure of your work.
+In the field of machine learning problems with high-dimensional data sets are common, but difficult to solve due to the ``curse of dimensionality''.
+To make solving easier we usually employ methods for dimensionality reduction and autoencoders are a popular example.
+Autoencoders are usually built with neural networks, but the downside of neural networks is high computation costs and their complicated workings which offer the user very little insight.
+In this work we aim to develop an autoencoder on the basis of random forests to counter these problems.
+%
+To construct an autoencoder from a random forest we select a set of forest leaves, which describe the data set well, and save them into an encoding vector.
+We use the encoding vector to encode data samples.
+There are two types of information we can use to decode the data: the paths leading to leaves in the encoding vector and saved random forest predictions.
+We combine the two to get the best possible reconstruction of encoded data.
+%
+We test the constructed autoencoder to tune the parameter settings and evaluate its performance in comparison to neural network autoencoders.
+We find that our autoencoder is significantly less accurate compared to common autoencoders and consider the possibilities for upgrading it in the future.
 
 \vfill\noindent
 \textbf{Math.~Subj.~Class.~(2010):} oznake kot 74B05, 65N99, na voljo so na naslovu
@@ -336,7 +357,7 @@ Ena izmed popularnih metod za manjšanje razsežnosti množic je uporaba samokod
 % Nevronske mreže imajo nekatere slabosti, ki se izrazijo tudi pri takih samokodirnikih.
 % Želimo implementirati različico samokodirnika, ki bi se soočila z nekaterimi izmed teh slabosti.
 Samokodirnik je model, ki podatkovno množico preslika v prostor manjše razsežnosti, nato pa jo ponovno preslika v prvotni prostor. % TODO: je to sploh res?
-Če je rekonstruirana množica dober približek prvotne množice, sklepamo, da vmesni prostor ohrani večino informacij v množici in lahko vmesno množico uporabimo namesto prvotne. % razbit na dve povedi
+Če je rekonstruirana množica dober približek prvotne množice, sklepamo, da vmesni prostor ohrani večino informacij v množici in ga lahko uporabimo namesto prvotnega. % razbit na dve povedi
 Standardni samokodirniki so zgrajeni iz modela (usmerjene) nevronske mreže.
 Nevronske mreže, in posledično standardni samokodirniki, imajo nekaj velikih slabosti: so časovno neučinkovite, iz vidika uporabnika so ``črna škatla'', ...
 
@@ -366,8 +387,8 @@ Pri dekodiranju izkoristimo podatke o poteh do listov kodirnega vektorja in napo
 % strojno učenje
 V poglavju~\ref{pogl:strojno_ucenje} pregledamo osnove strojnega učenja in definiramo standardne pojme, ki jih uporabljamo v preostanku besedila. 
 Najprej opišemo delitev na področji nadzorovanega in nenadzorovanega učenja.
-Nato obravnavamo problematiko učenja iz podatkovnih množic visokih razsežnosti, kjer se pojavi problem t.~i.~``prekletstva razsežnosti'' (ang.~curse of dimensionality). 
-Opišemo tudi glaven način soočanja s to problematiko - manjšanje razsežnosti (ang.~dimensionality reduction), ki se mu posvetimo v preostanku magistrske naloge.
+Nato obravnavamo problematiko učenja iz podatkovnih množic visokih razsežnosti, kjer se pojavi problem t.~i.~``prekletstva razsežnosti'' (ang.~\textsl{curse of dimensionality}). 
+Opišemo tudi glaven način soočanja s to problematiko - manjšanje razsežnosti (ang.~\textsl{dimensionality reduction}), ki se mu posvetimo v preostanku magistrske naloge.
 
 % samokodirniki
 % Opis samokodirnikov.
@@ -394,10 +415,10 @@ Na koncu razdelka še opišemo postopek dekodiranja s pomočjo shranjenih napove
 % Parametri.
 % Komponente.
 % Različice algoritmov in možne izboljšave.
-Za implementacijo samokodirnika smo izbrali Python, pri obdelavi podatkov pa uporabimo tudi R.
+Za implementacijo samokodirnika smo izbrali Python~\cite{python}, pri obdelavi podatkov pa uporabimo tudi R~\cite{r}.
 V poglavju~\ref{pogl:implementacija}, ki je namenjeno implementaciji, opišemo knjižnice, ki smo jih uporabili, in najpomembnejše parametre samokodirnika.
 Prikažemo shemo delovanja implementacije in jo opišemo.
-Podrobneje predstavimo tudi komponente, na katere je samokodirnik razdeljen, in naredimo pregled pomembnejših funkcij.
+Podrobneje predstavimo tudi komponente, iz katerih je samokodirnik sestavljen, in naredimo pregled pomembnejših funkcij.
 Nato opišemo še alternativne različice algoritma, ki smo jih implementirali, in možne izboljšave implementacije.
 
 % vrednotenje
@@ -405,7 +426,7 @@ V poglavju~\ref{pogl:vrednotenje} testiramo delovanje našega samokodirnika.
 Najprej opišemo metodologijo testiranja in predstavimo način, na katerega generiramo množice za testiranje.
 Pri testih se najprej posvetimo iskanju čim boljših privzetih vrednosti parametrov za naš samokodirnik.
 Nato izvedemo še teste za primerjavo našega samokodirnika s samokodirniki zgrajenimi iz nevronskih mrež.
-Poglavje zaključimo z opisom možnih izboljšav za naš samokodirnik in pregledom podobnega dela.
+Poglavje zaključimo z opisom možnih izboljšav za naš samokodirnik in pregledom podobnih del.
 
 
 % ====================  STROJNO UČENJE ==================== %
@@ -440,11 +461,11 @@ iščejo vzorce v množicah podatkov ali pa prepoznavajo skupine medsebojno podo
 \end{definicija}
 % TODO: urediti razsežnost... Nek standarden matematičen način za to povedat
 
-Metode strojnega učenja, ki se ukvarjajo z napovedovanjem vrednosti imenujemo metode za nadzorovano učenje (ang.~\emph{supervised learning}). 
+Metode strojnega učenja, ki se ukvarjajo z napovedovanjem vrednosti imenujemo metode za nadzorovano učenje (ang.~\textsl{supervised learning}). 
 % Z uporabo zabeleženih vrednosti podatkovnega elementa, ki ga napovedujemo, lahko namreč ``nadzorujemo'' njihovo delovanje.
 Z uporabo primerov shranjenih v podatkovni množici lahko namreč ``nadzorujemo učenje'' algoritma - ga prirejamo tako, da dosega čim boljše napovedi.
 % Metode, kjer takega nadzora ni, pa uvrščamo na področje nenadzorovanega učenja (ang.~unsupervised learning).
-Metode, ki se ne ukvarjajo z napovedovanjem vrednosti, uvrščamo na področje nenadzorovanega učenja (ang.~unsupervised learning).
+Metode, ki se ne ukvarjajo z napovedovanjem vrednosti, uvrščamo na področje nenadzorovanega učenja (ang.~\textsl{unsupervised learning}).
 Cilj pri nenadzorovanem učenju je poiskati vzorce v podatkih, npr.\ razpoznati množice medsebojno podobnih primerov ali pa kombinacije vrednosti atributov, ki se pogosto ponavljajo.
 
 % primeri strojnega učenja
@@ -552,7 +573,7 @@ Oglejmo si primer dveh različnih funkcij izgube.
 %  primer funkcije izgube za diskretno in numerično
 \begin{primer}
 Denimo, da je zaloga vrednosti ciljne spremenljivke $D_Y = [-1,1]$ in je $Y$ torej numerična spremenljivka. 
-Kvadratna funkcija izgube (ang.~square loss function) za elementa $u, v \in D_Y$ je definirana s sledečim predpisom:
+Kvadratna funkcija izgube (ang.~\textsl{square loss function}) za elementa $u, v \in D_Y$ je definirana s sledečim predpisom:
 $$
 L(u,v) = (u - v)^2.
 $$
@@ -577,7 +598,7 @@ Za vsakega od podatkov izračunamo funkcijo izgube, in dobljene vrednosti združ
 \begin{definicija}
 \label{def-funkcija-napake}
 	% Naj bo neki neki podatkovna množica?
-	Naj bo $S \subseteq \omega$ podatkovna množica, kjer je $\omega = D_1 \times \cdot D_p \times D_Y$ množica možnih primerov.
+	Naj bo $S \subseteq \omega$ podatkovna množica, kjer je $\omega = D_1 \times \cdots \times D_p \times D_Y$ množica možnih primerov.
 	Naj bo $L: D_Y \times D_Y \rightarrow \mathbb{R}_+$ funkcija izgube in $m: \prod_{i=1}^p D_i \rightarrow D_Y$ napovedni model. 
 	\emph{Funkcijo napake} $Err: (\prod_{i=1}^p D_i \rightarrow D_Y) \times \mathcal P (\omega) \rightarrow \mathbb{R}_+$ definiramo s predpisom:
 	\[
@@ -642,15 +663,15 @@ Pri nadzorovanem učenju problem, ki ga rešujemo, praviloma zastavijo eksperti 
 V primerjavi s tem pri nenadzorovanem učenju ponavadi ni vnaprej zastavljene naloge, potrebujemo zgolj množico podatkov, zato pa je znanje strokovnjaka toliko bolj potrebno pri interpretaciji rezultatov nenadzorovanega učenja.
 
 % primeri
-Pogosta primera sta analiza glavnih komponent (ang.~principal component analysis, krajše PCA), ki poišče glavne značilnosti množice, 
-in razvrščanje v skupine (ang.~clustering), kjer se množico razdeli na podmnožice med seboj podobnih primerov. 
+Pogosta primera sta analiza glavnih komponent (ang.~\textsl{principal component analysis}, krajše PCA), ki poišče glavne značilnosti množice, 
+in razvrščanje v skupine (ang.~\textsl{clustering}), kjer se množico razdeli na podmnožice med seboj podobnih primerov. 
 Nenadzorovano učenje se med drugim uporablja za prepoznavanje podobnih skupin uporabnikov na spletu (npr.\ v namen oglaševanja), 
 za ocenjevanje glavnih lastnosti finančnega portfelja, za grupiranje spletne vsebine v med seboj podobne skupine, s čimer se lahko uporabniku predlaga povezane artikle.
 
 % Formalno definiramo problem nenadzorovanega učenja - z navezovanjem na nadzorovano učenje, torej da ni ciljne spremenljivke.
 Pod nenadzorovano učenje spada mnogo pristopov in algoritmov, ki obdelajo množico podatkov in vrnejo rezultat v veliko različnih možnih oblikah. 
 Skupna definicija, ki bi opisala vse te postopke, bi bila okorna in preveč splošna, da bi bila uporabna. 
-Namesto tega si bomo raje podrobno ogledali primer postopka razvrščanja $k$-voditeljev (ang.~$k$-means clustering), ki spada med metode nenadzorovanega učenja.
+Namesto tega si bomo raje podrobno ogledali primer postopka razvrščanja $k$-voditeljev (ang.~\textsl{$k$-means clustering}), ki spada med metode nenadzorovanega učenja.
 % Primer učne množice
 
 \begin{primer}
@@ -742,8 +763,8 @@ Ta primer bo za naš namen zadoščal, saj obnašanje primerov znotraj krogle na
 		r^p \frac{\pi^{\frac{p}{2}}}{\Gamma (\frac{p}{2}+1)},
 	\end{equation}
 	kjer $\Gamma$ označuje gama funkcijo~\cite[enačba~5.4.1]{nist_dlmf}. % TODO: poiskat citat, kjer je definiran tut gamma za argumente, ki niso cela števila (predvsem za 0,5)
+	
 	Naj bo $x \in (0,1)$ neko pozitivno število.
-
 	Zanima nas verjetnost, da je enakomerno naključno izbrana točka od izhodišča oddaljena za $x$ ali manj, oz.~da velja $R_i \leq x$.
 	To velja v primeru, ko se točka nahaja v krogli $B_x$ s centrom v izhodišču in polmerom $x$.
 	Ker je bila točka enakomerno naključno izbrana v enotski krogli, je verjetnost, da se nahaja znotraj krogle $B_x$, enaka razmerju volumna krogle $B_x$ in enotske krogle.
@@ -980,8 +1001,8 @@ Elemente množice podatkov nato obravnavamo v tem podprostoru manjše razsežnos
 % Nekaj o standardnih pristopih.
 Obstaja veliko različnih pristopov za linearno manjšanje razsežnosti, pri katerih se množico podatkov z linearno preslikavo preslika v manj razsežen prostor. 
 Pri tem želimo, da je predstavitev v manjši razsežnosti optimalna glede na neko merilo, npr.\ dosega najmanjšo rekonstrukcijsko napako ali da ima preslikana množica čim večjo varianco. 
-Nekatere znane metode za linearno manjšanje razsežnosti so analiza glavnih komponent (ang.~principal component analysis, krajše PCA), 
-analiza kanonične korelacije (ang.~ canonical correlations analysis, krajše CCA), linearna regresija, analiza faktorjev (ang.~factor analysis).
+Nekatere znane metode za linearno manjšanje razsežnosti so analiza glavnih komponent (ang.~\textsl{principal component analysis}, krajše PCA), % omemba PCA odveč?
+analiza kanonične korelacije (ang.~\textsl{canonical correlations analysis}, krajše CCA), linearna regresija, analiza faktorjev (ang.~\textsl{factor analysis}).
 % Število različnih pristopov za linearno manjšanje dimenzij je zelo veliko, saj so se neodvisno razvile na več različnih področjih, npr.\ v statistiki, strojnem učenju, itd. 
 Obstajajo pa tudi raziskave, ki stremijo k združitvi in posplošitvi različnih metod linearnega manjšanja razsežnosti. 
 Pregled in primerjavo različnih pristopov lahko bralec najde v članku~\cite{JMLR:cunningham2015a}.
@@ -989,7 +1010,7 @@ Pregled in primerjavo različnih pristopov lahko bralec najde v članku~\cite{JM
 % komentar o tem, da se pogosto uporablja nenadzorovane metode. Samokodirniki so pa nadzorovana metoda?
 Obstajajo tudi metode za nelinearno manjšanje razsežnosti, ki so pogosto nadgradnja nekaterih metod za linearno manjšanje razsežnosti. 
 Omogočajo bolj kompleksno preslikavo v množico manjše razsežnosti, nekatere izmed teh metod pa so npr.\ Sammonova projekcija, 
-jedrska analiza glavnih komponent (ang.~kernel principal component analysis, krajše: kernel PCA), in pa samokodirniki~\cite{charte2018autoencoders}, ki so ena izmed najbolj razširjenih in uspešnih metod za manjšanje razsežnosti. 
+jedrska analiza glavnih komponent (ang.~\textsl{kernel principal component analysis}, krajše: kernel PCA), in pa samokodirniki~\cite{charte2018autoencoders}, ki so ena izmed najbolj razširjenih in uspešnih metod za manjšanje razsežnosti. 
 V preostanku dela se bomo osredotočili na samokodirnike.
 
 
@@ -1060,27 +1081,28 @@ Nekaj različic omenimo v kasnejšem razdelku, pred tem pa želimo opisati stand
 
 % ========================= %
 
-\subsection{Samokodirnik}
+% \subsection{Samokodirnik}
 % Opis standardnega samokodirnika/povzetek razdelka: uporablja feed-forward nevronske mreže, ki jih moramo definirati. Uči se z back propagation. 
 % Standardni samokodirniki so zgrajeni iz usmerjenih nevronskih mrež.
 % TODO: bi sem spadal še kkšev "uvodni" odstavek?
 
+% TODO: pregledati poglavje, če je smiselno po preureditvi naslovov
 
 % ========================= %
 
-\subsubsection{Usmerjene nevronske mreže}
+\subsection{Usmerjene nevronske mreže}
 
 % hiter opis, kaj nevronske mreže so/kaj delajo
-Usmerjene nevronske mreže so sestavljene iz gradnikov imenovanih nevroni, ki jih združimo v večjo strukturo~\cite{nielsen2015neural}.
+Usmerjene nevronske mreže so sestavljene iz gradnikov imenovanih nevroni, ki jih s sinapsami povežemo v večjo strukturo~\cite{nielsen2015neural}. % TODO: še kje dodat sinapse?
 Skupine nevronov imenujemo plasti, mreža pa je sestavljena iz vsaj dveh plasti.
-Posamezen nevron prejme vrednosti od vseh nevronov v prejšnji plasti, jih združi v eno vrednost z aktivacijsko funkcijo in to vrednost posreduje vsem nevronom v naslednji plasti.
+Posamezen nevron preko sinaps prejme vrednosti od vseh nevronov v prejšnji plasti, jih združi v eno vrednost z aktivacijsko funkcijo in to vrednost posreduje vsem nevronom v naslednji plasti.
 Usmerjena nevronska mreža kot napoved vrne vrednosti, ki jih izračunajo nevroni v zadnji plasti.
 Z nevronskimi mrežami lahko dobro napovedujemo kompleksne množice podatkov, zahtevajo pa več procesorske moči kot večina modelov. 
 Uporablja se jih na področjih kot so finančni trgi, medicinsko skeniranje in prepoznavanje pisave ter govora. 
 
 \begin{definicija}
 \label{nevron}
-	\emph{Aktivacijska funkcija} $\alpha: \R \rightarrow [0,1]$ je funkcija, ki slika iz realnih števil v interval $[0,1]$.
+	\emph{Aktivacijska funkcija} $\alpha: \R \rightarrow \R$ je funkcija na množici realnih števil.
 	Naj bo $k \in \mathbb{N}$ neko naravno število, $b \in \R$ neko realno število in naj bo $w=(w_1,\ldots,w_k) \in R^k$ vektor uteži.
 	Funkcijo $f: [0,1]^k \rightarrow [0,1]$ s predpisom oblike $f(x) = \alpha(w\cdot x + b)$ imenujemo \emph{nevron}, konstanto $b$ pa imenujemo \emph{pristranskost}.
 \end{definicija}
@@ -1091,7 +1113,7 @@ Nevronu s sigmoidno aktivacijsko funkcijo pravimo \emph{sigmoidni nevron}. Če $
 \[
 f_{\sigma}(x)= \frac{1}{1+e^{-\sum_{i=1}^k w_i x_i - b}}.
 \]
-Povedali smo že, da je usmerjena nevronska mreža sestavljena iz nevronov, ki si med seboj posredujejo vrednosti, moramo pa še formalno opisati način, na katerega so nevroni povezani.
+Povedali smo že, da je usmerjena nevronska mreža sestavljena iz nevronov, ki si med seboj posredujejo vrednosti skozi sinapse, moramo pa še formalno opisati način, na katerega so nevroni povezani.
 
 % TODO: zamenjati l z bolj vidno črko za oznako
 \begin{definicija}
@@ -1113,6 +1135,7 @@ Povedali smo že, da je usmerjena nevronska mreža sestavljena iz nevronov, ki s
 \end{figure}
 
 V arhitekturi usmerjene nevronske mreže je torej vsako vozlišče povezano z vsemi iz predhodne in sledeče plasti.
+Na sliki~\ref{fig:arihtektura} je prikazan primer arhitekture usmerjene nevronske mreže
 Arhitektura opiše strukturo mreže, definirati pa moramo, kako nevronska mreža z določeno arhitekturo deluje.
 
 \begin{definicija}
@@ -1183,6 +1206,7 @@ Vrednosti, ki jih izračunajo nevroni izhodne plasti so napoved modela.
 
 % lastnost: majhne spremembe v utežeh/bias-u naredijo majhne spremembe v rezultatu, ker je funkcija gladka
 % Lastnost: velikost spremembe rezultata je linearno odvisna od velikosti spremembe parametrov.
+Omenimo še, da so uteži aktivacijskih funkcij shranjene v povezavah, tj.\ v sinapsah nevronske mreže.
 Če je nevronska mreža sestavljena iz sigmoidnih nevronov, oz.~nevronov z dovolj ``lepim'' aktivacijskimi funkcijami, ima lepe lastnosti za učenje. 
 Če parametre mreže, tj.~uteži in pristranskost, spremenimo za majhno količino, se tudi izhodna vrednost spremeni za majhno količino. 
 To velja, ker je nevron zvezen kot funkcija uteži in pristranskosti in je velikost spremembe izhodne vrednosti linearno odvisna od velikosti sprememb uteži in pristranskosti~\cite[pogl.\ 1]{nielsen2015neural}.
@@ -1192,7 +1216,7 @@ To velja, ker je nevron zvezen kot funkcija uteži in pristranskosti in je velik
 Parametre nevronske mreže lahko popravljamo tako, da postaja rezultat pri izbranem argumentu bolj točen, s tem pa točnosti napovedi pri drugih argumentih ne pokvarimo preveč. 
 Algoritem torej prilagaja uteži in pristranskost nevronov v mreži, dokler ni razlika med napovedjo in resničnim rezultatom čim manjša. 
 Pri učenju usmerjenih nevronskih mrež za optimizacijo uporabimo gradientni spust~\cite[pogl.\ 1]{nielsen2015neural}.
-Računanje gradienta funkcije izgube, ki ga algoritem potrebuje, pa je za nevronske mreže zelo zamudno - za to uporabimo postopek \emph{vzvratnega širjenja napake} (ang.~backpropagation), ki je bolj učinkovit od direktnega izračuna. 
+Računanje gradienta funkcije izgube, ki ga algoritem potrebuje, pa je za nevronske mreže zelo zamudno - za to uporabimo postopek \emph{vzvratnega širjenja napake} (ang.~\textsl{backpropagation}), ki je bolj učinkovit od direktnega izračuna. 
 Bolj podroben opis nevronskih mrež in postopka, s katerim jih učimo, lahko bralec najde v delu~\cite[pogl.\ 2]{nielsen2015neural}.
 
 % Prednosti in slabosti nevronskih mrež
@@ -1205,7 +1229,7 @@ Model je namreč sestavljen iz nabora med seboj poveznih funkcij in zato že pri
 % ========================= %
 
 
-\subsubsection{Samokodirnik iz nevronskih mrež}
+\subsection{Usmerjena nevronska mreža kot samokodirnik}
 
 % TODO
 % Lahko bi tudi pojasnili, da je UNM kodirnika simetrična UNM dekodirnika: 
@@ -1430,7 +1454,7 @@ Naj bo $S \subseteq \omega$ podatkovna množica razsežnosti $p$.
 Algoritem $\mathrm{train\_random\_tree}$ označuje prilagojeno različico standardnega postopka izgradnje dreves, ki upošteva restrikcijo na $m$ izbranih spremenljivk. (TODO: sklic na algoritem za učenje dreves). 
 \end{enumerate}
 %
-Ponavadi velja $m < p$, če velja $m=p$, pa ta algoritem imenujemo vrečenje (ang.~bagging).
+Ponavadi velja $m < p$, če velja $m=p$, pa ta algoritem imenujemo vrečenje (ang.~\textsl{bagging}).
 \end{definicija}
 
 % TODO: zbrisat, če je odveč
@@ -1655,7 +1679,7 @@ Izkaže se, da v logiki obstaja znan problem, ki je formuliran na podoben način
 \begin{definicija}
 	Naj bo $\phi(x_1,\ldots,x_k)$ logična formula.
 	Če obstaja tak vektor logičnih vrednosti $(v_1, \ldots, v_k)$, da je izraz $\phi(v_1, \ldots, v_k)$ resničen,
-	pravimo, da je formula $\phi$ \textbf{zadovoljiva} (ang.~satisfiable).
+	pravimo, da je formula $\phi$ \textbf{zadovoljiva} (ang.~\textsl{satisfiable}).
 	Problem, ki se ukvarja s tem, ali je logična formula zadovoljiva, imenujemo SAT problem. % TODO: citat
 \end{definicija}
 % z rešitvijo SAT problema si lahko pomagamo, ampak je slow as FUCK.
@@ -2199,7 +2223,7 @@ V ta namen bomo izbrali množico primerov v prostoru manjše razsežnosti in jih
 Ta postopek imenujemo konstrukcija spremenljivk~\cite[razdelek\ 10.3]{flach2012machine}.
 
 % formulacija
-Naj bo $q \in \N$ razsežnost prvotnega prostora imenovan tudi \emph{skriti prostor} (ang. ``latent space'')
+Naj bo $q \in \N$ razsežnost prvotnega prostora imenovan tudi \emph{skriti prostor} (ang.~\textsl{latent space})
 in $p > q$ naravno število, ki je razsežnost večjega prostora.
 Naj bo v matriki $Z \in \R^{n \times q}$ zapisanih $n$ primerov iz prvotnega prostora.
 Naj bosta $W \in \R^{q \times p}$ in $X \in \R^{n \times p}$ taki matriki, da velja:
@@ -2451,7 +2475,7 @@ Testirali bi lahko nove mere kvalitete listov za konstrukcijo kodirnega vektorja
 Preizkusiti bi bilo treba tudi več različnih nastavitev pri izgradnji naključnega gozda.
 
 % tree pruning - nastavitve gozda pri učenju
-Pristop, ki se zdi pri tem najbolj obetaven je \emph{obrezovanje} (ang. pruning) odločitvenega drevesa. % TODO: je to post pruning? kakšen sklic za tole?
+Pristop, ki se zdi pri tem najbolj obetaven je \emph{obrezovanje} (ang.~\textsl{pruning}) odločitvenega drevesa. % TODO: je to post pruning? kakšen sklic za tole?
 S to metodo se po izgradnji drevesa zmanjša število vozlišč drevesa.
 Opravimo pregled posameznih dreves in iz njih izločimo najmanj pomembna vozlišča.
 Po končanem postopku v drevesu ostanejo zgolj pomembnejši listi in pričakujemo, da so preostali listi boljši kandidati za kodirni vektor.
