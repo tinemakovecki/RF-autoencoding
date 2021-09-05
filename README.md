@@ -1,2 +1,2 @@
 # RF-autoencoding
-master's thesis things for autoencoder thingamajigs
+Repository containing text and code for master's thesis "Autoencoder via random forest"
